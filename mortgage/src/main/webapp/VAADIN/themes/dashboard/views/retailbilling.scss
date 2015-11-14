@@ -1,0 +1,39 @@
+@mixin dashboard-retailbilling-view {
+	.vinHiddenLabel{
+	    	color: #414243;
+	}
+	
+	.vinVisibleLabel{
+	    	color: white;
+	        font-weight: normal;
+	}
+	
+    .my-disabled{
+		opacity: 1;
+		filter: none;
+	}
+	
+	.price-disabled {
+		opacity: 1;
+		filter: none;
+		font-weight: normal;
+   		color: black;
+   		
+	}
+	
+	.diamond-table-header .v-table-header{
+		color: #0B0B61;
+    	background: #7A90E9;
+    	text-align: center;
+	}
+	
+	.diamond-table-footer .v-table-footer{
+		color: #0B0B61;
+    	background: #7A90E9;
+    	text-align: center;
+	}
+	.diamond-table-footer-container .v-table-footer-container{
+		color: #0B0B61;
+    	text-align: center;
+    }
+}
