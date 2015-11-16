@@ -26,10 +26,12 @@ public class PriceForm extends FormLayout{
 
 	private static final long serialVersionUID = -5016984459457685827L;
 	public TextField totalItemPrice = new TextField("Total New Items Price", "0.0");
-	public TextField vatOnNewItemPrice = new TextField("Vat On New Items Price", "0.0");
+	public TextField vatOnNewItemPrice = new TextField("Vat On New Items Price(1%)", "0.0");
     public TextField oldPurchasePrice = new TextField("Old Purchase Price(-)", "0.0");
     public TextField discountPrice =  new TextField("Discount(-)", "0.0");
     public TextField netAmountToPay = new TextField("Net Payable Price", "0.0");
+    public TextField advancePayment = new TextField("Advance Payment", "0.0");
+    public TextField balanceAmount = new TextField("Balance", "0.0");
     public boolean isInvoiceEnabled = false;
     public PriceForm(Item item){
     	
@@ -41,11 +43,15 @@ public class PriceForm extends FormLayout{
     	oldPurchasePrice.setConverter(plainDoubleConverter);
     	discountPrice.setConverter(plainDoubleConverter);
     	netAmountToPay.setConverter(plainDoubleConverter);
+    	advancePayment.setConverter(plainDoubleConverter);
+    	balanceAmount.setConverter(plainDoubleConverter);
     	addComponent(totalItemPrice);
     	addComponent(discountPrice);
     	addComponent(vatOnNewItemPrice);
     	addComponent(oldPurchasePrice);
     	addComponent(netAmountToPay);
+    	addComponent(advancePayment);
+    	addComponent(balanceAmount);
     	// Now bind the member fields to the item
         FieldGroup binder = new FieldGroup(item);
         binder.bindMemberFields(this);
@@ -54,6 +60,8 @@ public class PriceForm extends FormLayout{
         customNumericValidator(vatOnNewItemPrice);
         customNumericValidator(oldPurchasePrice);
         customNumericValidator(netAmountToPay);
+        customNumericValidator(advancePayment);
+        customNumericValidator(balanceAmount);
         
         netAmountToPay.setEnabled(false);
         netAmountToPay.addStyleName("price-disabled");
@@ -61,6 +69,8 @@ public class PriceForm extends FormLayout{
         totalItemPrice.setStyleName("price-disabled");
         vatOnNewItemPrice.setEnabled(false);
         vatOnNewItemPrice.setStyleName("price-disabled");
+        balanceAmount.setEnabled(false);
+        balanceAmount.setStyleName("price-disabled");
         
     	totalItemPrice.addValueChangeListener(new ValueChangeListener() {
 			private static final long serialVersionUID = 5320925689852078782L;
@@ -70,6 +80,35 @@ public class PriceForm extends FormLayout{
 				netAmountToPay.setValue(String.format("%.3f", getTotalNetAmount()));
 			}
 		});
+    	
+    	netAmountToPay.addValueChangeListener(new ValueChangeListener() {
+			private static final long serialVersionUID = 5320925689852078782L;
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				balanceAmount.setValue(String.format("%.3f", getBalanceAmount()));
+			}
+		});
+    	
+    	advancePayment.setValidationVisible(true);
+    	advancePayment.addValidator(new DoubleRangeValidator("Must be number", 0.000, null));
+    	advancePayment.addValueChangeListener(new ValueChangeListener() {
+			private static final long serialVersionUID = 8724248055526259500L;
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				if(NumberUtils.isNumber(getNumericTextValue(advancePayment))){
+					balanceAmount.setValue(String.format("%.3f", getBalanceAmount()));
+					balanceAmount.removeStyleName("v-textfield-fail");
+					advancePayment.removeStyleName("v-textfield-fail");
+					advancePayment.setComponentError(null);
+				}else{
+					balanceAmount.clear();
+					balanceAmount.addStyleName("v-textfield-fail");
+					advancePayment.addStyleName("v-textfield-fail");
+				}
+			}
+		});
+
+    	
     	oldPurchasePrice.setValidationVisible(true);
     	oldPurchasePrice.addValidator(new DoubleRangeValidator("Must be number", 0.000, null));
     	oldPurchasePrice.addValueChangeListener(new ValueChangeListener() {
@@ -114,6 +153,12 @@ public class PriceForm extends FormLayout{
     	
     }
 
+    private Double getBalanceAmount() {
+		Double netAmount = getTotalNetAmount();
+		Double balance = netAmount - Double.valueOf((getNumericTextValue(advancePayment)));
+		return balance;
+	}
+    
 	private StringToDoubleConverter CustomStringToDoubleConverter() {
 		return new StringToDoubleConverter() {
  			private static final long serialVersionUID = -2654779837579321367L;

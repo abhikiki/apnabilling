@@ -3,8 +3,8 @@
 
     <artifactId>project</artifactId>
     <name>Project</name>
-    <groupId>com.abhishek.banki</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <groupId>com.abhishek.retailbilling</groupId>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>

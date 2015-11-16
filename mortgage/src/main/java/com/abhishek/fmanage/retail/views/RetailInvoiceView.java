@@ -240,13 +240,21 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				pfForm.isInvoiceEnabled = true;
 				pfForm.vatOnNewItemPrice.setValue((String.format("%.3f", pfForm.getVatPrice())));
 				pfForm.netAmountToPay.setValue(String.format("%.3f", pfForm.getTotalNetAmount()));
-				//pfForm.vatOnNewItemPrice.setEnabled(true);
+				pfForm.advancePayment.setValue(String.format("%.3f", 0.000f));
+				//pfForm.balanceAmount.setValue(String.format("%.3f", 0.000f));
+				pfForm.advancePayment.setEnabled(false);
+				pfForm.balanceAmount.setEnabled(false);
+				
+				
 			}else{
 				tinLabel.setStyleName("vinHiddenLabel");
 				pfForm.isInvoiceEnabled = false;
 				pfForm.vatOnNewItemPrice.setValue(String.format("%.3f", 0.000f));
 				pfForm.netAmountToPay.setValue(String.format("%.3f", pfForm.getTotalNetAmount()));
 				pfForm.vatOnNewItemPrice.setEnabled(false);
+				pfForm.advancePayment.setEnabled(true);
+				pfForm.balanceAmount.setEnabled(true);
+				
 			}
 			});
 		HorizontalLayout optionGroupLayout = new HorizontalLayout();
@@ -289,7 +297,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				String fileName = "";
 				try {
 					boolean isEstimateBill = billType.getValue().equals("Estimate Bill");
-					String invoiceDate = billPopUpDate.getValue().toString();
+					Date invoiceDate = billPopUpDate.getValue();
 					 fileName = new InvoiceGenerator(
 							 goldBillingTable,
 							 silverBillingTable,
