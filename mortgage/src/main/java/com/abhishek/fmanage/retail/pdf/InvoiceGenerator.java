@@ -378,7 +378,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			totalDiamondPricePhrase.add(new Chunk(
 					"Total Diamond Price(INR) = ", headerFont));
 			totalDiamondPricePhrase.add(new Chunk(String.format("%.3f",
-					con.getTotal()), rowFont));
+					con.getTotalPrice()), rowFont));
 			footerTable.addCell(new Phrase(totalDiamondPricePhrase));
 
 			Phrase totalGoldWeightPhrase = new Phrase();
@@ -495,7 +495,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			totalSilverPricePhrase.add(new Chunk("Total Silver Price(INR) = ",
 					headerFont));
 			totalSilverPricePhrase.add(new Chunk(String.format("%.3f",
-					con.getTotal()), rowFont));
+					con.getTotalPrice()), rowFont));
 			footerTable.addCell(new Phrase(totalSilverPricePhrase));
 			Phrase totalSilverWeightPhrase = new Phrase();
 			totalSilverWeightPhrase.add(new Chunk("Total Silver Wt(gm) = ",
@@ -612,7 +612,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			totalGoldPricePhrase.add(new Chunk("Total Gold Price(INR) = ",
 					headerFont));
 			totalGoldPricePhrase.add(new Chunk(String.format("%.3f",
-					con.getTotal()), rowFont));
+					con.getTotalPrice()), rowFont));
 			footerTable.addCell(new Phrase(totalGoldPricePhrase));
 			Phrase totalGoldWeightPhrase = new Phrase();
 			totalGoldWeightPhrase.add(new Chunk("Total Gold Wt(gm) = ",

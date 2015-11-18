@@ -33,11 +33,10 @@ public class PriceForm extends FormLayout{
     public TextField advancePayment = new TextField("Advance Payment", "0.0");
     public TextField balanceAmount = new TextField("Balance", "0.0");
     public boolean isInvoiceEnabled = false;
+
     public PriceForm(Item item){
-    	
     	addStyleName("sidebar");
     	StringToDoubleConverter plainDoubleConverter = CustomStringToDoubleConverter();
-    	// either set for the field or in your field factory for multiple fields
     	totalItemPrice.setConverter(plainDoubleConverter);
     	vatOnNewItemPrice.setConverter(plainDoubleConverter);
     	oldPurchasePrice.setConverter(plainDoubleConverter);
@@ -181,21 +180,21 @@ public class PriceForm extends FormLayout{
 
     private void customNumericValidator(TextField field){
     	field.addValidator(
-    			(value) -> {
-    				if(!NumberUtils.isNumber(String.valueOf(value))){
-    					field.addStyleName("v-textfield-fail");
-    				}else{
-    					field.setComponentError(null);
-    					field.removeStyleName("v-textfield-fail");
-    				}
-    		});		
+    		(value) -> {
+    			if(!NumberUtils.isNumber(String.valueOf(value))){
+    				field.addStyleName("v-textfield-fail");
+    			}else{
+    				field.setComponentError(null);
+    				field.removeStyleName("v-textfield-fail");
+    		}
+    	});		
     }
    
 	public Double getTotalNetAmount() {
 		Double totalNetAmount = Double.valueOf((getNumericTextValue(totalItemPrice)))
-				+ Double.valueOf((getNumericTextValue(vatOnNewItemPrice)))
-				- Double.valueOf((getNumericTextValue(oldPurchasePrice)))
-				- Double.valueOf((getNumericTextValue(discountPrice)));
+			+ Double.valueOf((getNumericTextValue(vatOnNewItemPrice)))
+			- Double.valueOf((getNumericTextValue(oldPurchasePrice)))
+			- Double.valueOf((getNumericTextValue(discountPrice)));
 		return totalNetAmount;
 	}
 	

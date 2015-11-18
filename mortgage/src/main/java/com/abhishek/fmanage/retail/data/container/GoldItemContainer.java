@@ -29,12 +29,13 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 	public static final String QUANTITY = "Quantity";
 	public static final String ITEM_NAME = "ItemName";
 	public static final String HALL_MARK_TYPE = "HallMark";
+	public static final ThemeResource removeItemImageResource = new ThemeResource("img/removeButtonSmall.jpg");
 	
 	private static final String MAKING_COST_TYPE_NET = "net";
 	private static final String MAKING_COST_TYPE_PER_GM = "per gm";
 	private static final String MAKING_COST_TYPE_PERCENT = "%";
 	private static final long serialVersionUID = 1L;
-
+	
 	public GoldItemContainer() {
 		addContainerProperty(DELETE, Image.class, new Image());
 		addContainerProperty(HALL_MARK_TYPE, ComboBox.class, new ComboBox());
@@ -48,7 +49,8 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		addContainerProperty(PRICE, TextField.class, new TextField());
 	}
 
-	public Double getTotal() {
+	@Override
+	public Double getTotalPrice() {
 		double totalCost = 0.0;
 		List<Object> itemIdsList = getAllItemIds();
 		for (Object obj : itemIdsList) {
@@ -70,11 +72,11 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		return totalWeight;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void addCustomItem() {
 		Object goldItemRowId = addItem();
 		Item item = getItem(goldItemRowId);
-
 		if (item != null) {
 			item.getItemProperty(DELETE).setValue(getRemoveItemImage(goldItemRowId));
 			item.getItemProperty(HALL_MARK_TYPE).setValue(getHallMarkTypeList(goldItemRowId));
@@ -90,8 +92,7 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 	}
 
 	private Image getRemoveItemImage(final Object goldItemRowId) {
-		ThemeResource resource = new ThemeResource("img/removeButtonSmall.jpg");
-		final Image image = new Image("", resource);
+		final Image image = new Image("", removeItemImageResource);
 		image.setHeight("20px");
 		image.setWidth("20px");
 		image.setDescription("Remove Item");
@@ -108,8 +109,7 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		itemPrice.setWidth("100%");
 		itemPrice.setEnabled(false);
 		itemPrice.setStyleName("my-disabled");
-		itemPrice.addValidator(new DoubleRangeValidator(
-				"Must be number and > 0", 0.0001, null));
+		itemPrice.addValidator(new DoubleRangeValidator("Must be number and > 0", 0.0001, null));
 		itemPrice.addValidator((value) -> {
 		    if (!NumberUtils.isNumber(String.valueOf(value))
 			    	|| (NumberUtils.isNumber(String.valueOf(value)) 
@@ -129,16 +129,14 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		goldRate.setValidationVisible(true);
 		goldRate.setWidth("80%");
 		goldRate.addValueChangeListener(getCustomValueChangeListener(currentItemId));
-		goldRate.addValidator(new DoubleRangeValidator(
-				"Must be number and > 0", 0.0001, null));
+		goldRate.addValidator(new DoubleRangeValidator("Must be number and > 0", 0.0001, null));
 		goldRate.addValueChangeListener(new Property.ValueChangeListener() {
 			private static final long serialVersionUID = 8427047967928189057L;
 			public void valueChange(ValueChangeEvent event) {
 				String value = (String) event.getProperty().getValue();
 				if (StringUtils.isEmpty(value)) {
 					goldRate.addStyleName("v-textfield-fail");
-					TextField goldPriceTextField = (TextField) getItem(
-							currentItemId).getItemProperty(PRICE).getValue();
+					TextField goldPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
 					goldPriceTextField.setValue("");
 					goldPriceTextField.removeStyleName("v-textfield-success");
 				}
@@ -146,8 +144,8 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		});
 		goldRate.addValidator((value) -> {
 			if (!NumberUtils.isNumber(String.valueOf(value))
-					|| (NumberUtils.isNumber(String.valueOf(value)) && (NumberUtils
-							.toDouble(String.valueOf(value)) <= 0.0))) {
+					|| (NumberUtils.isNumber(String.valueOf(value))
+						&& (NumberUtils.toDouble(String.valueOf(value)) <= 0.0))) {
 				goldRate.addStyleName("v-textfield-fail");
 			} else {
 				goldRate.removeStyleName("v-textfield-fail");
@@ -166,19 +164,16 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		makingCharge.addValueChangeListener(new Property.ValueChangeListener() {
 			private static final long serialVersionUID = -4068221795365506559L;
 			public void valueChange(ValueChangeEvent event) {
-				// Assuming that the value type is a String
 				String value = (String) event.getProperty().getValue();
 				if (StringUtils.isEmpty(value)) {
 					makingCharge.addStyleName("v-textfield-fail");
-					TextField goldPriceTextField = (TextField) getItem(
-							currentItemId).getItemProperty(PRICE).getValue();
+					TextField goldPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
 					goldPriceTextField.setValue("");
 					goldPriceTextField.removeStyleName("v-textfield-success");
 				}
 			}
 		});
-		makingCharge.addValidator(new DoubleRangeValidator(
-				"Must be number and >= 0", 0.0, null));
+		makingCharge.addValidator(new DoubleRangeValidator("Must be number and >= 0", 0.0, null));
 		makingCharge.addValidator((value) -> {
 			if (!NumberUtils.isNumber(String.valueOf(value))
 					|| (NumberUtils.isNumber(String.valueOf(value))
@@ -189,7 +184,6 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 				makingCharge.removeStyleName("v-textfield-fail");
 			}
 		});
-
 		return makingCharge;
 	}
 
@@ -249,7 +243,6 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		quantity.addValueChangeListener(new Property.ValueChangeListener() {
 			private static final long serialVersionUID = 4708857967116319893L;
 			public void valueChange(ValueChangeEvent event) {
-				// Assuming that the value type is a String
 				String value = (String) event.getProperty().getValue();
 				if (StringUtils.isEmpty(value)) {
 					quantity.addStyleName("v-textfield-fail");
@@ -278,42 +271,24 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 			private static final long serialVersionUID = 1L;
 
 			public void valueChange(ValueChangeEvent event) {
-				ComboBox itemNameField = (ComboBox) getItem(currentItemId)
-						.getItemProperty(ITEM_NAME).getValue();
-				ComboBox hallMarkTypeField = (ComboBox) getItem(currentItemId)
-						.getItemProperty(HALL_MARK_TYPE).getValue();
-				ComboBox piecePairField = (ComboBox) getItem(currentItemId)
-						.getItemProperty(PIECE_PAIR).getValue();
-				ComboBox makingChargeType = (ComboBox) getItem(currentItemId)
-						.getItemProperty(MAKING_CHARGE_TYPE).getValue();
-				TextField quantityTxtField = (TextField) getItem(currentItemId)
-						.getItemProperty(QUANTITY).getValue();
-				TextField weightTxtField = (TextField) getItem(currentItemId)
-						.getItemProperty(WEIGHT).getValue();
-				TextField makingChargeTxtField = (TextField) getItem(
-						currentItemId).getItemProperty(MAKING_CHARGE)
-						.getValue();
-				TextField goldRateTxtField = (TextField) getItem(currentItemId)
-						.getItemProperty(GOLD_RATE).getValue();
-				TextField goldPriceTxtField = (TextField) getItem(currentItemId)
-						.getItemProperty(PRICE).getValue();
-				int quantity = NumberUtils
-						.isDigits(quantityTxtField.getValue()) ? NumberUtils
-						.toInt(quantityTxtField.getValue()) : 0;
-				double weight = NumberUtils.isNumber(weightTxtField.getValue()) ? NumberUtils
-						.toDouble(weightTxtField.getValue()) : 0.0;
-				double makingCharge = NumberUtils.isNumber(makingChargeTxtField
-						.getValue()) ? NumberUtils
-						.toDouble(makingChargeTxtField.getValue()) : 0.0;
-				double goldRate = NumberUtils.isNumber(goldRateTxtField
-						.getValue()) ? NumberUtils.toDouble(goldRateTxtField
-						.getValue()) : 0.0;
+				ComboBox itemNameField = (ComboBox) getItem(currentItemId).getItemProperty(ITEM_NAME).getValue();
+				ComboBox hallMarkTypeField = (ComboBox) getItem(currentItemId).getItemProperty(HALL_MARK_TYPE).getValue();
+				ComboBox piecePairField = (ComboBox) getItem(currentItemId).getItemProperty(PIECE_PAIR).getValue();
+				ComboBox makingChargeType = (ComboBox) getItem(currentItemId).getItemProperty(MAKING_CHARGE_TYPE).getValue();
+				TextField quantityTxtField = (TextField) getItem(currentItemId).getItemProperty(QUANTITY).getValue();
+				TextField weightTxtField = (TextField) getItem(currentItemId).getItemProperty(WEIGHT).getValue();
+				TextField makingChargeTxtField = (TextField) getItem(currentItemId).getItemProperty(MAKING_CHARGE).getValue();
+				TextField goldRateTxtField = (TextField) getItem(currentItemId).getItemProperty(GOLD_RATE).getValue();
+				TextField goldPriceTxtField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+				int quantity = NumberUtils.isDigits(quantityTxtField.getValue()) ? NumberUtils.toInt(quantityTxtField.getValue()) : 0;
+				double weight = NumberUtils.isNumber(weightTxtField.getValue()) ? NumberUtils.toDouble(weightTxtField.getValue()) : 0.0;
+				double makingCharge = NumberUtils.isNumber(makingChargeTxtField.getValue()) ? NumberUtils.toDouble(makingChargeTxtField.getValue()) : 0.0;
+				double goldRate = NumberUtils.isNumber(goldRateTxtField.getValue()) ? NumberUtils.toDouble(goldRateTxtField.getValue()) : 0.0;
 				if ((quantity > 0)
 						&& (weight > 0.0)
 						&& (makingCharge >= 0.0)
 						&& (goldRate > 0.0)
-						&& !StringUtils.isBlank(String
-								.valueOf(hallMarkTypeField.getValue()))
+						&& !StringUtils.isBlank(String.valueOf(hallMarkTypeField.getValue()))
 						&& !StringUtils.isBlank(String.valueOf(piecePairField.getValue()))
 						&& !StringUtils.isBlank(String.valueOf(makingChargeType.getValue()))
 						&& !StringUtils.isBlank(String.valueOf(itemNameField.getValue())))
