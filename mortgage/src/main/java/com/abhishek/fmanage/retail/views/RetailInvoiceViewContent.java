@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package com.abhishek.fmanage.retail.views;
 
 import java.io.File;
@@ -16,7 +19,6 @@ import com.abhishek.fmanage.mortgage.data.bean.Customer;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.mortgage.data.container.ItemContainerType;
 import com.abhishek.fmanage.retail.data.container.DiamondItemContainer;
-import com.abhishek.fmanage.retail.data.container.GeneralItemContainer;
 import com.abhishek.fmanage.retail.data.container.GoldItemContainer;
 import com.abhishek.fmanage.retail.data.container.SilverItemContainer;
 import com.abhishek.fmanage.retail.form.PriceForm;
@@ -29,13 +31,14 @@ import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.util.PropertysetItem;
 import com.vaadin.event.MouseEvents;
 import com.vaadin.event.ShortcutAction.KeyCode;
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.ClientConnector;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ResourceReference;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -57,10 +60,14 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.Window;
 
-public class RetailInvoiceView extends VerticalLayout implements View{
+/**
+ * @author GUPTAA6
+ *
+ */
+public class RetailInvoiceViewContent {
 
-	private final Logger logger = LoggerFactory.getLogger(RetailInvoiceView.class);
-    private static final String INVOICE_BILL = "Invoice Bill";
+	private final Logger logger = LoggerFactory.getLogger(RetailInvoiceViewContent.class);
+	private static final String INVOICE_BILL = "Invoice Bill";
 	public static final String ESTIMATE_BILL = "Estimate Bill";
 	public static final String INDIAN_DATE_FORMAT = "dd/MM/yyyy";
     public static final String SELECT_DATE = "Select Date";
@@ -69,44 +76,57 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	private GoldItemContainer goldItemContainer = new GoldItemContainer();
 	private SilverItemContainer silverItemContainer = new SilverItemContainer();
 	private DiamondItemContainer diamondItemContainer = new DiamondItemContainer();
-	private GeneralItemContainer generalItemContainer = new GeneralItemContainer();
 	private Table goldBillingTable = new Table();
 	private Table silverBillingTable = new Table();
 	private Table diamondBillingTable = new Table(); 
-	private Table generalBillingTable = new Table(); 
-    private final PopupDateField billPopUpDate = new PopupDateField();
+    private PopupDateField billPopUpDate = new PopupDateField();
 	private VerticalLayout retailViewVerticalLayout = new VerticalLayout();
 	private PriceForm pfForm = new PriceForm(getPricePropertyItem());
 	private HorizontalLayout priceLayout = new HorizontalLayout();
 	private Panel p = new Panel();
-	private Customer cusBean = new Customer();
+	private Customer cusBean;
 	private CheckBox includePrice = new CheckBox("Include Price", true);
 	private FlexibleOptionGroup billType;
 	private TextArea notes = new TextArea("Invoice Notes");
 	private static final String VIN_NUMBER = CustomShopSettingFileUtility.getInstance().getTinNumber();
-	
-	@Override
-	public void enter(ViewChangeEvent event) {
-		setSizeFull();
+
+	private RetailInvoiceViewContent(){}
+	public RetailInvoiceViewContent(
+			PopupDateField billPopUpDate,
+			FlexibleOptionGroup billType,
+			Customer cusBean,
+			GoldItemContainer goldItemContainer,
+			SilverItemContainer silverItemContainer,
+			DiamondItemContainer diamondItemContainer,
+			PriceForm pfForm,
+			CheckBox includePrice,
+			TextArea notes) {
+		this.billPopUpDate = billPopUpDate;
+		this.billType = billType;
+		this.goldItemContainer = goldItemContainer;
+		this.silverItemContainer = silverItemContainer;
+		this.diamondItemContainer = diamondItemContainer;
+		this.pfForm = pfForm;
+		this.includePrice = includePrice;
+		this.notes = notes;
+		this.cusBean = cusBean;
+	}
+
+	public VerticalSplitPanel generate(){
 		goldBillingTable = getGoldBillingTable();
 		silverBillingTable = getSilverItemTable();
 		diamondBillingTable = getDiamondTable();
-		generalBillingTable = getGeneralTable();
-		
 		
 		VerticalLayout goldBillingLayout = getBillingLayout(goldBillingTable, goldItemContainer, ItemContainerType.GOLD);
 		VerticalLayout silverBillingLayout = getBillingLayout(silverBillingTable, silverItemContainer, ItemContainerType.SILVER);
 		VerticalLayout diamondBillingLayout = getBillingLayout(diamondBillingTable, diamondItemContainer, ItemContainerType.DIAMOND);
-		VerticalLayout generalBillingLayout = getBillingLayout(generalBillingTable, generalItemContainer, ItemContainerType.GENERAL);
 
-		retailViewVerticalLayout.addComponent(getUserDetailFormLayout());
+		retailViewVerticalLayout.addComponent(getUserDetailFormLayout(cusBean));
 		retailViewVerticalLayout.addComponent(goldBillingLayout);
 		retailViewVerticalLayout.addComponent(silverBillingLayout);
 		retailViewVerticalLayout.addComponent(diamondBillingLayout);
-		retailViewVerticalLayout.addComponent(generalBillingLayout);
 		retailViewVerticalLayout.addComponent(getCalculatedPriceLayout());
 		retailViewVerticalLayout.setSpacing(true);
-		retailViewVerticalLayout.setImmediate(true);
 		p.setSizeFull();
 		
 		HorizontalLayout toolbarLayout = new HorizontalLayout();
@@ -123,62 +143,9 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 		Panel toolBarPanel = new Panel();
 		toolBarPanel.setSizeUndefined();
 		toolBarPanel.setWidth("100%");
-		addComponent(vSplitPanel);
-		//addComponent(new RetailInvoiceViewContent(new PopupDateField(), billType,  new Customer(), new GoldItemContainer(), 
-			//	new SilverItemContainer(), new DiamondItemContainer(), new PriceForm(getPricePropertyItem()),
-				//new CheckBox("Include Price", true), new TextArea("Invoice Notes")).generate());
+		return vSplitPanel;
 	}
-
-	private Table getGeneralTable() {
-		 Table generalItemTable = new Table();
-	        generalItemTable.setSizeFull();
-	        generalItemTable.addStyleName("borderless");
-	        generalItemTable.setSelectable(false);
-	        generalItemTable.setColumnCollapsingAllowed(false);
-	        generalItemTable.setColumnReorderingAllowed(true);
-	        generalItemTable.setWidth("95%");
-	        generalItemTable.addStyleName("general-table");
-	        generalItemTable.addStyleName("general-table-header");
-	        generalItemTable.addStyleName("general-table-footer");
-	        generalItemTable.addStyleName("general-table-footer-container");
-	        generalItemTable.setContainerDataSource(generalItemContainer);
-	        generalItemTable.setVisibleColumns(new Object[] {
-	        		GeneralItemContainer.DELETE,
-	        		GeneralItemContainer.ITEM_NAME,
-	        		GeneralItemContainer.QUANTITY,
-	        		GeneralItemContainer.PIECE_PAIR,
-	        		GeneralItemContainer.WEIGHT,
-	        		GeneralItemContainer.PRICE_PER_PIECE_PAIR,
-	        		GeneralItemContainer.PRICE
-	            });
-	        generalItemTable.setFooterVisible(true);
-	        generalItemTable.setMultiSelect(false);
-	        generalItemTable.setPageLength(0);
-	        generalItemTable.setColumnWidth(GeneralItemContainer.ITEM_NAME, 180);
-	        generalItemTable.setColumnWidth(GeneralItemContainer.QUANTITY, 60);
-	        generalItemTable.setColumnWidth(GeneralItemContainer.WEIGHT, 90);
-	        String totalFormattedDiamondPrice = String.format("%.3f",((GeneralItemContainer)generalItemTable.getContainerDataSource()).getTotalPrice()); 
-	        generalItemTable.setColumnFooter(GeneralItemContainer.PRICE, totalFormattedDiamondPrice);
-	        generalItemTable.setColumnFooter(GeneralItemContainer.DELETE, "Items=" + generalItemTable.size());
-	        for (Object obj : generalItemTable.getItemIds()){
-	        	TextField itemTxtField = (TextField)(generalItemContainer.getItem(obj).getItemProperty(GeneralItemContainer.PRICE).getValue());
-	            itemTxtField.setImmediate(true);
-	            itemTxtField.addValueChangeListener(new ValueChangeListener() {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public void valueChange(ValueChangeEvent event) {
-						String totalFormattedDiamondPrice = String.format("%.3f",((GeneralItemContainer)generalItemTable.getContainerDataSource()).getTotalPrice());
-						generalItemTable.setColumnFooter(GeneralItemContainer.PRICE, totalFormattedDiamondPrice);
-					}
-				});
-	        }
-	        //diamondTableWeightContainerValueChange();
-	        addCustomTableDataContainerPriceItemCountValueChange(generalItemTable, generalItemContainer);
-	        generalItemTable.setImmediate(true);
-	        return generalItemTable;
-	}
-
+	
 	private Component getCalculatedPriceLayout()
 	{
 		priceLayout.setSizeFull();
@@ -193,7 +160,6 @@ public class RetailInvoiceView extends VerticalLayout implements View{
         priceLayout.setSpacing(true);
         priceLayout.setExpandRatio(notes, 1);
         priceLayout.setExpandRatio(includePrice, 0.8f);
-        
         priceLayout.setExpandRatio(pfForm, 1.2f);
         priceLayout.setExpandRatio(generateBillBtn, 0.8f);
         return priceLayout;
@@ -209,7 +175,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 		return item;
 	}
 
-	private Component getUserDetailFormLayout() {
+	private Component getUserDetailFormLayout(Customer cusBean) {
 		
 		FormLayout personDetailFormlayout1 = new FormLayout();
 		FormLayout personDetailFormlayout2 = new FormLayout();
@@ -283,7 +249,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
         newBillBtn.addClickListener(new Button.ClickListener() {
             private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
-				getUI().getNavigator().navigateTo("/retailbilling");
+				UI.getCurrent().getNavigator().navigateTo("/retailbilling");
             }
         });
         toolbar.addComponent(newBillBtn);
@@ -298,7 +264,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 		billPopUpDate.setValue(new Date());
 		toolbar.addComponent(billPopUpDate);
 
-		Label tinLabel = new Label("<b>TIN VAT NO:</b>" + VIN_NUMBER, ContentMode.HTML);
+		Label tinLabel = new Label("<b>TIN VAT NO:</b> 10100310077", ContentMode.HTML);
 		tinLabel.setStyleName("vinHiddenLabel");
 		tinLabel.setImmediate(true);
 
@@ -342,24 +308,24 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 		    optionGroupLayout.addComponent(captionLabel);
 		    optionGroupLayout.setComponentAlignment(captionLabel, Alignment.MIDDLE_LEFT);
 		}
-//		ThemeResource logoItemImageResource = new ThemeResource("img/apnaJewelleryLogo.jpg");
-//		final Image shopLogoImage = new Image("", logoItemImageResource);
-//		shopLogoImage.setHeight("40px");
-//		shopLogoImage.setWidth("40px");
-//		shopLogoImage.setDescription("Logo");
+		ThemeResource logoItemImageResource = new ThemeResource("img/apnaJewelleryLogo.jpg");
+		final Image shopLogoImage = new Image("", logoItemImageResource);
+		shopLogoImage.setHeight("40px");
+		shopLogoImage.setWidth("40px");
+		shopLogoImage.setDescription("Logo");
 		toolbar.addComponent(optionGroupLayout);
 		toolbar.addComponent(tinLabel);
-		//toolbar.addComponent(shopLogoImage);
+		toolbar.addComponent(shopLogoImage);
 		toolbar.setExpandRatio(newBillBtn, 1);
 	    toolbar.setExpandRatio(billPopUpDate, 1);
 	    toolbar.setExpandRatio(optionGroupLayout, 1);
-	    //toolbar.setExpandRatio(shopLogoImage, 1.5f);
+	    toolbar.setExpandRatio(shopLogoImage, 1.5f);
 	    toolbar.setExpandRatio(tinLabel, 1);
 	    toolbar.setComponentAlignment(newBillBtn, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(billPopUpDate, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(optionGroupLayout, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(tinLabel, Alignment.MIDDLE_LEFT);
-		//toolbar.setComponentAlignment(shopLogoImage, Alignment.TOP_CENTER);
+		toolbar.setComponentAlignment(shopLogoImage, Alignment.TOP_CENTER);
         return toolbar;
 	}
 	
@@ -375,21 +341,20 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				try {
 					boolean isEstimateBill = billType.getValue().equals(ESTIMATE_BILL);
 					Date invoiceDate = billPopUpDate.getValue();
-					 fileName = new InvoiceGenerator(
-							 goldBillingTable,
-							 silverBillingTable,
-							 diamondBillingTable,
-							 generalBillingTable,
-							 pfForm, cusBean).createPdf(includePrice.getValue(), VIN_NUMBER, isEstimateBill, invoiceDate, notes);
+//					 fileName = new InvoiceGenerator(
+//							 goldBillingTable,
+//							 silverBillingTable,
+//							 diamondBillingTable,
+//							 pfForm, cusBean).createPdf(includePrice.getValue(), VIN_NUMBER, isEstimateBill, invoiceDate, notes);
 				} catch (Exception e) {
 					logger.error("Error generating invoice", e);
 				}
 				
 				if(Page.getCurrent().getWebBrowser().isTouchDevice()){
 					Resource pdf = new FileResource(new File(fileName));
-				    setResource("help", pdf);
-				    ResourceReference rr = ResourceReference.create(pdf, (RetailInvoiceView)generateBillBtn.getData(), "help");
-				    Page.getCurrent().open(rr.getURL(), "blank_");
+					//setResource("help", pdf);
+				    //ResourceReference rr = ResourceReference.create(pdf, (RetailInvoiceViewContent)generateBillBtn.getData(), "help");
+				    //Page.getCurrent().open(rr.getURL(), "blank_");
 				}else{
 				File pdfFile = new File(fileName);
                 Embedded pdf = new Embedded("", new FileResource(pdfFile));
@@ -398,11 +363,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
                 pdf.setWidth("100%");
                 pdf.setHeight("90%");
                 
-                String windowName = "Invoice Bill";
-                if(billType.getValue().equals(ESTIMATE_BILL)){
-                	windowName = "Estimate Letter";
-                }
-			    Window w = new Window(windowName);
+			    Window w = new Window("InvoiceBill");
 			    w.setModal(true);
 				w.center();
 				w.setCloseShortcut(KeyCode.ESCAPE, null);
@@ -430,8 +391,6 @@ public class RetailInvoiceView extends VerticalLayout implements View{
      	case 1: buttonType = "Add Silver Item";
      		break;
      	case 2: buttonType = "Add Diamond Item";
-     		break;
-     	case 3: buttonType = "Add General Item";
      }
         Button newBillBtn = new Button(buttonType);
         newBillBtn.setSizeUndefined();
@@ -442,8 +401,8 @@ public class RetailInvoiceView extends VerticalLayout implements View{
             private static final long serialVersionUID = 1L;
 			public void buttonClick(ClickEvent event) {
 				container.addCustomItem();
-				table.setPageLength(table.size());
-				addCustomTableDataContainerPriceItemCountValueChange(table, container);
+				table.setImmediate(true);
+                addCustomTableDataContainerPriceItemCountValueChange(table, container);
                 goldTableWeightContainerValueChange();
                 silverTableWeightContainerValueChange();
                 diamondTableWeightContainerValueChange();
@@ -481,7 +440,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	            });
 	        diamondItemTable.setFooterVisible(true);
 	        diamondItemTable.setMultiSelect(false);
-	        diamondItemTable.setPageLength(0);
+	        diamondItemTable.setPageLength(3);
 	        diamondItemTable.setColumnWidth(DiamondItemContainer.ITEM_NAME, 180);
 	        diamondItemTable.setColumnWidth(DiamondItemContainer.QUANTITY, 60);
 	        diamondItemTable.setColumnWidth(DiamondItemContainer.GOLD_WEIGHT, 90);
@@ -539,7 +498,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	            });
 	        silverItemTable.setFooterVisible(true);
 	        silverItemTable.setMultiSelect(false);
-	        silverItemTable.setPageLength(0);
+	        silverItemTable.setPageLength(4);
 	        silverItemTable.setColumnWidth(SilverItemContainer.DELETE, 70);
 	        silverItemTable.setColumnWidth(SilverItemContainer.ITEM_NAME, 180);
 	        silverItemTable.setColumnWidth(SilverItemContainer.QUANTITY, 60);
@@ -585,7 +544,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	            });
 	        goldItemTable.setFooterVisible(true);
 	        goldItemTable.setMultiSelect(false);
-	        goldItemTable.setPageLength(0);
+	        goldItemTable.setPageLength(4);
 	        goldItemTable.setColumnWidth(GoldItemContainer.DELETE, 70);
 	        goldItemTable.setColumnWidth(GoldItemContainer.ITEM_NAME, 180);
 	        goldItemTable.setColumnWidth(GoldItemContainer.GOLD_TYPE, 80);
@@ -618,7 +577,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				public void valueChange(ValueChangeEvent event) {
 					String totalFormattedWeight = String.format("%.3f",(goldItemContainer).getTotalWeight()); 
 					goldBillingTable.setColumnFooter(GoldItemContainer.WEIGHT, totalFormattedWeight);
-					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 				}
 			});
 		    Image deleteImage = (Image)((goldItemContainer.getItem(obj).getItemProperty(DiamondItemContainer.DELETE).getValue()));
@@ -627,10 +586,9 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	               @Override
 	               public void click(com.vaadin.event.MouseEvents.ClickEvent event)
 	               {
-            		   goldBillingTable.setPageLength(goldBillingTable.size());
 	            	   String totalFormattedGoldWeight = String.format("%.3f",(goldItemContainer).getTotalWeight()); 
 	            	   goldBillingTable.setColumnFooter(GoldItemContainer.WEIGHT, totalFormattedGoldWeight);
-					   pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+					   pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 	               }
 	           });
 		}
@@ -648,7 +606,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				public void valueChange(ValueChangeEvent event) {
 					String totalFormattedWeight = String.format("%.3f",(silverItemContainer).getTotalWeight()); 
 					silverBillingTable.setColumnFooter(SilverItemContainer.WEIGHT, totalFormattedWeight);
-					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 					
 				}
 			});
@@ -658,10 +616,9 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	               @Override
 	               public void click(com.vaadin.event.MouseEvents.ClickEvent event)
 	               {
-	            	   silverBillingTable.setPageLength(silverBillingTable.size());
 	            	   String totalFormattedSilverWeight = String.format("%.3f",(silverItemContainer).getTotalWeight()); 
 	            	   silverBillingTable.setColumnFooter(SilverItemContainer.WEIGHT, totalFormattedSilverWeight);
-					   pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+					   pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 	               }
 	           });
 		}
@@ -679,7 +636,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				public void valueChange(ValueChangeEvent event) {
 					String totalFormattedWeight = String.format("%.3f",(diamondItemContainer).getTotalGoldWeight()); 
 					diamondBillingTable.setColumnFooter(DiamondItemContainer.GOLD_WEIGHT, totalFormattedWeight);
-					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 				}
 			});
 		    TextField diamondWtTextField = (TextField)((diamondItemContainer.getItem(obj).getItemProperty(DiamondItemContainer.DIAMOND_WEIGHT).getValue()));
@@ -690,7 +647,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				public void valueChange(ValueChangeEvent event) {
 					String totalFormattedWeight = String.format("%.2f",(diamondItemContainer).getTotalDiamondWeight()); 
 					diamondBillingTable.setColumnFooter(DiamondItemContainer.DIAMOND_WEIGHT, totalFormattedWeight);
-					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 				}
 			});
 		    Image deleteImage = (Image)((diamondItemContainer.getItem(obj).getItemProperty(DiamondItemContainer.DELETE).getValue()));
@@ -699,12 +656,11 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	               @Override
 	               public void click(com.vaadin.event.MouseEvents.ClickEvent event)
 	               {
-	            	   diamondBillingTable.setPageLength(diamondBillingTable.size());
 	            	   String totalFormattedGoldWeight = String.format("%.3f",(diamondItemContainer).getTotalGoldWeight()); 
 					   diamondBillingTable.setColumnFooter(DiamondItemContainer.GOLD_WEIGHT, totalFormattedGoldWeight);
 					   String totalFormattedDiamondWeight = String.format("%.2f",(diamondItemContainer).getTotalDiamondWeight()); 
 					   diamondBillingTable.setColumnFooter(DiamondItemContainer.DIAMOND_WEIGHT, totalFormattedDiamondWeight);
-					   pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+					   pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 	               }
 	           });
 		}
@@ -723,7 +679,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 					String totalFormattedPrice = String.format("%.3f",((CustomItemContainerInterface)table.getContainerDataSource()).getTotalPrice()); 
 					table.setColumnFooter(GoldItemContainer.PRICE, "Sum=" + totalFormattedPrice);
 					table.setColumnFooter(GoldItemContainer.DELETE, ("Items=" + table.size()));
-					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+					pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 				}
 			});
 		    Image deleteImage = (Image)(((IndexedContainer)container).getItem(obj).getItemProperty(GoldItemContainer.DELETE).getValue());
@@ -732,21 +688,19 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	               @Override
 	               public void click(com.vaadin.event.MouseEvents.ClickEvent event)
 	               {
-	            	  table.setPageLength(table.size());
-					   String totalFormattedPrice = String.format("%.3f",((CustomItemContainerInterface)table.getContainerDataSource()).getTotalPrice()); 
+	            	   String totalFormattedPrice = String.format("%.3f",((CustomItemContainerInterface)table.getContainerDataSource()).getTotalPrice()); 
 	            	   table.setColumnFooter(GoldItemContainer.PRICE, "Sum=" + totalFormattedPrice);
 	            	   table.setColumnFooter(GoldItemContainer.DELETE, ("Items=" + table.size()));
-	            	   pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondGeneralItemsPrice()));
+	            	   pfForm.totalItemPrice.setValue(String.format("%.3f", getTotalGoldSilverDiamondPrice()));
 	               }
 	           });
 		}
 	}
 	
-	double getTotalGoldSilverDiamondGeneralItemsPrice()
+	double getTotalGoldSilverDiamondPrice()
 	{	double totalGoldPrice = ((CustomItemContainerInterface)goldItemContainer).getTotalPrice();
 		double totalSilverPrice = ((CustomItemContainerInterface)silverItemContainer).getTotalPrice();
 		double totalDiamondPrice = ((CustomItemContainerInterface)diamondItemContainer).getTotalPrice();
-		double totalGeneralPrice = ((CustomItemContainerInterface)generalItemContainer).getTotalPrice();
-		return totalGoldPrice + totalSilverPrice + totalDiamondPrice + totalGeneralPrice;
+		return totalGoldPrice + totalSilverPrice + totalDiamondPrice;
 	}
 }

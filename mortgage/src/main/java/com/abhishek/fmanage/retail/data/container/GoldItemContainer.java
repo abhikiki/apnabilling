@@ -1,10 +1,12 @@
 package com.abhishek.fmanage.retail.data.container;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -28,7 +30,7 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 	public static final String PIECE_PAIR = "PiecePair";
 	public static final String QUANTITY = "Quantity";
 	public static final String ITEM_NAME = "ItemName";
-	public static final String HALL_MARK_TYPE = "HallMark";
+	public static final String GOLD_TYPE = "GoldType";
 	public static final ThemeResource removeItemImageResource = new ThemeResource("img/removeButtonSmall.jpg");
 	
 	private static final String MAKING_COST_TYPE_NET = "net";
@@ -38,7 +40,7 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 	
 	public GoldItemContainer() {
 		addContainerProperty(DELETE, Image.class, new Image());
-		addContainerProperty(HALL_MARK_TYPE, ComboBox.class, new ComboBox());
+		addContainerProperty(GOLD_TYPE, ComboBox.class, new ComboBox());
 		addContainerProperty(ITEM_NAME, ComboBox.class, new ComboBox());
 		addContainerProperty(QUANTITY, TextField.class, new TextField());
 		addContainerProperty(PIECE_PAIR, ComboBox.class, new ComboBox());
@@ -79,7 +81,7 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		Item item = getItem(goldItemRowId);
 		if (item != null) {
 			item.getItemProperty(DELETE).setValue(getRemoveItemImage(goldItemRowId));
-			item.getItemProperty(HALL_MARK_TYPE).setValue(getHallMarkTypeList(goldItemRowId));
+			item.getItemProperty(GOLD_TYPE).setValue(getHallMarkTypeList(goldItemRowId));
 			item.getItemProperty(ITEM_NAME).setValue(getItemNameList(goldItemRowId));
 			item.getItemProperty(QUANTITY).setValue(getQuantity(goldItemRowId));
 			item.getItemProperty(PIECE_PAIR).setValue(getPiecePair(goldItemRowId));
@@ -272,7 +274,7 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 
 			public void valueChange(ValueChangeEvent event) {
 				ComboBox itemNameField = (ComboBox) getItem(currentItemId).getItemProperty(ITEM_NAME).getValue();
-				ComboBox hallMarkTypeField = (ComboBox) getItem(currentItemId).getItemProperty(HALL_MARK_TYPE).getValue();
+				ComboBox hallMarkTypeField = (ComboBox) getItem(currentItemId).getItemProperty(GOLD_TYPE).getValue();
 				ComboBox piecePairField = (ComboBox) getItem(currentItemId).getItemProperty(PIECE_PAIR).getValue();
 				ComboBox makingChargeType = (ComboBox) getItem(currentItemId).getItemProperty(MAKING_CHARGE_TYPE).getValue();
 				TextField quantityTxtField = (TextField) getItem(currentItemId).getItemProperty(QUANTITY).getValue();
@@ -340,6 +342,10 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 	private ComboBox getItemNameList(final Object currentItemId) {
 		ComboBox itemName = new ComboBox();
 		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
+		ArrayList<String> goldItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getGoldItemsList();
+		for(String goldItem : goldItemListFromCsvFile){
+			itemName.addItem(goldItem);
+		}
 		itemName.setWidth("100%");
 		itemName.addItem("AD NOSEPIN");
 		itemName.addItem("BABY BALA");

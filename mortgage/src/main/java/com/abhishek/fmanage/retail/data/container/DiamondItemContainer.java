@@ -1,10 +1,12 @@
 package com.abhishek.fmanage.retail.data.container;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -202,6 +204,10 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 	private ComboBox getItemNameList(){
 		ComboBox itemName = new ComboBox();
 		itemName.setWidth("100%");
+		ArrayList<String> diamondItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getDiamondItemsList();
+		for(String diamondItem : diamondItemListFromCsvFile){
+			itemName.addItem(diamondItem);
+		}
 		itemName.addItem("TOPS");
 		itemName.addItem("LADIES RING");
 		itemName.addItem("GENTS RING");

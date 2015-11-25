@@ -8,6 +8,9 @@
 	        font-weight: normal;
 	}
 	
+	.customer-layout{
+		background: #D8F6CE;
+	}
     .my-disabled{
 		opacity: 1;
 		filter: none;
@@ -20,6 +23,40 @@
    		color: black;
    		
 	}
+	
+	.gold-table{
+		background: #F2F5A9;
+		
+	}
+	
+	.silver-table{
+		background: #E6E6E6;
+		
+	}
+	.diamond-table{
+		background: #CED8F6;
+		
+	}
+	
+	.general-table{
+		background: #ffd1b3;
+	}
+	
+	.general-table-header .v-table-header{
+		color: #0B0B61;
+    	background: #ff731a;
+    	text-align: center;
+	}
+	
+	.general-table-footer .v-table-footer{
+		color: #0B0B61;
+    	background: #ff731a;
+    	text-align: center;
+	}
+	.general-table-footer-container .v-table-footer-container{
+		color: #0B0B61;
+    	text-align: center;
+    }
 	
 	.diamond-table-header .v-table-header{
 		color: #0B0B61;

@@ -9,6 +9,7 @@ import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -26,7 +27,7 @@ public class PriceForm extends FormLayout{
 
 	private static final long serialVersionUID = -5016984459457685827L;
 	public TextField totalItemPrice = new TextField("Total New Items Price", "0.0");
-	public TextField vatOnNewItemPrice = new TextField("Vat On New Items Price(1%)", "0.0");
+	public TextField vatOnNewItemPrice = new TextField("Vat On New Items Price(" + String.valueOf(CustomShopSettingFileUtility.getInstance().getVatPercentage()) + "%)", "0.0");
     public TextField oldPurchasePrice = new TextField("Old Purchase Price(-)", "0.0");
     public TextField discountPrice =  new TextField("Discount(-)", "0.0");
     public TextField netAmountToPay = new TextField("Net Payable Price", "0.0");
@@ -212,7 +213,8 @@ public class PriceForm extends FormLayout{
 		if(isInvoiceEnabled)
 		{
 			double discountedPrice = Double.valueOf(getNumericTextValue(totalItemPrice)) - Double.valueOf(getNumericTextValue(discountPrice));
-			vatPrice = (1 * discountedPrice)/ 100.0;
+			//vatPrice = (1 * discountedPrice)/ 100.0;
+			vatPrice = (CustomShopSettingFileUtility.getInstance().getVatPercentage() * discountedPrice)/ 100.0;
 		}
 		return vatPrice;
 	}

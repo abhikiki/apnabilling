@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.abhishek.fmanage.retail.pdf;
 
 import java.io.File;
@@ -18,9 +15,13 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.bean.Customer;
 import com.abhishek.fmanage.retail.data.container.DiamondItemContainer;
+import com.abhishek.fmanage.retail.data.container.GeneralItemContainer;
 import com.abhishek.fmanage.retail.data.container.GoldItemContainer;
 import com.abhishek.fmanage.retail.data.container.SilverItemContainer;
 import com.abhishek.fmanage.retail.form.PriceForm;
@@ -35,7 +36,6 @@ import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.Barcode128;
 import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -43,13 +43,14 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPTableEvent;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 
 public class InvoiceGenerator implements PdfPTableEvent {
 
+	private final Logger logger = LoggerFactory.getLogger(InvoiceGenerator.class);
+	private static final String BILL_PATH = "BILL_PATH";
 	/** A font that will be used in our PDF. */
 	public static final Font BOLD_UNDERLINED = new Font(FontFamily.TIMES_ROMAN,
 			11, Font.BOLD | Font.UNDERLINE);
@@ -59,28 +60,26 @@ public class InvoiceGenerator implements PdfPTableEvent {
 	/** A font that will be used in our PDF. */
 	public static final Font NORMAL = new Font(FontFamily.TIMES_ROMAN, 10);
 
-	/** The resulting PDF file. */
-	public final String INVOICE_FILE_NAME = "Invoice_"
-			+ new Timestamp(new Date().getTime()).toString()
-					.replaceAll(" ", "_").replace(":", "_") + ".pdf";
-
 	private static final String NEW_LINE_SEPARATOR = "\n";
 	// CSV file header
 	private static final Object[] FILE_HEADER = { "FirstName", "LastName",
-			"ContactNumber", "EmailId", "PhoneNumber", "StreetAddress1",
+			"ContactNumber", "EmailId", "StreetAddress1",
 			"StreetAddress2", "City", "State", "Country", "Zipcode" };
 
 	private Table goldBillingTable;
 	private Table silverBillingTable;
 	private Table diamondBillingTable;
+	private Table generalBillingTable;
 	private PriceForm pfForm;
 	private Customer customer;
+	private Calendar cal = Calendar.getInstance();
 
 	public InvoiceGenerator(Table goldBillingTable, Table silverBillingTable,
-			Table diamondBillingTable, PriceForm pfForm, Customer customer) {
+			Table diamondBillingTable, Table generalBillingTable, PriceForm pfForm, Customer customer) {
 		this.goldBillingTable = goldBillingTable;
 		this.silverBillingTable = silverBillingTable;
 		this.diamondBillingTable = diamondBillingTable;
+		this.generalBillingTable = generalBillingTable;
 		this.pfForm = pfForm;
 		this.customer = customer;
 	}
@@ -103,17 +102,11 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			final boolean isEstimateBill, final Date invoiceDate,
 			final TextArea notes) throws SQLException, DocumentException,
 			IOException {
-		// step 1
+		cal.setTime(invoiceDate);
 		Document document = new Document(PageSize.A4);
-		// step 2
-		// PdfWriter.getInstance(document, new
-		// FileOutputStream(getDirectory(invoiceDate) +
-		// "\" + INVOICE_FILE_NAME));"
-		String filePath = System.getenv("BILL_PATH") + "\\"
-				+ getDirectory(invoiceDate, isEstimateBill) + "\\"
-				+ INVOICE_FILE_NAME;
+		String filePath = getFilePath(isEstimateBill, invoiceDate);
 		File file = new File(filePath);
-		PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(file));
+		PdfWriter.getInstance(document, new FileOutputStream(file));
 
 		// step 3
 		document.open();
@@ -141,6 +134,9 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		addDiamondItemsInformation(document, includePrice);
 		document.add(new Paragraph(" "));
 
+		addGeneralItemsInformation(document, includePrice);
+		document.add(new Paragraph(" "));
+		
 		addPriceInformationTable(document, isEstimateBill);
 		document.add(new Paragraph(" "));
 
@@ -156,6 +152,26 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 	}
 
+	private String getFilePath(final boolean isEstimateBill, final Date invoiceDate) {
+		String filePath = System.getenv(BILL_PATH) + File.separator	+ getDirectory(invoiceDate, isEstimateBill) + File.separator;
+		if(isEstimateBill){
+			
+			filePath += "Estimate_";
+			
+		}else{
+			filePath += "Invoice_";
+		}
+		filePath += String.valueOf(cal.get(Calendar.YEAR)) + "-"
+				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
+				+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
+				+ String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + "-"
+				+ String.valueOf(cal.get(Calendar.MINUTE)) + "-"
+				+ String.valueOf(cal.get(Calendar.SECOND)) + "-"
+				+ String.valueOf(cal.get(Calendar.MILLISECOND)) + ".pdf";
+		
+		return filePath;
+	}
+
 	private void saveCustomerInformation(Customer customer) {
 		FileWriter fileWriter = null;
 		CSVPrinter csvFilePrinter = null;
@@ -163,7 +179,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				.withRecordSeparator(NEW_LINE_SEPARATOR);
 		try {
 			// initialize FileWriter object
-			File f = new File(System.getenv("BILL_PATH") + "\\"	+ "customerInfo.csv");
+			File f = new File(System.getenv(BILL_PATH) + File.separator	+ "customerInfo.csv");
 			boolean isFileExist = false;
 			if(isFileExist = f.exists()){
 				f.createNewFile();
@@ -179,12 +195,12 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			}
 			
 
+
 			List<String> customerInfoList = new ArrayList<>();
 			customerInfoList.add(customer.getFirstName());
 			customerInfoList.add(customer.getLastName());
 			customerInfoList.add(customer.getContactNumber());
 			customerInfoList.add(customer.getEmailId());
-			customerInfoList.add(customer.getContactNumber());
 			customerInfoList.add(customer.getStreetAddress1());
 			customerInfoList.add(customer.getStreetAddress2());
 			customerInfoList.add(customer.getCity());
@@ -194,20 +210,16 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			csvFilePrinter.printRecord(customerInfoList);
 
 		} catch (Exception e) {
-			 e.printStackTrace();
+			logger.error("Error updating customer information", e);
 		} finally {
 			try {
 				fileWriter.flush();
 				fileWriter.close();
 				csvFilePrinter.close();
 			} catch (Exception e) {
-
-				System.out.println("Error while flushing/closing fileWriter/csvPrinter !!!");
-				e.printStackTrace();
+				logger.error("Error while flushing/closing fileWriter/csvPrinter !!!", e);
 			}
-
 		}
-
 	}
 
 //	private com.itextpdf.text.Image generateBarCode(PdfWriter writer, Date date) throws DocumentException
@@ -243,12 +255,10 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		cell.setBackgroundColor(new BaseColor(247, 200, 153));
 		if(!isEstimateBill)
 		{
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(invoiceDate);
 			String InvoiceId = String.valueOf(cal.get(Calendar.YEAR)) + "-"
 					+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
 					+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
-					+ String.valueOf(cal.get(Calendar.HOUR)) + "-"
+					+ String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + "-"
 					+ String.valueOf(cal.get(Calendar.MINUTE)) + "-"
 					+ String.valueOf(cal.get(Calendar.SECOND)) + "-"
 					+ String.valueOf(cal.get(Calendar.MILLISECOND));
@@ -281,6 +291,93 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 	}
 
+	private void addGeneralItemsInformation(Document document, boolean includePrice) throws DocumentException, IOException {
+		PdfPTable table;
+		if (includePrice) {
+			table = new PdfPTable(new float[] { 1, 1, 0.5f, 1, 0.7f, 1.8f});
+		} else {
+			table = new PdfPTable(5);
+		}
+		table.setWidthPercentage(100f);
+		table.getDefaultCell().setPadding(1);
+		table.getDefaultCell().setUseAscender(true);
+		table.getDefaultCell().setUseDescender(true);
+		table.getDefaultCell().setFixedHeight(22f - getTotalItems() * 0.5f);
+		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_LEFT);
+		table.getDefaultCell().setBackgroundColor(new BaseColor(255, 209, 179));
+		BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER,
+				BaseFont.CP1252, BaseFont.EMBEDDED);
+		Font headerFont = new Font(baseFont, 11, Font.BOLD);
+		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
+
+		String columnNames[] = new String[] { "Price", "General Item", "Qty",
+				"Pc/Pair", "Wt(gms)", "Price per(piece/pair)"};
+		if (generalBillingTable.size() > 0) {
+			for (int i = 0; i < columnNames.length; i++) {
+				if ((i == 0) && includePrice == false)
+					continue;
+				table.addCell(new Phrase(columnNames[i], headerFont));
+			}
+			GeneralItemContainer con = (GeneralItemContainer) generalBillingTable.getContainerDataSource();
+			for (Object obj : generalBillingTable.getItemIds()) {
+				TextField itemTxtField = (TextField) (con.getItem(obj)
+						.getItemProperty(GeneralItemContainer.PRICE).getValue());
+				String itemPrice = itemTxtField.getValue();
+				if (NumberUtils.isNumber(itemPrice)
+						&& Double.valueOf(itemPrice) > 0.0) {
+					if (includePrice) {
+						table.addCell(new Phrase(itemTxtField.getValue(),
+								rowFont));
+					}
+					ComboBox itemNameField = (ComboBox) con.getItem(obj)
+							.getItemProperty(GeneralItemContainer.ITEM_NAME)
+							.getValue();
+					table.addCell(new Phrase(String.valueOf(itemNameField
+							.getValue()), rowFont));
+
+					TextField quantityTxtField = (TextField) con.getItem(obj)
+							.getItemProperty(GeneralItemContainer.QUANTITY)
+							.getValue();
+					table.addCell(new Phrase(quantityTxtField.getValue()
+							.toString(), rowFont));
+
+					ComboBox piecePairField = (ComboBox) con.getItem(obj)
+							.getItemProperty(GeneralItemContainer.PIECE_PAIR)
+							.getValue();
+					table.addCell(new Phrase(String.valueOf(piecePairField
+							.getValue()), rowFont));
+
+					TextField weightGeneralTxtField = (TextField) con.getItem(obj)
+							.getItemProperty(GeneralItemContainer.WEIGHT)
+							.getValue();
+					String weightStr = weightGeneralTxtField.getValue().toString();
+					table.addCell(new Phrase(NumberUtils.isNumber(weightStr) ? weightStr : "N/A", rowFont));
+
+					TextField pricePerPiecePairTxtField = (TextField) con
+							.getItem(obj)
+							.getItemProperty(
+									GeneralItemContainer.PRICE_PER_PIECE_PAIR)
+							.getValue();
+					table.addCell(new Phrase(pricePerPiecePairTxtField.getValue()
+							.toString(), rowFont));
+				}
+			}
+			document.add(table);
+			PdfPTable footerTable = getPDFTable(true, 1);
+			footerTable.getDefaultCell().setBackgroundColor(
+					new BaseColor(255, 209, 179));
+
+			Phrase totalGeneralPricePhrase = new Phrase();
+			totalGeneralPricePhrase.add(new Chunk(
+					"Total Items Price(INR) = ", headerFont));
+			totalGeneralPricePhrase.add(new Chunk(String.format("%.3f",
+					con.getTotalPrice()), rowFont));
+			footerTable.addCell(new Phrase(totalGeneralPricePhrase));
+			document.add(footerTable);
+		}
+	}
+
+	
 	private void addDiamondItemsInformation(Document document,
 			boolean includePrice) throws DocumentException, IOException {
 		PdfPTable table;
@@ -530,8 +627,8 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		Font headerFont = new Font(baseFont, 11, Font.BOLD);
 		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
 
-		String columnNames[] = new String[] { "Price", "Gold Items",
-				"HallMark", "Qty", "Pc/Pair", "Wt(gms)", "MakingCost",
+		String columnNames[] = new String[] { "Price", "Gold Item",
+				"GoldType", "Qty", "Pc/Pair", "Wt(gms)", "MakingCost",
 				"MkCostType", "Rate-pergm" };
 		if (goldBillingTable.size() > 0) {
 			for (int i = 0; i < columnNames.length; i++) {
@@ -558,7 +655,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 							.getValue()), rowFont));
 
 					ComboBox hallMarkTypeField = (ComboBox) con.getItem(obj)
-							.getItemProperty(GoldItemContainer.HALL_MARK_TYPE)
+							.getItemProperty(GoldItemContainer.GOLD_TYPE)
 							.getValue();
 					table.addCell(new Phrase(String.valueOf(hallMarkTypeField
 							.getValue()), rowFont));
@@ -653,10 +750,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		table.getDefaultCell().setPadding(1);
 		table.getDefaultCell().setUseAscender(true);
 		table.getDefaultCell().setUseDescender(true);
-		// table.getDefaultCell().setColspan(5);
-		// table.addCell(day.toString());
 		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_LEFT);
-		// table.getDefaultCell().setColspan(1);
 		table.getDefaultCell().setBorder(0);
 		table.getDefaultCell().setBackgroundColor(new BaseColor(243, 175, 250));
 		BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER,
@@ -706,7 +800,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 					Double.valueOf(pfForm.discountPrice.getValue())), rowFont)));
 		}
 		if (!isEstimateBill) {
-			table.addCell(new Phrase(new Chunk("Vat(1%) Charge(INR) : ",
+			table.addCell(new Phrase(new Chunk("Vat(" + String.valueOf(CustomShopSettingFileUtility.getInstance().getVatPercentage())+ "%) Charge(INR) : ",
 					headerFont)));
 			table.addCell(new Phrase(new Chunk(String.format("%.3f",
 					Double.valueOf(pfForm.vatOnNewItemPrice.getValue())),
@@ -838,13 +932,12 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 	String getDirectory(Date invoiceDate, boolean isEstimateBill) {
 		String directoryName = getDirectoryName(invoiceDate, isEstimateBill);
-		File theDir = new File(System.getenv("BILL_PATH") + "\\"
-				+ directoryName);
+		File theDir = new File(System.getenv(BILL_PATH) + File.separator 	+ directoryName);
 
 		// if the directory does not exist, create it
 		if (!theDir.exists()) {
 			System.out.println("Creating Directory: "
-					+ System.getenv("BILL_PATH") + "\\" + directoryName);
+					+ System.getenv(BILL_PATH) + File.separator + directoryName);
 			boolean result = false;
 
 			try {
@@ -852,28 +945,44 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				result = true;
 			} catch (SecurityException se) {
 
-				// se.printStackTrace();
+				logger.error("Error creating directory ", se);
 			}
 			if (result) {
-				System.out.println("DIR created");
+				System.out.println("Directory created");
 			}
 		}
 		return directoryName;
 	}
 
 	String getDirectoryName(Date invoiceDate, boolean isEstimateBill) {
-		Calendar cal = Calendar.getInstance();
 		cal.setTime(invoiceDate);
-		String dir = String.valueOf(cal.get(Calendar.YEAR)) + "\\"
-				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "\\"
+		String dir = String.valueOf(cal.get(Calendar.YEAR));
+		if (isEstimateBill) {
+			dir += File.separator + "ESTIMATE";
+		} else {
+			dir += File.separator + "INVOICE";
+		}
+		dir += 	File.separator + String.valueOf(cal.get(Calendar.MONTH) + 1) + File.separator
 				+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
 				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
 				+ String.valueOf(cal.get(Calendar.YEAR));
-		if (isEstimateBill) {
-			dir += "\\estimate";
-		} else {
-			dir += "\\invoice";
-		}
 		return dir;
 	}
+	
+	
+//	String getDirectoryName(Date invoiceDate, boolean isEstimateBill) {
+//		Calendar cal = Calendar.getInstance();
+//		cal.setTime(invoiceDate);
+//		String dir = String.valueOf(cal.get(Calendar.YEAR)) + File.separator
+//				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + File.separator
+//				+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
+//				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
+//				+ String.valueOf(cal.get(Calendar.YEAR));
+//		if (isEstimateBill) {
+//			dir += File.separator + "estimate";
+//		} else {
+//			dir += File.separator + "invoice";
+//		}
+//		return dir;
+//	}
 }

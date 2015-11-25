@@ -1,10 +1,12 @@
 package com.abhishek.fmanage.retail.data.container;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -315,9 +317,12 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 
 	private ComboBox getItemNameList() {
 		ComboBox itemName = new ComboBox();
+		ArrayList<String> silverItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getSilverItemsList();
+		for(String silverItem : silverItemListFromCsvFile){
+			itemName.addItem(silverItem);
+		}
 		itemName.setWidth("100%");
 		itemName.addItem("AD NECKLACE");
-		itemName.addItem("AD SET");
 		itemName.addItem("AD SET");
 		itemName.addItem("AD SILVER SET");
 		itemName.addItem("AD TOPS");

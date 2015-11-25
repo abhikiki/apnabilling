@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
-import com.abhishek.fmanage.dashboard.views.transaction.MortgageTransactionView;
 import com.abhishek.fmanage.retail.views.RetailInvoiceView;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
