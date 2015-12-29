@@ -34,6 +34,7 @@ public class PriceForm extends FormLayout{
     public TextField advancePayment = new TextField("Advance Payment", "0.0");
     public TextField balanceAmount = new TextField("Balance", "0.0");
     public boolean isInvoiceEnabled = false;
+    public int invoiceNumber = 0;
 
     public PriceForm(Item item){
     	addStyleName("sidebar");

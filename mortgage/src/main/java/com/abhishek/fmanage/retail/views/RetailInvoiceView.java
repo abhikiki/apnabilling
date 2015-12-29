@@ -1,6 +1,7 @@
 package com.abhishek.fmanage.retail.views;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -35,12 +36,12 @@ import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ResourceReference;
-import com.vaadin.server.ThemeResource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.FormLayout;
@@ -79,11 +80,13 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	private PriceForm pfForm = new PriceForm(getPricePropertyItem());
 	private HorizontalLayout priceLayout = new HorizontalLayout();
 	private Panel p = new Panel();
+	ComboBox staffNameComboBox = new ComboBox("Staff Name");
 	private Customer cusBean = new Customer();
 	private CheckBox includePrice = new CheckBox("Include Price", true);
 	private FlexibleOptionGroup billType;
 	private TextArea notes = new TextArea("Invoice Notes");
-	private static final String VIN_NUMBER = CustomShopSettingFileUtility.getInstance().getTinNumber();
+	TextField invoiceNumberTxt;
+	private static final String TIN_NUMBER = CustomShopSettingFileUtility.getInstance().getTinNumber();
 	
 	@Override
 	public void enter(ViewChangeEvent event) {
@@ -275,6 +278,8 @@ public class RetailInvoiceView extends VerticalLayout implements View{
         toolbar.setMargin(true);
         toolbar.addStyleName("toolbar");
         
+       
+        
         Button newBillBtn = new Button("New Bill");
         newBillBtn.setSizeUndefined();
         newBillBtn.addStyleName("icon-newbill");
@@ -288,6 +293,11 @@ public class RetailInvoiceView extends VerticalLayout implements View{
         });
         toolbar.addComponent(newBillBtn);
         toolbar.setComponentAlignment(newBillBtn, Alignment.MIDDLE_LEFT);
+        
+        ComboBox staffListCombo = getStaffListComboBox();
+        toolbar.addComponent(staffListCombo);
+        toolbar.setComponentAlignment(staffListCombo, Alignment.MIDDLE_LEFT);
+        
         billPopUpDate.setCaption("Billing Date");
 		billPopUpDate.setImmediate(true);
 		billPopUpDate.setInvalidAllowed(false);
@@ -298,10 +308,17 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 		billPopUpDate.setValue(new Date());
 		toolbar.addComponent(billPopUpDate);
 
-		Label tinLabel = new Label("<b>TIN VAT NO:</b>" + VIN_NUMBER, ContentMode.HTML);
+		Label tinLabel = new Label("<b>TIN VAT NO:</b>" + TIN_NUMBER, ContentMode.HTML);
 		tinLabel.setStyleName("vinHiddenLabel");
 		tinLabel.setImmediate(true);
 
+		invoiceNumberTxt = new TextField("Invoice Number");
+		invoiceNumberTxt.setImmediate(true);
+		invoiceNumberTxt.setVisible(false);
+		invoiceNumberTxt.setRequired(true);
+		invoiceNumberTxt.setValidationVisible(true);
+		invoiceNumberTxt.setWidth("100%");
+		
 		// A single-select radio button group
 		billType = new FlexibleOptionGroup();
 		billType.addItems(ESTIMATE_BILL, INVOICE_BILL);
@@ -316,6 +333,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				pfForm.advancePayment.setValue(String.format("%.3f", 0.000f));
 				pfForm.advancePayment.setEnabled(false);
 				pfForm.balanceAmount.setEnabled(false);
+				invoiceNumberTxt.setVisible(true);
 			}else{
 				tinLabel.setStyleName("vinHiddenLabel");
 				pfForm.isInvoiceEnabled = false;
@@ -324,6 +342,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				pfForm.vatOnNewItemPrice.setEnabled(false);
 				pfForm.advancePayment.setEnabled(true);
 				pfForm.balanceAmount.setEnabled(true);
+				invoiceNumberTxt.setVisible(false);
 				
 			}
 			});
@@ -349,20 +368,39 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 //		shopLogoImage.setDescription("Logo");
 		toolbar.addComponent(optionGroupLayout);
 		toolbar.addComponent(tinLabel);
+		toolbar.addComponent(invoiceNumberTxt);
+		
+		
 		//toolbar.addComponent(shopLogoImage);
 		toolbar.setExpandRatio(newBillBtn, 1);
+		toolbar.setExpandRatio(staffListCombo, 1);
 	    toolbar.setExpandRatio(billPopUpDate, 1);
 	    toolbar.setExpandRatio(optionGroupLayout, 1);
 	    //toolbar.setExpandRatio(shopLogoImage, 1.5f);
 	    toolbar.setExpandRatio(tinLabel, 1);
+	    toolbar.setExpandRatio(invoiceNumberTxt, 1);
 	    toolbar.setComponentAlignment(newBillBtn, Alignment.MIDDLE_LEFT);
+	    toolbar.setComponentAlignment(staffListCombo, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(billPopUpDate, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(optionGroupLayout, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(tinLabel, Alignment.MIDDLE_LEFT);
+		toolbar.setComponentAlignment(invoiceNumberTxt, Alignment.MIDDLE_LEFT);
 		//toolbar.setComponentAlignment(shopLogoImage, Alignment.TOP_CENTER);
         return toolbar;
 	}
 	
+	private ComboBox getStaffListComboBox() {
+		
+		staffNameComboBox.setNullSelectionAllowed(false);
+		staffNameComboBox.addItem("STAFF");
+		staffNameComboBox.setValue("STAFF");
+		ArrayList<String> staffNameListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getStaffNameList();
+		for(String staffName : staffNameListFromCsvFile){
+			staffNameComboBox.addItem(staffName);
+		}
+		return staffNameComboBox;
+	}
+
 	private Button getGenerateBillBtn(Customer cusBean) {
 		Button generateBillBtn = new Button("Generate Bill");
 		generateBillBtn.setSizeUndefined();
@@ -375,12 +413,26 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				try {
 					boolean isEstimateBill = billType.getValue().equals(ESTIMATE_BILL);
 					Date invoiceDate = billPopUpDate.getValue();
+//					RetailTransactionBean retailTransaction = new ExtractRetailTransaction(
+//							goldBillingTable,
+//							 silverBillingTable,
+//							 diamondBillingTable,
+//							 generalBillingTable,
+//							 pfForm,
+//							 isEstimateBill,
+//							 invoiceDate).extract();
+					String staffName = staffNameComboBox.getValue().toString();
+					String invoiceNumber = "";
+					if(!isEstimateBill)
+					{
+						invoiceNumber = invoiceNumberTxt.getValue().toString();
+					}
 					 fileName = new InvoiceGenerator(
 							 goldBillingTable,
 							 silverBillingTable,
 							 diamondBillingTable,
 							 generalBillingTable,
-							 pfForm, cusBean).createPdf(includePrice.getValue(), VIN_NUMBER, isEstimateBill, invoiceDate, notes);
+							 pfForm, cusBean).createPdf(staffName, includePrice.getValue(), TIN_NUMBER, isEstimateBill, invoiceDate, notes, invoiceNumber);
 				} catch (Exception e) {
 					logger.error("Error generating invoice", e);
 				}

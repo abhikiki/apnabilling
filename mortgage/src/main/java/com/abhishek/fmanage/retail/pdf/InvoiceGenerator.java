@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -62,7 +61,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 	private static final String NEW_LINE_SEPARATOR = "\n";
 	// CSV file header
-	private static final Object[] FILE_HEADER = { "FirstName", "LastName",
+	private static final Object[] FILE_HEADER = { "Date", "FirstName", "LastName",
 			"ContactNumber", "EmailId", "StreetAddress1",
 			"StreetAddress2", "City", "State", "Country", "Zipcode" };
 
@@ -92,15 +91,16 @@ public class InvoiceGenerator implements PdfPTableEvent {
 	 * @param includePrice
 	 * @param invoiceDate
 	 * @param notes
+	 * @param invoiceNumber 
 	 * @param filename
 	 *            the path to the new PDF document
 	 * @throws DocumentException
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public String createPdf(final boolean includePrice, final String vinNumber,
+	public String createPdf(final String staffName, final boolean includePrice, final String vinNumber,
 			final boolean isEstimateBill, final Date invoiceDate,
-			final TextArea notes) throws SQLException, DocumentException,
+			final TextArea notes, String invoiceNumber) throws SQLException, DocumentException,
 			IOException {
 		cal.setTime(invoiceDate);
 		Document document = new Document(PageSize.A4);
@@ -117,7 +117,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		document.add(new Paragraph(" "));
 		
 		//document.add(generateBarCode(writer));
-		addInvoiceType(document, isEstimateBill, invoiceDate);
+		addInvoiceType(document, isEstimateBill, invoiceDate, invoiceNumber);
 		document.add(new Paragraph(" "));
 		addDateVinInformation(document, invoiceDate, isEstimateBill, vinNumber);
 		document.add(new Paragraph(" "));
@@ -142,14 +142,63 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 		addNotes(document, notes);
 		document.add(new Paragraph(" "));
-
+		
+		if(!isEstimateBill)
+		{
+			document.add(new Paragraph(" "));
+			
+		}
+		addSignature(document, isEstimateBill, staffName);
+		document.add(new Paragraph(" "));
+		
 		document.newPage();
 
 		// step 5
 		document.close();
-		saveCustomerInformation(customer);
+		saveCustomerInformation(customer, invoiceDate);
 		return filePath;
 
+	}
+
+	private void addSignature(Document document, boolean isEstimateBill, String staffName) throws DocumentException, IOException {
+		PdfPTable table;
+		table = new PdfPTable(3);
+		table.setWidthPercentage(100f);
+		table.getDefaultCell().setBorder(PdfPCell.NO_BORDER);
+		table.getDefaultCell().setPadding(1);
+		table.getDefaultCell().setUseAscender(true);
+		table.getDefaultCell().setUseDescender(true);
+		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_LEFT);
+		table.getDefaultCell().setBorder(0);
+		table.getDefaultCell().setBackgroundColor(new BaseColor(243, 175, 250));
+		BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER,
+				BaseFont.CP1252, BaseFont.EMBEDDED);
+		Font headerFont = new Font(baseFont, 11, Font.BOLD);
+		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
+
+		if(!isEstimateBill)
+		{
+			Phrase authorizedSignatory = new Phrase();
+			authorizedSignatory.add(new Chunk("Authorized Signatory", headerFont));
+			table.addCell(authorizedSignatory);
+			Phrase customerSignature = new Phrase();
+			customerSignature.add(new Chunk("Customer Signature", headerFont));
+			table.addCell(customerSignature);
+			
+		}else{
+			Phrase authorizedSignatory = new Phrase();
+			authorizedSignatory.add(new Chunk("", headerFont));
+			table.addCell(authorizedSignatory);
+			Phrase customerSignature = new Phrase();
+			customerSignature.add(new Chunk("", headerFont));
+			table.addCell(customerSignature);
+			
+		}
+		Phrase staffNamePhrase = new Phrase();
+		staffNamePhrase.add(new Chunk("Dealing Staff: ", headerFont));
+		staffNamePhrase.add(new Chunk(staffName, rowFont));
+		table.addCell(staffNamePhrase);
+		document.add(table);
 	}
 
 	private String getFilePath(final boolean isEstimateBill, final Date invoiceDate) {
@@ -172,7 +221,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		return filePath;
 	}
 
-	private void saveCustomerInformation(Customer customer) {
+	private void saveCustomerInformation(Customer customer, Date invoiceDate) {
 		FileWriter fileWriter = null;
 		CSVPrinter csvFilePrinter = null;
 		CSVFormat csvFileFormat = CSVFormat.DEFAULT
@@ -197,6 +246,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 
 			List<String> customerInfoList = new ArrayList<>();
+			customerInfoList.add(String.valueOf(invoiceDate));
 			customerInfoList.add(customer.getFirstName());
 			customerInfoList.add(customer.getLastName());
 			customerInfoList.add(customer.getContactNumber());
@@ -230,7 +280,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 //        com.itextpdf.text.Image barcode1 = barcd.createImageWithBarcode(cb, BaseColor.DARK_GRAY, BaseColor.BLUE);
 //        return barcode1;
 //	}
-	private void addInvoiceType(Document document, boolean isEstimateBill, Date invoiceDate)
+	private void addInvoiceType(Document document, boolean isEstimateBill, Date invoiceDate, String invoiceNumber)
 			throws DocumentException, IOException {
 		PdfPTable footerTable = getPDFTable(!isEstimateBill, 2);
 		footerTable.getDefaultCell().setBackgroundColor(
@@ -255,15 +305,15 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		cell.setBackgroundColor(new BaseColor(247, 200, 153));
 		if(!isEstimateBill)
 		{
-			String InvoiceId = String.valueOf(cal.get(Calendar.YEAR)) + "-"
-					+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
-					+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
-					+ String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + "-"
-					+ String.valueOf(cal.get(Calendar.MINUTE)) + "-"
-					+ String.valueOf(cal.get(Calendar.SECOND)) + "-"
-					+ String.valueOf(cal.get(Calendar.MILLISECOND));
+//			String InvoiceId = String.valueOf(cal.get(Calendar.YEAR)) + "-"
+//					+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
+//					+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
+//					+ String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + "-"
+//					+ String.valueOf(cal.get(Calendar.MINUTE)) + "-"
+//					+ String.valueOf(cal.get(Calendar.SECOND)) + "-"
+//					+ String.valueOf(cal.get(Calendar.MILLISECOND));
 			Phrase p = new Phrase(new Chunk("Invoice Id: ", headerFont));
-			p.add(new Chunk(InvoiceId, rowFont));
+			p.add(new Chunk(invoiceNumber, rowFont));
 			footerTable.addCell(p);
 		}
 		footerTable.addCell(cell);
@@ -822,7 +872,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 		} else {
 			table.addCell(new Phrase(new Chunk(String
-					.format("%d(rounded)", Math.round(Double
+					.format("%d(round off)", Math.round(Double
 							.valueOf(pfForm.netAmountToPay.getValue()))),
 					rowFont)));
 		}

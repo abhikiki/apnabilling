@@ -27,7 +27,7 @@ public class CustomShopSettingFileUtility {
 
 	private static volatile CustomShopSettingFileUtility instance = null;
 	private static final String[] FILE_HEADER_MAPPING = { "VAT_PERCENT",
-			"TIN_NUMBER", "GOLD_ITEMS", "SILVER_ITEMS", "DIAMOND_ITEMS", "GENERAL_ITEMS" };
+			"TIN_NUMBER", "GOLD_ITEMS", "SILVER_ITEMS", "DIAMOND_ITEMS", "GENERAL_ITEMS", "STAFF_NAMES" };
 	private final Logger logger = LoggerFactory.getLogger(CustomShopSettingFileUtility.class);
 
 	private static double vatPercent = 1;
@@ -69,6 +69,8 @@ public class CustomShopSettingFileUtility {
 			customSettingMap.put("SILVER_ITEMS", new ArrayList<String>());
 			customSettingMap.put("DIAMOND_ITEMS", new ArrayList<String>());
 			customSettingMap.put("GENERAL_ITEMS", new ArrayList<String>());
+			customSettingMap.put("STAFF_NAMES", new ArrayList<String>());
+			
 			for (int i = 1; i < csvRecords.size(); i++) {
 
 				CSVRecord record = (CSVRecord) csvRecords.get(i);
@@ -78,6 +80,7 @@ public class CustomShopSettingFileUtility {
 				String silverItemNameFromCsv = record.get("SILVER_ITEMS");
 				String diamondItemNameFromCsv = record.get("DIAMOND_ITEMS");
 				String generalItemNameFromCsv = record.get("GENERAL_ITEMS");
+				String staffNamesFromCsv = record.get("STAFF_NAMES");
 
 				if(NumberUtils.isNumber(vatPercentFromCsv)){
 					vatPercent = NumberUtils.toDouble(vatPercentFromCsv);
@@ -104,6 +107,16 @@ public class CustomShopSettingFileUtility {
 					ArrayList<String> generalItemList = (ArrayList<String>) customSettingMap.get("GENERAL_ITEMS");
 					generalItemList.add(generalItemNameFromCsv);
 					customSettingMap.put("GENERAL_ITEMS", generalItemList);
+				}
+				if(!StringUtils.isBlank(generalItemNameFromCsv)){
+					ArrayList<String> generalItemList = (ArrayList<String>) customSettingMap.get("GENERAL_ITEMS");
+					generalItemList.add(generalItemNameFromCsv);
+					customSettingMap.put("GENERAL_ITEMS", generalItemList);
+				}
+				if(!StringUtils.isBlank(staffNamesFromCsv)){
+					ArrayList<String> staffNamesList = (ArrayList<String>) customSettingMap.get("STAFF_NAMES");
+					staffNamesList.add(staffNamesFromCsv);
+					customSettingMap.put("STAFF_NAMES", staffNamesList);
 				}
 			}
 		} catch (Exception e) {
@@ -140,5 +153,9 @@ public class CustomShopSettingFileUtility {
 	
 	public List<String> getGeneralItemsList(){
 		return customSettingMap.get("GENERAL_ITEMS");
+	}
+	
+	public List<String> getStaffNameList(){
+		return customSettingMap.get("STAFF_NAMES");
 	}
 }
