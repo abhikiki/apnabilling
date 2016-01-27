@@ -11,6 +11,7 @@ import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.validator.DoubleRangeValidator;
 import com.vaadin.server.ThemeResource;
@@ -94,7 +95,7 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
         if (item != null)
         {
         	item.getItemProperty(DELETE).setValue(image);
-        	item.getItemProperty(ITEM_NAME).setValue(getItemNameList());
+        	item.getItemProperty(ITEM_NAME).setValue(getItemNameList(diamondItemRowId));
         	item.getItemProperty(QUANTITY).setValue(getQuantity(diamondItemRowId));
         	item.getItemProperty(PIECE_PAIR).setValue(getPiecePair());
         	item.getItemProperty(GOLD_WEIGHT).setValue(getWeight(diamondItemRowId));
@@ -107,6 +108,7 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 
 	private Object getCertificate(final Object diamondItemRowId) {
 		ComboBox itemName = new ComboBox();
+		itemName.setNullSelectionAllowed(false);
 		itemName.addItem("Yes");
 		itemName.addItem("No");
 		itemName.setValue("Yes");
@@ -127,6 +129,8 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 					itemPrice.addStyleName("v-textfield-fail");
 				}else{
 					itemPrice.removeStyleName("v-textfield-fail");
+					itemPrice.removeStyleName("v-textfield-warning");
+					itemPrice.addStyleName("v-textfield-success");
 				}
 			});
 		return itemPrice;
@@ -145,6 +149,10 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 		        String value = (String) event.getProperty().getValue();
 		        if(StringUtils.isEmpty(value)){
 		        	weight.addStyleName("v-textfield-fail");
+		        	TextField diamondPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+		        	diamondPriceTextField.setValue("");
+		        	diamondPriceTextField.removeStyleName("v-textfield-success");
+		        	diamondPriceTextField.addStyleName("v-textfield-warning");
 		        }
 		    }
 		});
@@ -155,6 +163,10 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 							&& (NumberUtils.toDouble(String.valueOf(value)) <= 0.0)))
 				{
 					weight.addStyleName("v-textfield-fail");
+					TextField diamondPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+		        	diamondPriceTextField.setValue("");
+		        	diamondPriceTextField.removeStyleName("v-textfield-success");
+		        	diamondPriceTextField.addStyleName("v-textfield-warning");
 				}else{
 					weight.setComponentError(null);
 					weight.removeStyleName("v-textfield-fail");
@@ -165,6 +177,7 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 
 	private ComboBox getPiecePair() {
 		ComboBox itemName = new ComboBox();
+		itemName.setNullSelectionAllowed(false);
 		itemName.addItem("Piece");
 		itemName.addItem("Pair");
 		itemName.setValue("Piece");
@@ -184,6 +197,10 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 		        String value = (String) event.getProperty().getValue();
 		        if(StringUtils.isEmpty(value)){
 		        	quantity.addStyleName("v-textfield-fail");
+		        	TextField diamondPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+		        	diamondPriceTextField.setValue("");
+		        	diamondPriceTextField.removeStyleName("v-textfield-success");
+		        	diamondPriceTextField.addStyleName("v-textfield-warning");
 		        }
 		    }
 		});
@@ -193,6 +210,10 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 						|| ( NumberUtils.isDigits(String.valueOf(value))
 							&& (NumberUtils.toInt(String.valueOf(value)) <= 0.0))){
 					quantity.addStyleName("v-textfield-fail");
+					TextField diamondPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+		        	diamondPriceTextField.setValue("");
+		        	diamondPriceTextField.removeStyleName("v-textfield-success");
+		        	diamondPriceTextField.addStyleName("v-textfield-warning");
 				}else{
 					quantity.setComponentError(null);
 					quantity.removeStyleName("v-textfield-fail");
@@ -201,9 +222,10 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 		return quantity;
 	}
 	
-	private ComboBox getItemNameList(){
+	private ComboBox getItemNameList(final Object currentItemId){
 		ComboBox itemName = new ComboBox();
 		itemName.setWidth("100%");
+		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
 		ArrayList<String> diamondItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getDiamondItemsList();
 		for(String diamondItem : diamondItemListFromCsvFile){
 			itemName.addItem(diamondItem);
@@ -221,5 +243,26 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 		itemName.addItem("DIAMOND ITEM");
 		itemName.addItem("MISCELLANEOUS");
 		return itemName;
+	}
+
+	private ValueChangeListener getCustomValueChangeListener(Object currentItemId) {
+		
+		return new Property.ValueChangeListener() {
+			private static final long serialVersionUID = 1L;
+
+			public void valueChange(ValueChangeEvent event) {
+				
+				ComboBox itemNameField = (ComboBox) getItem(currentItemId).getItemProperty(ITEM_NAME).getValue();
+				if(StringUtils.isBlank((String)itemNameField.getValue())){
+					TextField diamondPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+		        	diamondPriceTextField.setValue("");
+		        	diamondPriceTextField.removeStyleName("v-textfield-success");
+		        	diamondPriceTextField.addStyleName("v-textfield-warning");
+		        	itemNameField.addStyleName("v-textfield-fail");
+				}else{
+					itemNameField.removeStyleName("v-textfield-fail");
+				}
+			}
+		};
 	}
 }

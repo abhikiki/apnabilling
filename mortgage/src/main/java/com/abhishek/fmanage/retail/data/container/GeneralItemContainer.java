@@ -137,19 +137,36 @@ public class GeneralItemContainer extends IndexedContainer implements CustomItem
 				String value = (String) event.getProperty().getValue();
 				if (!StringUtils.isEmpty(value) && !NumberUtils.isNumber(value)) {
 					weight.addStyleName("v-textfield-fail");
+					weight.setImmediate(true);
 					TextField generalPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
 					generalPriceTextField.setValue("");
 					generalPriceTextField.removeStyleName("v-textfield-success");
-				}else{
-				weight.addStyleName("v-textfield-success");
+					generalPriceTextField.addStyleName("v-textfield-warning");
+				}
 			}
-		}
+		});
+		weight.addValidator(new DoubleRangeValidator("Must be number and > 0", 0.0001, null));
+		weight.addValidator((value) -> {
+			if (!NumberUtils.isNumber(String.valueOf(value))
+					|| (NumberUtils.isNumber(String.valueOf(value))
+						&& (NumberUtils.toDouble(String.valueOf(value)) <= 0.0))) {
+				weight.addStyleName("v-textfield-fail");
+				TextField generalPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+				generalPriceTextField.setValue("");
+				generalPriceTextField.removeStyleName("v-textfield-success");
+				generalPriceTextField.addStyleName("v-textfield-warning");
+				
+			} else {
+				weight.setComponentError(null);
+				weight.removeStyleName("v-textfield-fail");
+			}
 		});
 		return weight;
 	}
 
 	private Object getPiecePair(Object currentItemId) {
 		ComboBox itemName = new ComboBox();
+		itemName.setNullSelectionAllowed(false);
 		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
 		itemName.addItem("Piece");
 		itemName.addItem("Pair");
@@ -183,6 +200,9 @@ public class GeneralItemContainer extends IndexedContainer implements CustomItem
 					|| (NumberUtils.isDigits(String.valueOf(value)) 
 							&& (NumberUtils.toInt(String.valueOf(value)) <= 0))) {
 				quantity.addStyleName("v-textfield-fail");
+				TextField generalPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+				generalPriceTextField.setValue("");
+				generalPriceTextField.removeStyleName("v-textfield-success");
 			} else {
 				quantity.setComponentError(null);
 				quantity.removeStyleName("v-textfield-fail");
@@ -204,27 +224,19 @@ public class GeneralItemContainer extends IndexedContainer implements CustomItem
 				TextField genralItemPricePerPieceTxtField = (TextField) getItem(currentItemId).getItemProperty(PRICE_PER_PIECE_PAIR).getValue();
 				int quantity = NumberUtils.isDigits(quantityTxtField.getValue()) ? NumberUtils.toInt(quantityTxtField.getValue()) : 0;
 				double pricePerPiecePair = NumberUtils.isNumber(genralItemPricePerPieceTxtField.getValue()) ? NumberUtils.toDouble(genralItemPricePerPieceTxtField.getValue()) : 0.0f;
-				Double weight = null;
-				if(StringUtils.isBlank(weightTxtField.getValue())){
-					weight = null;
-				}
-				if(!StringUtils.isBlank(weightTxtField.getValue()) 
-						&& NumberUtils.isNumber(weightTxtField.getValue()))
-				{
-					weight = NumberUtils.toDouble(weightTxtField.getValue());
-				}
 				
 				if (quantity > 0
-						&& (weight == null || NumberUtils.isNumber(weightTxtField.getValue()))
+						&& (NumberUtils.isNumber(weightTxtField.getValue()))
 						&& pricePerPiecePair > 0.000f
-						&& !StringUtils.isBlank(String.valueOf(piecePairField.getValue()))
-						&& !StringUtils.isBlank(String.valueOf(itemNameField.getValue())))
+						&& !StringUtils.isBlank((String)piecePairField.getValue())
+						&& !StringUtils.isBlank((String)itemNameField.getValue()))
 				{
 					genralItemPriceTxtField.setValue(String.format("%.3f", quantity * pricePerPiecePair));
 					genralItemPriceTxtField.addStyleName("v-textfield-success");
 					genralItemPriceTxtField.setImmediate(true);
 				} else {
 					genralItemPriceTxtField.clear();
+					genralItemPriceTxtField.removeStyleName("v-textfield-success");
 					genralItemPriceTxtField.addStyleName("v-textfield-warning");
 					genralItemPriceTxtField.setImmediate(true);
 				}

@@ -17,7 +17,6 @@ import com.vaadin.data.validator.DoubleRangeValidator;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.TextField;
 
 public class SilverItemContainer extends IndexedContainer implements CustomItemContainerInterface {
@@ -85,7 +84,7 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		image.addClickListener((event -> removeItem(image.getData())));
 		if (item != null) {
 			item.getItemProperty(DELETE).setValue(image);
-			item.getItemProperty(ITEM_NAME).setValue(getItemNameList());
+			item.getItemProperty(ITEM_NAME).setValue(getItemNameList(silverItemRowId));
 			item.getItemProperty(QUANTITY).setValue(getQuantity(silverItemRowId));
 			item.getItemProperty(PIECE_PAIR).setValue(getPiecePair());
 			item.getItemProperty(WEIGHT).setValue(getWeight(silverItemRowId));
@@ -177,6 +176,9 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 				|| (NumberUtils.isNumber(String.valueOf(value))
 					&& (NumberUtils.toDouble(String.valueOf(value)) < 0.0))) {
 						makingCharge.addStyleName("v-textfield-fail");
+						TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+						silverPriceTextField.setValue("");
+						silverPriceTextField.removeStyleName("v-textfield-success");
 
 			} else {
 					makingCharge.setComponentError(null);
@@ -188,6 +190,7 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 
 	private ComboBox getMakingChargeType(final Object goldItemRowId) {
 		ComboBox itemName = new ComboBox();
+		itemName.setNullSelectionAllowed(false);
 		itemName.addItem("%");
 		itemName.addItem("per gm");
 		itemName.addItem("net");
@@ -222,6 +225,9 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 					|| (NumberUtils.isNumber(String.valueOf(value))
 						&& (NumberUtils.toDouble(String.valueOf(value)) <= 0.0))) {
 				weight.addStyleName("v-textfield-fail");
+				TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+				silverPriceTextField.setValue("");
+				silverPriceTextField.removeStyleName("v-textfield-success");
 			} else {
 				weight.setComponentError(null);
 				weight.removeStyleName("v-textfield-fail");
@@ -232,6 +238,7 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 
 	private ComboBox getPiecePair() {
 		ComboBox itemName = new ComboBox();
+		itemName.setNullSelectionAllowed(false);
 		itemName.addItem("Piece");
 		itemName.addItem("Pair");
 		itemName.setValue("Piece");
@@ -263,6 +270,9 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 					|| (NumberUtils.isDigits(String.valueOf(value))
 						&& (NumberUtils.toInt(String.valueOf(value)) <= 0))) {
 				quantity.addStyleName("v-textfield-fail");
+				TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+				silverPriceTextField.setValue("");
+				silverPriceTextField.removeStyleName("v-textfield-success");
 			} else {
 				quantity.setComponentError(null);
 				quantity.removeStyleName("v-textfield-fail");
@@ -275,6 +285,7 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		return new Property.ValueChangeListener() {
 			private static final long serialVersionUID = 1L;
 			public void valueChange(ValueChangeEvent event) {
+				ComboBox itemNameField = (ComboBox) getItem(currentItemId).getItemProperty(ITEM_NAME).getValue();
 				ComboBox piecePairField = (ComboBox) getItem(currentItemId).getItemProperty(PIECE_PAIR).getValue();
 				ComboBox makingChargeType = (ComboBox) getItem(currentItemId).getItemProperty(MAKING_CHARGE_TYPE).getValue();
 				TextField quantityTxtField = (TextField) getItem(currentItemId).getItemProperty(QUANTITY).getValue();
@@ -286,12 +297,13 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 				double weight = NumberUtils.isNumber(weightTxtField.getValue()) ? NumberUtils.toDouble(weightTxtField.getValue()) : 0.0;
 				double makingCharge = NumberUtils.isNumber(makingChargeTxtField.getValue()) ? NumberUtils.toDouble(makingChargeTxtField.getValue()) : 0.0;
 				double silverRate = NumberUtils.isNumber(silverRateTxtField.getValue()) ? NumberUtils.toDouble(silverRateTxtField.getValue()) : 0.0;
-				if ((quantity > 0)
-						&& (weight > 0.0)
-						&& (makingCharge >= 0.0)
-						&& (silverRate > 0.0)
-						&& !StringUtils.isBlank(String.valueOf(piecePairField.getValue()))
-						&& !StringUtils.isBlank(String.valueOf(makingChargeType.getValue()))) {
+				if ((NumberUtils.isDigits(quantityTxtField.getValue()) && quantity > 0)
+						&& (NumberUtils.isNumber(weightTxtField.getValue()) && weight > 0.0)
+						&& (NumberUtils.isNumber(makingChargeTxtField.getValue()) && makingCharge >= 0.0)
+						&& (NumberUtils.isNumber(silverRateTxtField.getValue()) && silverRate > 0.0)
+						&& !StringUtils.isBlank((String)piecePairField.getValue())
+						&& !StringUtils.isBlank((String)makingChargeType.getValue())
+						&& !StringUtils.isBlank((String)itemNameField.getValue())) {
 					double silverPrice = 0.0;
 					switch (String.valueOf(makingChargeType.getValue())) {
 					case MAKING_COST_TYPE_PERCENT:
@@ -306,8 +318,10 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 					silverPriceTxtField.setValue(String.format("%.3f",silverPrice));
 					silverPriceTxtField.addStyleName("v-textfield-success");
 					silverPriceTxtField.setImmediate(true);
-					Notification.show("Item entry complete");
+					//Notification.show("Item entry complete");
 				} else {
+					silverPriceTxtField.clear();
+					silverPriceTxtField.removeStyleName("v-textfield-success");
 					silverPriceTxtField.addStyleName("v-textfield-warning");
 					silverPriceTxtField.setImmediate(true);
 				}
@@ -315,8 +329,9 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		};
 	}
 
-	private ComboBox getItemNameList() {
+	private ComboBox getItemNameList(final Object currentItemId) {
 		ComboBox itemName = new ComboBox();
+		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
 		ArrayList<String> silverItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getSilverItemsList();
 		for(String silverItem : silverItemListFromCsvFile){
 			itemName.addItem(silverItem);
