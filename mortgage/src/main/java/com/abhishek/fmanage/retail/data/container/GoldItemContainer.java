@@ -8,6 +8,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
+import com.abhishek.fmanage.retail.bean.GoldTransactionItemBean;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -93,6 +94,42 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 		}
 	}
 
+	
+	@SuppressWarnings("unchecked")
+	public void addCustomItem(GoldTransactionItemBean goldItemBean) {
+		Object goldItemRowId = addItem();
+		Item item = getItem(goldItemRowId);
+		if (item != null) {
+			item.getItemProperty(DELETE).setValue(getRemoveItemImage(goldItemRowId));
+			
+			ComboBox hallMarkTypeCombo = getHallMarkTypeList(goldItemRowId);
+			hallMarkTypeCombo.addItem(goldItemBean.getGoldType());
+			hallMarkTypeCombo.setValue(goldItemBean.getGoldType());
+			item.getItemProperty(GOLD_TYPE).setValue(hallMarkTypeCombo);
+			
+			ComboBox itemNameCombo = getItemNameList(goldItemRowId);
+			itemNameCombo.addItem(goldItemBean.getGoldItemName());
+			itemNameCombo.setValue(goldItemBean.getGoldItemName());
+			item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
+			
+			TextField quantity = getQuantity(goldItemRowId);
+			quantity.setValue(String.valueOf(goldItemBean.getQuantity()));
+			item.getItemProperty(QUANTITY).setValue(quantity);
+			
+			ComboBox piecePairCombo = getPiecePair(goldItemRowId);
+			piecePairCombo.addItem(goldItemBean.getPiecePair());
+			piecePairCombo.setValue(goldItemBean.getPiecePair());
+			item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
+			
+			item.getItemProperty(WEIGHT).setValue(getWeight(goldItemRowId));
+			item.getItemProperty(MAKING_CHARGE).setValue(getMakingCharge(goldItemRowId));
+			item.getItemProperty(MAKING_CHARGE_TYPE).setValue(getMakingChargeType(goldItemRowId));
+			item.getItemProperty(GOLD_RATE).setValue(getGoldRate(goldItemRowId));
+			item.getItemProperty(PRICE).setValue(getPrice());
+		}
+	}
+	
+	
 	private Image getRemoveItemImage(final Object goldItemRowId) {
 		final Image image = new Image("", removeItemImageResource);
 		image.setHeight("20px");

@@ -13,17 +13,17 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.bean.Customer;
-import com.abhishek.fmanage.retail.data.container.DiamondItemContainer;
-import com.abhishek.fmanage.retail.data.container.GeneralItemContainer;
-import com.abhishek.fmanage.retail.data.container.GoldItemContainer;
-import com.abhishek.fmanage.retail.data.container.SilverItemContainer;
-import com.abhishek.fmanage.retail.form.PriceForm;
+import com.abhishek.fmanage.retail.bean.DiamondTransactionItemBean;
+import com.abhishek.fmanage.retail.bean.GeneralTransactionItemBean;
+import com.abhishek.fmanage.retail.bean.GoldTransactionItemBean;
+import com.abhishek.fmanage.retail.bean.PriceBean;
+import com.abhishek.fmanage.retail.bean.RetailTransactionBean;
+import com.abhishek.fmanage.retail.bean.SilverTransactionItemBean;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -41,14 +41,11 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPTableEvent;
 import com.itextpdf.text.pdf.PdfWriter;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 
 public class InvoiceGenerator implements PdfPTableEvent {
 
-	private final Logger logger = LoggerFactory.getLogger(InvoiceGenerator.class);
+	private final Logger logger = LoggerFactory
+			.getLogger(InvoiceGenerator.class);
 	private static final String BILL_PATH = "BILL_PATH";
 	/** A font that will be used in our PDF. */
 	public static final Font BOLD_UNDERLINED = new Font(FontFamily.TIMES_ROMAN,
@@ -61,27 +58,19 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 	private static final String NEW_LINE_SEPARATOR = "\n";
 	// CSV file header
-	private static final Object[] FILE_HEADER = { "Date", "FirstName", "LastName",
-			"ContactNumber", "EmailId", "StreetAddress1",
+	private static final Object[] FILE_HEADER = { "Date", "FirstName",
+			"LastName", "ContactNumber", "EmailId", "StreetAddress1",
 			"StreetAddress2", "City", "State", "Country", "Zipcode" };
 
-	private Table goldBillingTable;
-	private Table silverBillingTable;
-	private Table diamondBillingTable;
-	private Table generalBillingTable;
-	private PriceForm pfForm;
-	private Customer customer;
+	
 	private Calendar cal = Calendar.getInstance();
 
-	public InvoiceGenerator(Table goldBillingTable, Table silverBillingTable,
-			Table diamondBillingTable, Table generalBillingTable, PriceForm pfForm, Customer customer) {
-		this.goldBillingTable = goldBillingTable;
-		this.silverBillingTable = silverBillingTable;
-		this.diamondBillingTable = diamondBillingTable;
-		this.generalBillingTable = generalBillingTable;
-		this.pfForm = pfForm;
-		this.customer = customer;
+	private RetailTransactionBean retailTransaction;
+
+	public InvoiceGenerator(RetailTransactionBean retailTransaction) {
+		this.retailTransaction = retailTransaction;
 	}
+
 
 	/**
 	 * Creates a PDF document.
@@ -91,17 +80,22 @@ public class InvoiceGenerator implements PdfPTableEvent {
 	 * @param includePrice
 	 * @param invoiceDate
 	 * @param notes
-	 * @param invoiceNumber 
+	 * @param invoiceNumber
 	 * @param filename
 	 *            the path to the new PDF document
 	 * @throws DocumentException
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public String createPdf(final String staffName, final boolean includePrice, final String vinNumber,
-			final boolean isEstimateBill, final Date invoiceDate,
-			final TextArea notes, String invoiceNumber) throws SQLException, DocumentException,
+	public String createPdf() throws SQLException, DocumentException,
 			IOException {
+		Date invoiceDate = retailTransaction.getInvoiceDate();
+		Boolean isEstimateBill = retailTransaction.isEstimateBill();
+		String invoiceNumber = retailTransaction.getInvoiceNumber().toString();
+		String staffName = retailTransaction.getDealingStaffName();
+		Boolean includePrice = retailTransaction.getIncludePrice();
+		String vinNumber = retailTransaction.getVinNumber();
+		String notes = retailTransaction.getNotes();
 		cal.setTime(invoiceDate);
 		Document document = new Document(PageSize.A4);
 		String filePath = getFilePath(isEstimateBill, invoiceDate);
@@ -115,8 +109,8 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		document.add(new Paragraph(" "));
 		document.add(new Paragraph(" "));
 		document.add(new Paragraph(" "));
-		
-		//document.add(generateBarCode(writer));
+
+		// document.add(generateBarCode(writer));
 		addInvoiceType(document, isEstimateBill, invoiceDate, invoiceNumber);
 		document.add(new Paragraph(" "));
 		addDateVinInformation(document, invoiceDate, isEstimateBill, vinNumber);
@@ -136,31 +130,31 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 		addGeneralItemsInformation(document, includePrice);
 		document.add(new Paragraph(" "));
-		
+
 		addPriceInformationTable(document, isEstimateBill);
 		document.add(new Paragraph(" "));
 
 		addNotes(document, notes);
 		document.add(new Paragraph(" "));
-		
-		if(!isEstimateBill)
-		{
+
+		if (!isEstimateBill) {
 			document.add(new Paragraph(" "));
-			
+
 		}
 		addSignature(document, isEstimateBill, staffName);
 		document.add(new Paragraph(" "));
-		
+
 		document.newPage();
 
 		// step 5
 		document.close();
-		saveCustomerInformation(customer, invoiceDate);
+		saveCustomerInformation(retailTransaction.getCustomer(), invoiceDate);
 		return filePath;
 
 	}
 
-	private void addSignature(Document document, boolean isEstimateBill, String staffName) throws DocumentException, IOException {
+	private void addSignature(Document document, boolean isEstimateBill,
+			String staffName) throws DocumentException, IOException {
 		PdfPTable table;
 		table = new PdfPTable(3);
 		table.setWidthPercentage(100f);
@@ -176,23 +170,23 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		Font headerFont = new Font(baseFont, 11, Font.BOLD);
 		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
 
-		if(!isEstimateBill)
-		{
+		if (!isEstimateBill) {
 			Phrase authorizedSignatory = new Phrase();
-			authorizedSignatory.add(new Chunk("Authorized Signatory", headerFont));
+			authorizedSignatory.add(new Chunk("Authorized Signatory",
+					headerFont));
 			table.addCell(authorizedSignatory);
 			Phrase customerSignature = new Phrase();
 			customerSignature.add(new Chunk("Customer Signature", headerFont));
 			table.addCell(customerSignature);
-			
-		}else{
+
+		} else {
 			Phrase authorizedSignatory = new Phrase();
 			authorizedSignatory.add(new Chunk("", headerFont));
 			table.addCell(authorizedSignatory);
 			Phrase customerSignature = new Phrase();
 			customerSignature.add(new Chunk("", headerFont));
 			table.addCell(customerSignature);
-			
+
 		}
 		Phrase staffNamePhrase = new Phrase();
 		staffNamePhrase.add(new Chunk("Dealing Staff: ", headerFont));
@@ -201,13 +195,15 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		document.add(table);
 	}
 
-	private String getFilePath(final boolean isEstimateBill, final Date invoiceDate) {
-		String filePath = System.getenv(BILL_PATH) + File.separator	+ getDirectory(invoiceDate, isEstimateBill) + File.separator;
-		if(isEstimateBill){
-			
+	private String getFilePath(final boolean isEstimateBill,
+			final Date invoiceDate) {
+		String filePath = System.getenv(BILL_PATH) + File.separator
+				+ getDirectory(invoiceDate, isEstimateBill) + File.separator;
+		if (isEstimateBill) {
+
 			filePath += "Estimate_";
-			
-		}else{
+
+		} else {
 			filePath += "Invoice_";
 		}
 		filePath += String.valueOf(cal.get(Calendar.YEAR)) + "-"
@@ -217,7 +213,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				+ String.valueOf(cal.get(Calendar.MINUTE)) + "-"
 				+ String.valueOf(cal.get(Calendar.SECOND)) + "-"
 				+ String.valueOf(cal.get(Calendar.MILLISECOND)) + ".pdf";
-		
+
 		return filePath;
 	}
 
@@ -228,22 +224,21 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				.withRecordSeparator(NEW_LINE_SEPARATOR);
 		try {
 			// initialize FileWriter object
-			File f = new File(System.getenv(BILL_PATH) + File.separator	+ "customerInfo.csv");
+			File f = new File(System.getenv(BILL_PATH) + File.separator
+					+ "customerInfo.csv");
 			boolean isFileExist = false;
-			if(isFileExist = f.exists()){
+			if (isFileExist = f.exists()) {
 				f.createNewFile();
-				
+
 			}
-			
+
 			fileWriter = new FileWriter(f, true);
 			// initialize CSVPrinter object
 			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
 			// Create CSV file header
-			if(!isFileExist){
+			if (!isFileExist) {
 				csvFilePrinter.printRecord(FILE_HEADER);
 			}
-			
-
 
 			List<String> customerInfoList = new ArrayList<>();
 			customerInfoList.add(String.valueOf(invoiceDate));
@@ -267,21 +262,26 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				fileWriter.close();
 				csvFilePrinter.close();
 			} catch (Exception e) {
-				logger.error("Error while flushing/closing fileWriter/csvPrinter !!!", e);
+				logger.error(
+						"Error while flushing/closing fileWriter/csvPrinter !!!",
+						e);
 			}
 		}
 	}
 
-//	private com.itextpdf.text.Image generateBarCode(PdfWriter writer, Date date) throws DocumentException
-//	{
-//		Barcode128 barcd = new Barcode128();
-//        barcd.setCode("10031"); 
-//        PdfContentByte cb = writer.getDirectContent();
-//        com.itextpdf.text.Image barcode1 = barcd.createImageWithBarcode(cb, BaseColor.DARK_GRAY, BaseColor.BLUE);
-//        return barcode1;
-//	}
-	private void addInvoiceType(Document document, boolean isEstimateBill, Date invoiceDate, String invoiceNumber)
-			throws DocumentException, IOException {
+	// private com.itextpdf.text.Image generateBarCode(PdfWriter writer, Date
+	// date) throws DocumentException
+	// {
+	// Barcode128 barcd = new Barcode128();
+	// barcd.setCode("10031");
+	// PdfContentByte cb = writer.getDirectContent();
+	// com.itextpdf.text.Image barcode1 = barcd.createImageWithBarcode(cb,
+	// BaseColor.DARK_GRAY, BaseColor.BLUE);
+	// return barcode1;
+	// }
+	private void addInvoiceType(Document document, boolean isEstimateBill,
+			Date invoiceDate, String invoiceNumber) throws DocumentException,
+			IOException {
 		PdfPTable footerTable = getPDFTable(!isEstimateBill, 2);
 		footerTable.getDefaultCell().setBackgroundColor(
 				new BaseColor(252, 175, 175));
@@ -293,25 +293,24 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
 		Phrase notePhrase = new Phrase();
 		if (isEstimateBill) {
-			
+
 			notePhrase.add(new Chunk("Estimate Letter", headerFont));
 		} else {
 			notePhrase.add(new Chunk("Retail Invoice", headerFont));
 
 		}
-		
+
 		PdfPCell cell = new PdfPCell(notePhrase);
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		cell.setBackgroundColor(new BaseColor(247, 200, 153));
-		if(!isEstimateBill)
-		{
-//			String InvoiceId = String.valueOf(cal.get(Calendar.YEAR)) + "-"
-//					+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
-//					+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
-//					+ String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + "-"
-//					+ String.valueOf(cal.get(Calendar.MINUTE)) + "-"
-//					+ String.valueOf(cal.get(Calendar.SECOND)) + "-"
-//					+ String.valueOf(cal.get(Calendar.MILLISECOND));
+		if (!isEstimateBill) {
+			// String InvoiceId = String.valueOf(cal.get(Calendar.YEAR)) + "-"
+			// + String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
+			// + String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
+			// + String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + "-"
+			// + String.valueOf(cal.get(Calendar.MINUTE)) + "-"
+			// + String.valueOf(cal.get(Calendar.SECOND)) + "-"
+			// + String.valueOf(cal.get(Calendar.MILLISECOND));
 			Phrase p = new Phrase(new Chunk("Invoice Id: ", headerFont));
 			p.add(new Chunk(invoiceNumber, rowFont));
 			footerTable.addCell(p);
@@ -321,10 +320,9 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 	}
 
-	private void addNotes(Document document, TextArea notes)
+	private void addNotes(Document document, String notes)
 			throws DocumentException, IOException {
-		String invoiceNote = notes.getValue();
-		if (!StringUtils.isBlank(invoiceNote)) {
+		if (!StringUtils.isBlank(notes)) {
 			PdfPTable footerTable = getPDFTable(true, 1);
 			footerTable.getDefaultCell().setBackgroundColor(
 					new BaseColor(252, 175, 175));
@@ -334,17 +332,18 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			Font rowFont = new Font(baseFont, 10, Font.NORMAL);
 			Phrase notePhrase = new Phrase();
 			notePhrase.add(new Chunk("Notes: ", headerFont));
-			notePhrase.add(new Chunk(invoiceNote, rowFont));
+			notePhrase.add(new Chunk(notes, rowFont));
 			footerTable.addCell(notePhrase);
 			document.add(footerTable);
 		}
 
 	}
 
-	private void addGeneralItemsInformation(Document document, boolean includePrice) throws DocumentException, IOException {
+	private void addGeneralItemsInformation(Document document,
+			boolean includePrice) throws DocumentException, IOException {
 		PdfPTable table;
 		if (includePrice) {
-			table = new PdfPTable(new float[] { 1, 1, 0.5f, 1, 0.7f, 1.8f});
+			table = new PdfPTable(new float[] { 1, 1, 0.5f, 1, 0.7f, 1.8f });
 		} else {
 			table = new PdfPTable(5);
 		}
@@ -361,75 +360,43 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
 
 		String columnNames[] = new String[] { "Price", "General Item", "Qty",
-				"Pc/Pair", "Wt(gms)", "Price per(piece/pair)"};
-		if (generalBillingTable.size() > 0) {
+				"Pc/Pair", "Wt(gms)", "Price per(piece/pair)" };
+		if (retailTransaction.getGeneralTransactionItemBeanList().size() > 0) {
 			for (int i = 0; i < columnNames.length; i++) {
 				if ((i == 0) && includePrice == false)
 					continue;
 				table.addCell(new Phrase(columnNames[i], headerFont));
 			}
-			GeneralItemContainer con = (GeneralItemContainer) generalBillingTable.getContainerDataSource();
-			for (Object obj : generalBillingTable.getItemIds()) {
-				TextField itemTxtField = (TextField) (con.getItem(obj)
-						.getItemProperty(GeneralItemContainer.PRICE).getValue());
-				String itemPrice = itemTxtField.getValue();
-				if (NumberUtils.isNumber(itemPrice)
-						&& Double.valueOf(itemPrice) > 0.0) {
-					if (includePrice) {
-						table.addCell(new Phrase(itemTxtField.getValue(),
-								rowFont));
-					}
-					ComboBox itemNameField = (ComboBox) con.getItem(obj)
-							.getItemProperty(GeneralItemContainer.ITEM_NAME)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(itemNameField
-							.getValue()), rowFont));
 
-					TextField quantityTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(GeneralItemContainer.QUANTITY)
-							.getValue();
-					table.addCell(new Phrase(quantityTxtField.getValue()
-							.toString(), rowFont));
-
-					ComboBox piecePairField = (ComboBox) con.getItem(obj)
-							.getItemProperty(GeneralItemContainer.PIECE_PAIR)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(piecePairField
-							.getValue()), rowFont));
-
-					TextField weightGeneralTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(GeneralItemContainer.WEIGHT)
-							.getValue();
-					String weightStr = weightGeneralTxtField.getValue().toString();
-					table.addCell(new Phrase(NumberUtils.isNumber(weightStr) ? weightStr : "N/A", rowFont));
-
-					TextField pricePerPiecePairTxtField = (TextField) con
-							.getItem(obj)
-							.getItemProperty(
-									GeneralItemContainer.PRICE_PER_PIECE_PAIR)
-							.getValue();
-					table.addCell(new Phrase(pricePerPiecePairTxtField.getValue()
-							.toString(), rowFont));
-				}
-			}
+			List<GeneralTransactionItemBean> generalItemsTransactionList = retailTransaction.getGeneralTransactionItemBeanList();
+			generalItemsTransactionList
+					.forEach(item -> {
+						if (includePrice) {
+							table.addCell(new Phrase(item.getItemPrice().toString(),
+									rowFont));
+						}
+						table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
+						table.addCell(new Phrase(String.valueOf(item.getQuantity()), rowFont));
+						table.addCell(new Phrase(String.valueOf(item.getPiecepair()), rowFont));
+						table.addCell(new Phrase(item.getWeight() > 0.0 ? item.getWeight().toString() : "N/A", rowFont));
+						table.addCell(new Phrase(item.getPricePerPiecepair().toString(), rowFont));
+					});
 			document.add(table);
 			PdfPTable footerTable = getPDFTable(true, 1);
 			footerTable.getDefaultCell().setBackgroundColor(
 					new BaseColor(255, 209, 179));
 
 			Phrase totalGeneralPricePhrase = new Phrase();
-			totalGeneralPricePhrase.add(new Chunk(
-					"Total Items Price(INR) = ", headerFont));
+			totalGeneralPricePhrase.add(new Chunk("Total Items Price(INR) = ",
+					headerFont));
 			totalGeneralPricePhrase.add(new Chunk(String.format("%.3f",
-					con.getTotalPrice()), rowFont));
+					generalItemsTransactionList.stream().map(item -> item.getItemPrice()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
 			footerTable.addCell(new Phrase(totalGeneralPricePhrase));
 			document.add(footerTable);
 		}
 	}
 
-	
-	private void addDiamondItemsInformation(Document document,
-			boolean includePrice) throws DocumentException, IOException {
+	private void addDiamondItemsInformation(Document document, boolean includePrice) throws DocumentException, IOException {
 		PdfPTable table;
 		if (includePrice) {
 			table = new PdfPTable(new float[] { 1.2f, 1, 0.4f, 0.9f, 0.9f,
@@ -452,70 +419,29 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		String columnNames[] = new String[] { "Price", "Diamond Items", "Qty",
 				"Pc/Pair", "Gold Wt(gms)", "Diamond Wt(Carat)",
 				"#Diamond Piece", "Certificate" };
-		if (diamondBillingTable.size() > 0) {
+		List<DiamondTransactionItemBean> diamondItemsTransactionList = retailTransaction.getDiamondTransactionItemBeanList();
+		
+		if (!diamondItemsTransactionList.isEmpty()) {
 			for (int i = 0; i < columnNames.length; i++) {
 				if ((i == 0) && includePrice == false)
 					continue;
 				table.addCell(new Phrase(columnNames[i], headerFont));
 			}
-			DiamondItemContainer con = (DiamondItemContainer) diamondBillingTable
-					.getContainerDataSource();
-			for (Object obj : diamondBillingTable.getItemIds()) {
-				TextField itemTxtField = (TextField) (con.getItem(obj)
-						.getItemProperty(DiamondItemContainer.PRICE).getValue());
-				String itemPrice = itemTxtField.getValue();
-				if (NumberUtils.isNumber(itemPrice)
-						&& Double.valueOf(itemPrice) > 0.0) {
-					if (includePrice == true) {
-						table.addCell(new Phrase(itemTxtField.getValue(),
-								rowFont));
-					}
-					ComboBox itemNameField = (ComboBox) con.getItem(obj)
-							.getItemProperty(DiamondItemContainer.ITEM_NAME)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(itemNameField
-							.getValue()), rowFont));
-
-					TextField quantityTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(DiamondItemContainer.QUANTITY)
-							.getValue();
-					table.addCell(new Phrase(quantityTxtField.getValue()
-							.toString(), rowFont));
-
-					ComboBox piecePairField = (ComboBox) con.getItem(obj)
-							.getItemProperty(DiamondItemContainer.PIECE_PAIR)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(piecePairField
-							.getValue()), rowFont));
-
-					TextField weightGoldTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(DiamondItemContainer.GOLD_WEIGHT)
-							.getValue();
-					table.addCell(new Phrase(weightGoldTxtField.getValue()
-							.toString(), rowFont));
-
-					TextField weightDiamondTxtField = (TextField) con
-							.getItem(obj)
-							.getItemProperty(
-									DiamondItemContainer.DIAMOND_WEIGHT)
-							.getValue();
-					table.addCell(new Phrase(weightDiamondTxtField.getValue()
-							.toString(), rowFont));
-
-					TextField diamondPieceTxtField = (TextField) con
-							.getItem(obj)
-							.getItemProperty(DiamondItemContainer.DIAMOND_PIECE)
-							.getValue();
-					table.addCell(new Phrase(diamondPieceTxtField.getValue()
-							.toString(), rowFont));
-
-					ComboBox certificate = (ComboBox) con.getItem(obj)
-							.getItemProperty(DiamondItemContainer.CERTIFICATE)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(certificate
-							.getValue()), rowFont));
+			diamondItemsTransactionList
+			.forEach(item -> {
+				if (includePrice) {
+					table.addCell(new Phrase(item.getItemPrice().toString(),
+							rowFont));
 				}
-			}
+				table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
+				table.addCell(new Phrase(String.valueOf(item.getQuantity()), rowFont));
+				table.addCell(new Phrase(String.valueOf(item.getPiecePair()), rowFont));
+				table.addCell(new Phrase(item.getGoldWeight().toString(), rowFont));
+				table.addCell(new Phrase(item.getDiamondWeightCarat().toString(), rowFont));
+				table.addCell(new Phrase(String.valueOf(item.getDiamondPieceCount()), rowFont));
+				table.addCell(new Phrase(item.isCertified() ? "YES" : "NO", rowFont));
+			});
+			
 			document.add(table);
 			PdfPTable footerTable = getPDFTable(true, 3);
 			footerTable.getDefaultCell().setBackgroundColor(
@@ -524,22 +450,18 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			Phrase totalDiamondPricePhrase = new Phrase();
 			totalDiamondPricePhrase.add(new Chunk(
 					"Total Diamond Price(INR) = ", headerFont));
-			totalDiamondPricePhrase.add(new Chunk(String.format("%.3f",
-					con.getTotalPrice()), rowFont));
+			totalDiamondPricePhrase.add(new Chunk(String.format("%.3f", diamondItemsTransactionList.stream().map(item -> item.getItemPrice()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
 			footerTable.addCell(new Phrase(totalDiamondPricePhrase));
 
 			Phrase totalGoldWeightPhrase = new Phrase();
-			totalGoldWeightPhrase.add(new Chunk("Total Gold Wt(gm) = ",
-					headerFont));
-			totalGoldWeightPhrase.add(new Chunk(String.format("%.3f",
-					con.getTotalGoldWeight()), rowFont));
+			totalGoldWeightPhrase.add(new Chunk("Total Gold Wt(gm) = ", headerFont));
+			totalGoldWeightPhrase.add(new Chunk(String.format("%.3f", diamondItemsTransactionList.stream().map(item -> item.getGoldWeight()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
 			footerTable.addCell(new Phrase(totalGoldWeightPhrase));
 
 			Phrase totalDiamondWeightPhrase = new Phrase();
 			totalDiamondWeightPhrase.add(new Chunk(
 					"Total Diamond Wt(Carat) = ", headerFont));
-			totalDiamondWeightPhrase.add(new Chunk(String.format("%.2f",
-					con.getTotalDiamondWeight()), rowFont));
+			totalDiamondWeightPhrase.add(new Chunk(String.format("%.2f", diamondItemsTransactionList.stream().map(item -> item.getDiamondWeightCarat()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
 			footerTable.addCell(new Phrase(totalDiamondWeightPhrase));
 
 			document.add(footerTable);
@@ -569,71 +491,31 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 		String columnNames[] = new String[] { "Price", "Silver Items", "Qty",
 				"Pc/Pair", "Wt(gms)", "MakingCost", "MkCostType", "Rate-pergm" };
-		if (silverBillingTable.size() > 0) {
+		List<SilverTransactionItemBean> silverItemsTransactionList = retailTransaction.getSilverTransactionItemBeanList();
+		if (silverItemsTransactionList.size() > 0) {
 			for (int i = 0; i < columnNames.length; i++) {
 				if ((i == 0) && includePrice == false)
 					continue;
 				table.addCell(new Phrase(columnNames[i], headerFont));
 			}
-			SilverItemContainer con = (SilverItemContainer) silverBillingTable
-					.getContainerDataSource();
-			for (Object obj : silverBillingTable.getItemIds()) {
-				TextField itemTxtField = (TextField) (con.getItem(obj)
-						.getItemProperty(SilverItemContainer.PRICE).getValue());
-				String itemPrice = itemTxtField.getValue();
-				if (NumberUtils.isNumber(itemPrice)
-						&& Double.valueOf(itemPrice) > 0.0) {
-					if (includePrice == true) {
-						table.addCell(new Phrase(itemTxtField.getValue(),
-								rowFont));
-					}
-					ComboBox itemNameField = (ComboBox) con.getItem(obj)
-							.getItemProperty(SilverItemContainer.ITEM_NAME)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(itemNameField
-							.getValue()), rowFont));
-
-					TextField quantityTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(SilverItemContainer.QUANTITY)
-							.getValue();
-					table.addCell(new Phrase(quantityTxtField.getValue()
-							.toString(), rowFont));
-
-					ComboBox piecePairField = (ComboBox) con.getItem(obj)
-							.getItemProperty(SilverItemContainer.PIECE_PAIR)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(piecePairField
-							.getValue()), rowFont));
-
-					TextField weightTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(SilverItemContainer.WEIGHT)
-							.getValue();
-					table.addCell(new Phrase(weightTxtField.getValue()
-							.toString(), rowFont));
-
-					TextField makingChargeTxtField = (TextField) con
-							.getItem(obj)
-							.getItemProperty(SilverItemContainer.MAKING_CHARGE)
-							.getValue();
-					table.addCell(new Phrase(makingChargeTxtField.getValue()
-							.toString(), rowFont));
-
-					ComboBox makingChargeType = (ComboBox) con
-							.getItem(obj)
-							.getItemProperty(
-									SilverItemContainer.MAKING_CHARGE_TYPE)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(makingChargeType
-							.getValue()), rowFont));
-
-					TextField silverRateTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(SilverItemContainer.SILVER_RATE)
-							.getValue();
-					table.addCell(new Phrase(silverRateTxtField.getValue()
-							.toString(), rowFont));
-
+			
+			
+			silverItemsTransactionList
+			.forEach(item -> {
+				if (includePrice) {
+					table.addCell(new Phrase(item.getSilverItemPrice().toString(),
+							rowFont));
 				}
-			}
+				table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
+				table.addCell(new Phrase(String.valueOf(item.getQuantity()), rowFont));
+				table.addCell(new Phrase(String.valueOf(item.getPiecepair()), rowFont));
+				table.addCell(new Phrase(item.getWeight().toString(), rowFont));
+				table.addCell(new Phrase(item.getMakingCharge().toString(), rowFont));
+				table.addCell(new Phrase(item.getMakingChargeType(), rowFont));
+				table.addCell(new Phrase(item.getSilverRate().toString(), rowFont));
+			});
+			
+		
 			document.add(table);
 			PdfPTable footerTable = getPDFTable(true, 2);
 			footerTable.getDefaultCell().setBackgroundColor(
@@ -641,14 +523,12 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			Phrase totalSilverPricePhrase = new Phrase();
 			totalSilverPricePhrase.add(new Chunk("Total Silver Price(INR) = ",
 					headerFont));
-			totalSilverPricePhrase.add(new Chunk(String.format("%.3f",
-					con.getTotalPrice()), rowFont));
+			totalSilverPricePhrase.add(new Chunk(String.format("%.3f", silverItemsTransactionList.stream().map(item -> item.getSilverItemPrice()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
 			footerTable.addCell(new Phrase(totalSilverPricePhrase));
 			Phrase totalSilverWeightPhrase = new Phrase();
 			totalSilverWeightPhrase.add(new Chunk("Total Silver Wt(gm) = ",
 					headerFont));
-			totalSilverWeightPhrase.add(new Chunk(String.format("%.3f",
-					con.getTotalWeight()), rowFont));
+			totalSilverWeightPhrase.add(new Chunk(String.format("%.3f", silverItemsTransactionList.stream().map(item -> item.getWeight()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
 			footerTable.addCell(totalSilverWeightPhrase);
 			document.add(footerTable);
 		}
@@ -677,80 +557,35 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		Font headerFont = new Font(baseFont, 11, Font.BOLD);
 		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
 
-		String columnNames[] = new String[] { "Price", "Gold Item",
-				"GoldType", "Qty", "Pc/Pair", "Wt(gms)", "MakingCost",
-				"MkCostType", "Rate-pergm" };
-		if (goldBillingTable.size() > 0) {
+		String columnNames[] = new String[] { "Price", "Gold Item", "GoldType",
+				"Qty", "Pc/Pair", "Wt(gms)", "MakingCost", "MkCostType",
+				"Rate-pergm" };
+		List<GoldTransactionItemBean> goldItemsTransactionList = retailTransaction.getGoldTransactionItemBeanList();
+		
+		if (!goldItemsTransactionList.isEmpty()) {
 			for (int i = 0; i < columnNames.length; i++) {
 				if ((i == 0) && includePrice == false)
 					continue;
 				table.addCell(new Phrase(columnNames[i], headerFont));
 			}
-			GoldItemContainer con = (GoldItemContainer) goldBillingTable
-					.getContainerDataSource();
-			for (Object obj : goldBillingTable.getItemIds()) {
-				TextField itemTxtField = (TextField) (con.getItem(obj)
-						.getItemProperty(GoldItemContainer.PRICE).getValue());
-				String itemPrice = itemTxtField.getValue();
-				if (NumberUtils.isNumber(itemPrice)
-						&& Double.valueOf(itemPrice) > 0.0) {
-					if (includePrice == true) {
-						table.addCell(new Phrase(itemTxtField.getValue(),
-								rowFont));
-					}
-					ComboBox itemNameField = (ComboBox) con.getItem(obj)
-							.getItemProperty(GoldItemContainer.ITEM_NAME)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(itemNameField
-							.getValue()), rowFont));
-
-					ComboBox hallMarkTypeField = (ComboBox) con.getItem(obj)
-							.getItemProperty(GoldItemContainer.GOLD_TYPE)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(hallMarkTypeField
-							.getValue()), rowFont));
-
-					TextField quantityTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(GoldItemContainer.QUANTITY)
-							.getValue();
-					table.addCell(new Phrase(quantityTxtField.getValue()
-							.toString(), rowFont));
-
-					ComboBox piecePairField = (ComboBox) con.getItem(obj)
-							.getItemProperty(GoldItemContainer.PIECE_PAIR)
-							.getValue();
-					table.addCell(new Phrase(String.valueOf(piecePairField
-							.getValue()), rowFont));
-
-					TextField weightTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(GoldItemContainer.WEIGHT)
-							.getValue();
-					table.addCell(new Phrase(weightTxtField.getValue()
-							.toString(), rowFont));
-
-					TextField makingChargeTxtField = (TextField) con
-							.getItem(obj)
-							.getItemProperty(GoldItemContainer.MAKING_CHARGE)
-							.getValue();
-					table.addCell(new Phrase(makingChargeTxtField.getValue()
-							.toString(), rowFont));
-
-					ComboBox makingChargeType = (ComboBox) con
-							.getItem(obj)
-							.getItemProperty(
-									GoldItemContainer.MAKING_CHARGE_TYPE)
-							.getValue();
-					table.addCell(new Phrase(makingChargeType.getValue()
-							.toString(), rowFont));
-
-					TextField goldRateTxtField = (TextField) con.getItem(obj)
-							.getItemProperty(GoldItemContainer.GOLD_RATE)
-							.getValue();
-					table.addCell(new Phrase(goldRateTxtField.getValue()
-							.toString(), rowFont));
-
+			
+		goldItemsTransactionList
+			.forEach(golItem -> {
+				if (includePrice) {
+					table.addCell(new Phrase(golItem.getGoldItemPrice().toString(), rowFont));
 				}
-			}
+				table.addCell(new Phrase(String.valueOf(golItem.getGoldItemName()), rowFont));
+				table.addCell(new Phrase(golItem.getGoldType(), rowFont));
+				table.addCell(new Phrase(String.valueOf(golItem.getQuantity()), rowFont));
+				table.addCell(new Phrase(golItem.getPiecePair(), rowFont));
+				table.addCell(new Phrase(golItem.getWeight().toString(), rowFont));
+				table.addCell(new Phrase(golItem.getMakingCharge().toString(), rowFont));
+				table.addCell(new Phrase(golItem.getMakingChargeType(), rowFont));
+				table.addCell(new Phrase(golItem.getGoldRate().toString(), rowFont));
+			});
+			
+			
+			
 			document.add(table);
 			PdfPTable footerTable = getPDFTable(true, 2);
 			footerTable.getDefaultCell().setBackgroundColor(
@@ -758,18 +593,17 @@ public class InvoiceGenerator implements PdfPTableEvent {
 			Phrase totalGoldPricePhrase = new Phrase();
 			totalGoldPricePhrase.add(new Chunk("Total Gold Price(INR) = ",
 					headerFont));
-			totalGoldPricePhrase.add(new Chunk(String.format("%.3f",
-					con.getTotalPrice()), rowFont));
+			totalGoldPricePhrase.add(new Chunk(String.format("%.3f", goldItemsTransactionList.stream().map(item -> item.getGoldItemPrice()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
 			footerTable.addCell(new Phrase(totalGoldPricePhrase));
 			Phrase totalGoldWeightPhrase = new Phrase();
 			totalGoldWeightPhrase.add(new Chunk("Total Gold Wt(gm) = ",
 					headerFont));
-			totalGoldWeightPhrase.add(new Chunk(String.format("%.3f",
-					con.getTotalWeight()), rowFont));
+			totalGoldWeightPhrase.add(new Chunk(String.format("%.3f", goldItemsTransactionList.stream().map(item -> item.getWeight()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
 			footerTable.addCell(totalGoldWeightPhrase);
 			document.add(footerTable);
 		}
 	}
+	
 
 	private PdfPTable getPDFTable(boolean includePrice, int columnCountWithPrice) {
 		PdfPTable table;
@@ -840,54 +674,47 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 		table.addCell(new Phrase(new Chunk("Total Items Price(INR): ",
 				headerFont)));
-		table.addCell(new Phrase(new Chunk(String.format("%.3f",
-				Double.valueOf(pfForm.totalItemPrice.getValue())), rowFont)));
+		PriceBean priceBean = retailTransaction.getPriceBean();
+		table.addCell(new Phrase(new Chunk(String.format("%.3f",priceBean.getTotalItemsPrice()), rowFont)));
 
-		Double discountPrice = new Double(pfForm.discountPrice.getValue());
+		
+		Double discountPrice = 	retailTransaction.getPriceBean().getDiscount();
 		if (discountPrice > 0) {
 			table.addCell(new Phrase(new Chunk("Discount(INR): ", headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f",
-					Double.valueOf(pfForm.discountPrice.getValue())), rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f",priceBean.getDiscount(), rowFont))));
 		}
 		if (!isEstimateBill) {
-			table.addCell(new Phrase(new Chunk("Vat(" + String.valueOf(CustomShopSettingFileUtility.getInstance().getVatPercentage())+ "%) Charge(INR) : ",
+			table.addCell(new Phrase(new Chunk("Vat("
+					+ String.valueOf(CustomShopSettingFileUtility.getInstance()
+							.getVatPercentage()) + "%) Charge(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f",
-					Double.valueOf(pfForm.vatOnNewItemPrice.getValue())),
-					rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getVatCharge(), rowFont))));
 		}
-		Double oldPurchasePrice = new Double(pfForm.oldPurchasePrice.getValue());
+		Double oldPurchasePrice = priceBean.getOldPurchase();
 		if (oldPurchasePrice > 0) {
 			table.addCell(new Phrase(new Chunk("Old Purchase(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f",
-					Double.valueOf(pfForm.oldPurchasePrice.getValue())),
-					rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getOldPurchase(), rowFont))));
 		}
 		table.addCell(new Phrase(new Chunk("Net Amount(INR) : ", headerFont)));
-		Double advancedPayment = new Double(pfForm.advancePayment.getValue());
+		Double advancedPayment = priceBean.getAdvancePaymentAmount();
 		if (advancedPayment > 0) {
-			table.addCell(new Phrase(new Chunk(String.format("%.3f",
-					Double.valueOf(pfForm.netAmountToPay.getValue())), rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getNetpayableAmount(), rowFont))));
 
 		} else {
 			table.addCell(new Phrase(new Chunk(String
-					.format("%d(round off)", Math.round(Double
-							.valueOf(pfForm.netAmountToPay.getValue()))),
+					.format("%d(round off)", Math.round(priceBean.getNetpayableAmount())),
 					rowFont)));
 		}
 
 		if (isEstimateBill && advancedPayment > 0) {
 			table.addCell(new Phrase(new Chunk("Advance Payment(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f",
-					Double.valueOf(pfForm.advancePayment.getValue())), rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", advancedPayment, rowFont))));
 
 			table.addCell(new Phrase(new Chunk("Balance Amount(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String
-					.format("%d(rounded)", Math.round(Double
-							.valueOf(pfForm.balanceAmount.getValue()))),
+			table.addCell(new Phrase(new Chunk(String.format("%d(rounded)", Math.round(priceBean.getBalanceAmount())),
 					rowFont)));
 		}
 
@@ -910,7 +737,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				BaseFont.CP1252, BaseFont.EMBEDDED);
 		Font headerFont = new Font(baseFont, 10, Font.BOLD);
 		Font rowFont = new Font(baseFont, 9, Font.NORMAL);
-
+		Customer customer = retailTransaction.getCustomer();
 		customerTable.addCell(new Phrase(new Chunk("Customer Name: ",
 				headerFont)));
 		customerTable.addCell(new Phrase(new Chunk(customer.getFirstName()
@@ -976,18 +803,20 @@ public class InvoiceGenerator implements PdfPTableEvent {
 	}
 
 	int getTotalItems() {
-		return goldBillingTable.size() + silverBillingTable.size()
-				+ diamondBillingTable.size();
+		return retailTransaction.getGoldTransactionItemBeanList().size() + retailTransaction.getSilverTransactionItemBeanList().size()
+				+ retailTransaction.getDiamondTransactionItemBeanList().size();
 	}
 
 	String getDirectory(Date invoiceDate, boolean isEstimateBill) {
 		String directoryName = getDirectoryName(invoiceDate, isEstimateBill);
-		File theDir = new File(System.getenv(BILL_PATH) + File.separator 	+ directoryName);
+		File theDir = new File(System.getenv(BILL_PATH) + File.separator
+				+ directoryName);
 
 		// if the directory does not exist, create it
 		if (!theDir.exists()) {
-			System.out.println("Creating Directory: "
-					+ System.getenv(BILL_PATH) + File.separator + directoryName);
+			System.out
+					.println("Creating Directory: " + System.getenv(BILL_PATH)
+							+ File.separator + directoryName);
 			boolean result = false;
 
 			try {
@@ -1012,27 +841,11 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		} else {
 			dir += File.separator + "INVOICE";
 		}
-		dir += 	File.separator + String.valueOf(cal.get(Calendar.MONTH) + 1) + File.separator
+		dir += File.separator + String.valueOf(cal.get(Calendar.MONTH) + 1)
+				+ File.separator
 				+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
 				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
 				+ String.valueOf(cal.get(Calendar.YEAR));
 		return dir;
 	}
-	
-	
-//	String getDirectoryName(Date invoiceDate, boolean isEstimateBill) {
-//		Calendar cal = Calendar.getInstance();
-//		cal.setTime(invoiceDate);
-//		String dir = String.valueOf(cal.get(Calendar.YEAR)) + File.separator
-//				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + File.separator
-//				+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
-//				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
-//				+ String.valueOf(cal.get(Calendar.YEAR));
-//		if (isEstimateBill) {
-//			dir += File.separator + "estimate";
-//		} else {
-//			dir += File.separator + "invoice";
-//		}
-//		return dir;
-//	}
 }

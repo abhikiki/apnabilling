@@ -31,7 +31,7 @@ public class DiamondTransactionItemBean {
 		this.quantity = quantity;
 		this.piecePair = piecePair;
 		this.goldWeight = goldWeight;
-		this.diamondWeightCarat = this.diamondWeightCarat;
+		this.diamondWeightCarat = diamondWeightCarat;
 		this.diamondPieceCount = diamondPieceCount;
 		this.certified = certified;
 		this.itemPrice = itemPrice;

@@ -16,6 +16,7 @@ import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.bean.Customer;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.mortgage.data.container.ItemContainerType;
+import com.abhishek.fmanage.retail.bean.RetailTransactionBean;
 import com.abhishek.fmanage.retail.data.container.DiamondItemContainer;
 import com.abhishek.fmanage.retail.data.container.GeneralItemContainer;
 import com.abhishek.fmanage.retail.data.container.GoldItemContainer;
@@ -413,26 +414,31 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				try {
 					boolean isEstimateBill = billType.getValue().equals(ESTIMATE_BILL);
 					Date invoiceDate = billPopUpDate.getValue();
-//					RetailTransactionBean retailTransaction = new ExtractRetailTransaction(
-//							goldBillingTable,
-//							 silverBillingTable,
-//							 diamondBillingTable,
-//							 generalBillingTable,
-//							 pfForm,
-//							 isEstimateBill,
-//							 invoiceDate).extract();
-					String staffName = staffNameComboBox.getValue().toString();
-					String invoiceNumber = "";
+					String invoiceNumber = "0";
 					if(!isEstimateBill)
 					{
 						invoiceNumber = invoiceNumberTxt.getValue().toString();
 					}
-					 fileName = new InvoiceGenerator(
-							 goldBillingTable,
+					boolean isInvoiceCancelled = false;
+					RetailTransactionBean retailTransaction = new ExtractRetailTransaction(
+							goldBillingTable,
 							 silverBillingTable,
 							 diamondBillingTable,
 							 generalBillingTable,
-							 pfForm, cusBean).createPdf(staffName, includePrice.getValue(), TIN_NUMBER, isEstimateBill, invoiceDate, notes, invoiceNumber);
+							 cusBean,
+							 pfForm,
+							 isEstimateBill,
+							 invoiceDate,
+							 TIN_NUMBER,
+							 Long.parseLong(invoiceNumber),
+							 staffNameComboBox.getValue().toString(), 
+							 includePrice.getValue(), 
+							 notes.getValue(), 
+							 isInvoiceCancelled).extract();
+					
+					
+					 fileName = new InvoiceGenerator(retailTransaction).createPdf();
+
 				} catch (Exception e) {
 					logger.error("Error generating invoice", e);
 				}
