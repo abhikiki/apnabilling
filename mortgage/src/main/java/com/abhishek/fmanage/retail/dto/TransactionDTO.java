@@ -1,25 +1,23 @@
 /**
  * 
  */
-package com.abhishek.fmanage.retail.bean;
+package com.abhishek.fmanage.retail.dto;
 
 import java.util.Date;
 import java.util.List;
-
-import com.abhishek.fmanage.mortgage.data.bean.Customer;
 
 /**
  * @author GUPTAA6
  *
  */
-public class RetailTransactionBean {
+public class TransactionDTO {
 
-	private List<GoldTransactionItemBean> goldTransactionItemBeanList;
-	private List<SilverTransactionItemBean> silverTransactionItemBeanList;
-	private List<DiamondTransactionItemBean> diamondTransactionItemBeanList;
-	private List<GeneralTransactionItemBean> generalTransactionItemBeanList;
-	private Customer customer;
-	private PriceBean priceBean;
+	private List<GoldTransactionItemDTO> goldTransactionItemBeanList;
+	private List<SilverTransactionItemDTO> silverTransactionItemBeanList;
+	private List<DiamondTransactionItemDTO> diamondTransactionItemBeanList;
+	private List<GeneralTransactionItemDTO> generalTransactionItemBeanList;
+	private CustomerDTO customer;
+	private PriceDTO priceBean;
 	private boolean isEstimateBill;
 	private Date invoiceDate;
 	private String vinNumber;
@@ -29,16 +27,16 @@ public class RetailTransactionBean {
 	private String notes;
 	private boolean isInvoiceCancelled;
 	
-	public RetailTransactionBean() {
+	public TransactionDTO() {
 	}
 	
-	public RetailTransactionBean(
-		List<GoldTransactionItemBean> goldTransactionItemBeanList,
-		List<SilverTransactionItemBean> silverTransactionItemBeanList,
-		List<DiamondTransactionItemBean> diamondTransactionItemBeanList,
-		List<GeneralTransactionItemBean> generalTransactionItemBeanList,
-		Customer customer,
-		PriceBean priceBean,
+	public TransactionDTO(
+		List<GoldTransactionItemDTO> goldTransactionItemBeanList,
+		List<SilverTransactionItemDTO> silverTransactionItemBeanList,
+		List<DiamondTransactionItemDTO> diamondTransactionItemBeanList,
+		List<GeneralTransactionItemDTO> generalTransactionItemBeanList,
+		CustomerDTO customer,
+		PriceDTO priceBean,
 		boolean isEstimateBill,
 		Date invoiceDate,
 		String vinNumber,
@@ -81,11 +79,11 @@ public class RetailTransactionBean {
 		this.includePrice = includePrice;
 	}
 
-	public Customer getCustomer() {
+	public CustomerDTO getCustomer() {
 		return customer;
 	}
 
-	public void setCustomer(Customer customer) {
+	public void setCustomer(CustomerDTO customer) {
 		this.customer = customer;
 	}
 
@@ -105,23 +103,23 @@ public class RetailTransactionBean {
 		this.dealingStaffName = dealingStaffName;
 	}
 
-	public List<GoldTransactionItemBean> getGoldTransactionItemBeanList() {
+	public List<GoldTransactionItemDTO> getGoldTransactionItemBeanList() {
 		return goldTransactionItemBeanList;
 	}
 
-	public List<SilverTransactionItemBean> getSilverTransactionItemBeanList() {
+	public List<SilverTransactionItemDTO> getSilverTransactionItemBeanList() {
 		return silverTransactionItemBeanList;
 	}
 
-	public List<DiamondTransactionItemBean> getDiamondTransactionItemBeanList() {
+	public List<DiamondTransactionItemDTO> getDiamondTransactionItemBeanList() {
 		return diamondTransactionItemBeanList;
 	}
 
-	public List<GeneralTransactionItemBean> getGeneralTransactionItemBeanList() {
+	public List<GeneralTransactionItemDTO> getGeneralTransactionItemBeanList() {
 		return generalTransactionItemBeanList;
 	}
 
-	public PriceBean getPriceBean() {
+	public PriceDTO getPriceBean() {
 		return priceBean;
 	}
 

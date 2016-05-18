@@ -1,13 +1,13 @@
 /**
  * 
  */
-package com.abhishek.fmanage.retail.bean;
+package com.abhishek.fmanage.retail.dto;
 
 /**
  * @author GUPTAA6
  *
  */
-public class GeneralTransactionItemBean {
+public class GeneralTransactionItemDTO {
 
 	private String itemName;
 	private int quantity;
@@ -16,9 +16,9 @@ public class GeneralTransactionItemBean {
 	private Double pricePerPiecepair;
 	private Double itemPrice;
 	
-	public GeneralTransactionItemBean() {}
+	public GeneralTransactionItemDTO() {}
 
-	public GeneralTransactionItemBean(
+	public GeneralTransactionItemDTO(
 		String itemName,
 		int quantity,
 		String piecepair,

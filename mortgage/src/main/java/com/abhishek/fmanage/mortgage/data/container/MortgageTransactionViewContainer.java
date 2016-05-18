@@ -6,9 +6,9 @@ package com.abhishek.fmanage.mortgage.data.container;
 import java.lang.reflect.Constructor;
 import java.util.List;
 
-import com.abhishek.fmanage.mortgage.data.bean.Customer;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageItem;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageTransaction;
+import com.abhishek.fmanage.retail.dto.CustomerDTO;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.Button;
@@ -64,7 +64,7 @@ public class MortgageTransactionViewContainer extends IndexedContainer
         {
             item.getItemProperty(MORTGAGE_TRANSACTION).setValue(mortgageTransaction);
             item.getItemProperty(DATE_COL_NAME).setValue("14/01/2014");
-            Customer customer = mortgageTransaction.getCustomer();
+            CustomerDTO customer = mortgageTransaction.getCustomer();
             item.getItemProperty(CUSTOMER_NAME_COL_NAME).setValue(customer.getFirstName() + " " + customer.getLastName());
             item.getItemProperty(AMOUNT_LENDED_COL_NAME).setValue(String.valueOf(mortgageTransaction.getAmountPaidToCustomer()));
             item.getItemProperty(TOTAL_ITEM_WEIGHT_COL_NAME).setValue(String.valueOf(mortgageTransaction.getTotalItemWeight()));

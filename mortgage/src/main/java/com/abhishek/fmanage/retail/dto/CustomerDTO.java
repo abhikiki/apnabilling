@@ -8,7 +8,9 @@
  * only in accordance with the terms of the license agreement you entered
  * into with Abhishek's Company.
  */
-package com.abhishek.fmanage.mortgage.data.bean;
+package com.abhishek.fmanage.retail.dto;
+
+import com.abhishek.fmanage.mortgage.data.bean.AbstractPerson;
 
 /**
  * Class for storing customer information
@@ -16,7 +18,7 @@ package com.abhishek.fmanage.mortgage.data.bean;
  * @author Abhishek Gupta
  * 
  */
-public class Customer extends AbstractPerson
+public class CustomerDTO extends AbstractPerson
 {
     /**
 	 * 

@@ -17,13 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
-import com.abhishek.fmanage.mortgage.data.bean.Customer;
-import com.abhishek.fmanage.retail.bean.DiamondTransactionItemBean;
-import com.abhishek.fmanage.retail.bean.GeneralTransactionItemBean;
-import com.abhishek.fmanage.retail.bean.GoldTransactionItemBean;
-import com.abhishek.fmanage.retail.bean.PriceBean;
-import com.abhishek.fmanage.retail.bean.RetailTransactionBean;
-import com.abhishek.fmanage.retail.bean.SilverTransactionItemBean;
+import com.abhishek.fmanage.retail.dto.CustomerDTO;
+import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.PriceDTO;
+import com.abhishek.fmanage.retail.dto.TransactionDTO;
+import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -65,9 +65,9 @@ public class InvoiceGenerator implements PdfPTableEvent {
 	
 	private Calendar cal = Calendar.getInstance();
 
-	private RetailTransactionBean retailTransaction;
+	private TransactionDTO retailTransaction;
 
-	public InvoiceGenerator(RetailTransactionBean retailTransaction) {
+	public InvoiceGenerator(TransactionDTO retailTransaction) {
 		this.retailTransaction = retailTransaction;
 	}
 
@@ -87,8 +87,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 	 * @throws IOException
 	 * @throws SQLException
 	 */
-	public String createPdf() throws SQLException, DocumentException,
-			IOException {
+	public String createPdf() throws SQLException, DocumentException, IOException {
 		Date invoiceDate = retailTransaction.getInvoiceDate();
 		Boolean isEstimateBill = retailTransaction.isEstimateBill();
 		String invoiceNumber = retailTransaction.getInvoiceNumber().toString();
@@ -217,7 +216,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		return filePath;
 	}
 
-	private void saveCustomerInformation(Customer customer, Date invoiceDate) {
+	private void saveCustomerInformation(CustomerDTO customer, Date invoiceDate) {
 		FileWriter fileWriter = null;
 		CSVPrinter csvFilePrinter = null;
 		CSVFormat csvFileFormat = CSVFormat.DEFAULT
@@ -368,7 +367,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				table.addCell(new Phrase(columnNames[i], headerFont));
 			}
 
-			List<GeneralTransactionItemBean> generalItemsTransactionList = retailTransaction.getGeneralTransactionItemBeanList();
+			List<GeneralTransactionItemDTO> generalItemsTransactionList = retailTransaction.getGeneralTransactionItemBeanList();
 			generalItemsTransactionList
 					.forEach(item -> {
 						if (includePrice) {
@@ -419,7 +418,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		String columnNames[] = new String[] { "Price", "Diamond Items", "Qty",
 				"Pc/Pair", "Gold Wt(gms)", "Diamond Wt(Carat)",
 				"#Diamond Piece", "Certificate" };
-		List<DiamondTransactionItemBean> diamondItemsTransactionList = retailTransaction.getDiamondTransactionItemBeanList();
+		List<DiamondTransactionItemDTO> diamondItemsTransactionList = retailTransaction.getDiamondTransactionItemBeanList();
 		
 		if (!diamondItemsTransactionList.isEmpty()) {
 			for (int i = 0; i < columnNames.length; i++) {
@@ -491,7 +490,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 		String columnNames[] = new String[] { "Price", "Silver Items", "Qty",
 				"Pc/Pair", "Wt(gms)", "MakingCost", "MkCostType", "Rate-pergm" };
-		List<SilverTransactionItemBean> silverItemsTransactionList = retailTransaction.getSilverTransactionItemBeanList();
+		List<SilverTransactionItemDTO> silverItemsTransactionList = retailTransaction.getSilverTransactionItemBeanList();
 		if (silverItemsTransactionList.size() > 0) {
 			for (int i = 0; i < columnNames.length; i++) {
 				if ((i == 0) && includePrice == false)
@@ -560,7 +559,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		String columnNames[] = new String[] { "Price", "Gold Item", "GoldType",
 				"Qty", "Pc/Pair", "Wt(gms)", "MakingCost", "MkCostType",
 				"Rate-pergm" };
-		List<GoldTransactionItemBean> goldItemsTransactionList = retailTransaction.getGoldTransactionItemBeanList();
+		List<GoldTransactionItemDTO> goldItemsTransactionList = retailTransaction.getGoldTransactionItemBeanList();
 		
 		if (!goldItemsTransactionList.isEmpty()) {
 			for (int i = 0; i < columnNames.length; i++) {
@@ -674,7 +673,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 		table.addCell(new Phrase(new Chunk("Total Items Price(INR): ",
 				headerFont)));
-		PriceBean priceBean = retailTransaction.getPriceBean();
+		PriceDTO priceBean = retailTransaction.getPriceBean();
 		table.addCell(new Phrase(new Chunk(String.format("%.3f",priceBean.getTotalItemsPrice()), rowFont)));
 
 		
@@ -737,7 +736,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				BaseFont.CP1252, BaseFont.EMBEDDED);
 		Font headerFont = new Font(baseFont, 10, Font.BOLD);
 		Font rowFont = new Font(baseFont, 9, Font.NORMAL);
-		Customer customer = retailTransaction.getCustomer();
+		CustomerDTO customer = retailTransaction.getCustomer();
 		customerTable.addCell(new Phrase(new Chunk("Customer Name: ",
 				headerFont)));
 		customerTable.addCell(new Phrase(new Chunk(customer.getFirstName()

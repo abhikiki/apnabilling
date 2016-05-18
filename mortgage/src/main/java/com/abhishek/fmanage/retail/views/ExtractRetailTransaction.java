@@ -9,17 +9,17 @@ import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import com.abhishek.fmanage.mortgage.data.bean.Customer;
-import com.abhishek.fmanage.retail.bean.DiamondTransactionItemBean;
-import com.abhishek.fmanage.retail.bean.GeneralTransactionItemBean;
-import com.abhishek.fmanage.retail.bean.GoldTransactionItemBean;
-import com.abhishek.fmanage.retail.bean.PriceBean;
-import com.abhishek.fmanage.retail.bean.RetailTransactionBean;
-import com.abhishek.fmanage.retail.bean.SilverTransactionItemBean;
 import com.abhishek.fmanage.retail.data.container.DiamondItemContainer;
 import com.abhishek.fmanage.retail.data.container.GeneralItemContainer;
 import com.abhishek.fmanage.retail.data.container.GoldItemContainer;
 import com.abhishek.fmanage.retail.data.container.SilverItemContainer;
+import com.abhishek.fmanage.retail.dto.CustomerDTO;
+import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.PriceDTO;
+import com.abhishek.fmanage.retail.dto.TransactionDTO;
+import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.abhishek.fmanage.retail.form.PriceForm;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Table;
@@ -35,7 +35,7 @@ public class ExtractRetailTransaction {
 	private Table silverBillingTable;
 	private Table diamondBillingTable;
 	private Table generalBillingTable;
-	private Customer customer;
+	private CustomerDTO customer;
 	private PriceForm pfForm;
 	private boolean isEstimateBill;
 	private Date invoiceDate;
@@ -52,7 +52,7 @@ public class ExtractRetailTransaction {
 			final Table silverBillingTable,
 			final Table diamondBillingTable,
 			final Table generalBillingTable,
-			final Customer customer,
+			final CustomerDTO customer,
 			final PriceForm pfForm,
 			final boolean isEstimateBill,
 			final Date invoiceDate,
@@ -78,8 +78,8 @@ public class ExtractRetailTransaction {
 		this.isInvoiceCancelled = isInvoiceCancelled;
 	}
 
-	public RetailTransactionBean extract() {
-		PriceBean priceBean = new PriceBean();
+	public TransactionDTO extract() {
+		PriceDTO priceBean = new PriceDTO();
 		priceBean.setTotalItemsPrice(Double.valueOf(pfForm.totalItemPrice.getValue()));
 		priceBean.setDiscount(Double.valueOf(pfForm.discountPrice.getValue()));
 		priceBean.setVatCharge(Double.valueOf(pfForm.vatOnNewItemPrice.getValue()));
@@ -87,7 +87,7 @@ public class ExtractRetailTransaction {
 		priceBean.setNetpayableAmount(Double.valueOf(pfForm.netAmountToPay.getValue()));
 		priceBean.setAdvancePaymentAmount(Double.valueOf(pfForm.advancePayment.getValue()));
 		priceBean.setBalanceAmount(Double.valueOf(pfForm.balanceAmount.getValue()));
-		return new RetailTransactionBean(
+		return new TransactionDTO(
 				extractGoldTransItem(),
 				extractSilverTransItem(),
 				extractDiamondTransItem(),
@@ -104,8 +104,8 @@ public class ExtractRetailTransaction {
 				isInvoiceCancelled);
 	}
 
-	private List<GeneralTransactionItemBean> extractGeneralTransItem() {
-		List<GeneralTransactionItemBean> generalTransBeanList = new ArrayList<>();
+	private List<GeneralTransactionItemDTO> extractGeneralTransItem() {
+		List<GeneralTransactionItemDTO> generalTransBeanList = new ArrayList<>();
 		GeneralItemContainer con = (GeneralItemContainer)generalBillingTable.getContainerDataSource();
 		for (Object obj : generalBillingTable.getItemIds()) {
 			if(NumberUtils.isNumber(((TextField) (con.getItem(obj).getItemProperty(GeneralItemContainer.PRICE).getValue())).getValue()))
@@ -116,7 +116,7 @@ public class ExtractRetailTransaction {
 				String piecePair = String.valueOf(((ComboBox) con.getItem(obj).getItemProperty(GeneralItemContainer.PIECE_PAIR).getValue()).getValue());
 				Double pricePerPiecePair = Double.valueOf(((TextField) con.getItem(obj).getItemProperty(GeneralItemContainer.PRICE_PER_PIECE_PAIR).getValue()).getValue());
 				Double weight = Double.valueOf(((TextField) con.getItem(obj).getItemProperty(GeneralItemContainer.WEIGHT).getValue()).getValue());
-				GeneralTransactionItemBean generalTransBean = new GeneralTransactionItemBean(
+				GeneralTransactionItemDTO generalTransBean = new GeneralTransactionItemDTO(
 					itemName, quantity, piecePair, weight, pricePerPiecePair, itemPrice);
 				generalTransBeanList.add(generalTransBean);
 			}
@@ -124,8 +124,8 @@ public class ExtractRetailTransaction {
 		return generalTransBeanList;
 	}
 
-	private List<DiamondTransactionItemBean> extractDiamondTransItem() {
-		List<DiamondTransactionItemBean> diamondTransBeanList = new ArrayList<>();
+	private List<DiamondTransactionItemDTO> extractDiamondTransItem() {
+		List<DiamondTransactionItemDTO> diamondTransBeanList = new ArrayList<>();
 		DiamondItemContainer con = (DiamondItemContainer)diamondBillingTable.getContainerDataSource();
 		for (Object obj : diamondBillingTable.getItemIds()) {
 			if(NumberUtils.isNumber(((TextField) (con.getItem(obj).getItemProperty(DiamondItemContainer.PRICE).getValue())).getValue()))
@@ -139,7 +139,7 @@ public class ExtractRetailTransaction {
 				int diamondPieceCount = Integer.valueOf(((TextField) con.getItem(obj).getItemProperty(DiamondItemContainer.DIAMOND_PIECE).getValue()).getValue());
 				String certificate = String.valueOf(((ComboBox) con.getItem(obj).getItemProperty(DiamondItemContainer.CERTIFICATE).getValue()).getValue());
 				boolean certified = certificate.equalsIgnoreCase("Yes") ? true : false;
-				DiamondTransactionItemBean diamondTransBean = new DiamondTransactionItemBean(
+				DiamondTransactionItemDTO diamondTransBean = new DiamondTransactionItemDTO(
 					itemName, quantity, piecePair, goldWeight, diamondWeightCarat, diamondPieceCount, certified, itemPrice);
 						diamondTransBeanList.add(diamondTransBean);
 			}
@@ -148,8 +148,8 @@ public class ExtractRetailTransaction {
 		return diamondTransBeanList;
 	}
 
-	private List<SilverTransactionItemBean> extractSilverTransItem() {
-		List<SilverTransactionItemBean> silverTransBeanList = new ArrayList<>();
+	private List<SilverTransactionItemDTO> extractSilverTransItem() {
+		List<SilverTransactionItemDTO> silverTransBeanList = new ArrayList<>();
 		SilverItemContainer con = (SilverItemContainer) silverBillingTable.getContainerDataSource();
 		for (Object obj : silverBillingTable.getItemIds()) {
 			if(NumberUtils.isNumber(((TextField) (con.getItem(obj).getItemProperty(SilverItemContainer.PRICE).getValue())).getValue()))
@@ -162,7 +162,7 @@ public class ExtractRetailTransaction {
 				Double makingCharge = Double.valueOf(((TextField) con.getItem(obj).getItemProperty(SilverItemContainer.MAKING_CHARGE).getValue()).getValue());
 				String makingChargeType = String.valueOf(((ComboBox) con.getItem(obj).getItemProperty(SilverItemContainer.MAKING_CHARGE_TYPE).getValue()).getValue());
 				Double silverRate = Double.valueOf(((TextField) con.getItem(obj).getItemProperty(SilverItemContainer.SILVER_RATE).getValue()).getValue());
-					SilverTransactionItemBean bean = new SilverTransactionItemBean(
+					SilverTransactionItemDTO bean = new SilverTransactionItemDTO(
 						silverItemName, quantity, piecePair, weight, makingCharge, makingChargeType, silverRate, silverItemPrice);
 					silverTransBeanList.add(bean);
 			}
@@ -170,8 +170,8 @@ public class ExtractRetailTransaction {
 		return silverTransBeanList;
 	}
 
-	private List<GoldTransactionItemBean> extractGoldTransItem() {
-		List<GoldTransactionItemBean> goldTransBeanList = new ArrayList<>();
+	private List<GoldTransactionItemDTO> extractGoldTransItem() {
+		List<GoldTransactionItemDTO> goldTransBeanList = new ArrayList<>();
 		GoldItemContainer con = (GoldItemContainer) goldBillingTable.getContainerDataSource();
 		for (Object obj : goldBillingTable.getItemIds()) {
 			if(NumberUtils.isNumber(((TextField) (con.getItem(obj).getItemProperty(GoldItemContainer.PRICE).getValue())).getValue()))
@@ -185,7 +185,7 @@ public class ExtractRetailTransaction {
 				Double weight = Double.valueOf(((TextField) con.getItem(obj).getItemProperty(GoldItemContainer.WEIGHT).getValue()).getValue());
 				Double makingCharge = Double.valueOf(((TextField) con.getItem(obj).getItemProperty(GoldItemContainer.MAKING_CHARGE).getValue()).getValue());
 				Double goldRate = Double.valueOf(((TextField) con.getItem(obj).getItemProperty(GoldItemContainer.GOLD_RATE).getValue()).getValue());
-					GoldTransactionItemBean bean = new GoldTransactionItemBean(
+					GoldTransactionItemDTO bean = new GoldTransactionItemDTO(
 							goldItemName, goldType, quantity, piecePair, weight, makingCharge, makingChargeType, goldRate, goldItemPrice);
 					goldTransBeanList.add(bean);
 			}

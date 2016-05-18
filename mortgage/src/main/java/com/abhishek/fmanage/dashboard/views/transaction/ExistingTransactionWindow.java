@@ -4,10 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.abhishek.fmanage.mortgage.data.bean.Customer;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageItem;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageTransaction;
 import com.abhishek.fmanage.mortgage.data.container.MortgageItemViewContainer;
+import com.abhishek.fmanage.retail.dto.CustomerDTO;
 import com.avathartech.fastformfields.widgets.DecimalTextField;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -250,9 +250,9 @@ public class ExistingTransactionWindow extends Window {
 	}
 
 	private void setupUserDetailFormLayout() {
-		final BeanFieldGroup<Customer> binder = new BeanFieldGroup<Customer>(
-				Customer.class);
-		binder.setItemDataSource(new Customer());
+		final BeanFieldGroup<CustomerDTO> binder = new BeanFieldGroup<CustomerDTO>(
+				CustomerDTO.class);
+		binder.setItemDataSource(new CustomerDTO());
 		binder.setBuffered(false);
 
 		userDetailFormlayout.setEnabled(true);
@@ -284,7 +284,7 @@ public class ExistingTransactionWindow extends Window {
 	private void populateComponentData(final MortgageTransaction mTrans,
 			final MortgageItemViewContainer mItemViewContainer) {
 		@SuppressWarnings("unchecked")
-		BeanFieldGroup<Customer> binder = (BeanFieldGroup<Customer>) userDetailFormlayout.getData();
+		BeanFieldGroup<CustomerDTO> binder = (BeanFieldGroup<CustomerDTO>) userDetailFormlayout.getData();
 		binder.setItemDataSource(mTrans.getCustomer());
 
 		transactionDatePopupDataField.setValue(new Date(989));

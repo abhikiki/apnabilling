@@ -7,10 +7,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.abhishek.fmanage.mortgage.data.bean.Customer;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageItem;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageTransaction;
 import com.abhishek.fmanage.mortgage.data.container.MortgageItemViewContainer;
+import com.abhishek.fmanage.retail.dto.CustomerDTO;
 import com.avathartech.fastformfields.widgets.DecimalTextField;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -107,9 +107,9 @@ public class NewTransactionWindow extends Window
         footer.addComponent(ok);
         footer.setComponentAlignment(ok, Alignment.TOP_RIGHT);
 
-        final BeanFieldGroup<Customer> binder =
-           new BeanFieldGroup<Customer>(Customer.class);
-        binder.setItemDataSource(new Customer());
+        final BeanFieldGroup<CustomerDTO> binder =
+           new BeanFieldGroup<CustomerDTO>(CustomerDTO.class);
+        binder.setItemDataSource(new CustomerDTO());
         binder.setBuffered(false);
         
         
@@ -268,7 +268,7 @@ public class NewTransactionWindow extends Window
     private void populateComponentData(MortgageTransaction mTrans, MortgageItemViewContainer mItemViewContainer)
     {
         @SuppressWarnings("unchecked")
-		BeanFieldGroup<Customer> binder = (BeanFieldGroup<Customer>) layout.getData();
+		BeanFieldGroup<CustomerDTO> binder = (BeanFieldGroup<CustomerDTO>) layout.getData();
         binder.setItemDataSource(mTrans.getCustomer());
        
         transactionDate.setValue(new Date(989));

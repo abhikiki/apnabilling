@@ -1,13 +1,13 @@
 /**
  * 
  */
-package com.abhishek.fmanage.retail.bean;
+package com.abhishek.fmanage.retail.dto;
 
 /**
  * @author GUPTAA6
  *
  */
-public class PriceBean {
+public class PriceDTO {
 
 	private Double vatPercentage;
 	private Double totalItemsPrice;
@@ -18,11 +18,11 @@ public class PriceBean {
 	private Double advancePaymentAmount;
 	Double balanceAmount;
 	
-	public PriceBean() {
+	public PriceDTO() {
 		// TODO Auto-generated constructor stub
 	}
 
-	public PriceBean(
+	public PriceDTO(
 		Double vatPercentage,
 		Double totalItemsPrice,
 		Double discount,

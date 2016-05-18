@@ -1,13 +1,13 @@
 /**
  * 
  */
-package com.abhishek.fmanage.retail.bean;
+package com.abhishek.fmanage.retail.dto;
 
 /**
  * @author GUPTAA6
  *
  */
-public class GoldTransactionItemBean {
+public class GoldTransactionItemDTO {
 
 	private String goldItemName;
 	private String goldType;
@@ -19,9 +19,9 @@ public class GoldTransactionItemBean {
 	private Double goldRate;
 	private Double goldItemPrice;
 	
-	public GoldTransactionItemBean() {}
+	public GoldTransactionItemDTO() {}
 
-	public GoldTransactionItemBean(
+	public GoldTransactionItemDTO(
 		String goldItemName,
 		String goldType,
 		int quantity,

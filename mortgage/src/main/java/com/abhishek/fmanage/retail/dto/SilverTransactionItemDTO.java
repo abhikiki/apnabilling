@@ -1,13 +1,13 @@
 /**
  * 
  */
-package com.abhishek.fmanage.retail.bean;
+package com.abhishek.fmanage.retail.dto;
 
 /**
  * @author GUPTAA6
  *
  */
-public class SilverTransactionItemBean {
+public class SilverTransactionItemDTO {
 
 
 	private String itemName;
@@ -20,9 +20,9 @@ public class SilverTransactionItemBean {
 	private Double silverItemPrice;
 
 
-	public SilverTransactionItemBean() {}
+	public SilverTransactionItemDTO() {}
 	
-	public SilverTransactionItemBean(
+	public SilverTransactionItemDTO(
 			String itemName,
 			int quantity,
 			String piecepair,

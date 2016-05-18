@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import com.abhishek.fmanage.mortgage.data.bean.Customer;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageCustomerPayment;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageItem;
 import com.abhishek.fmanage.mortgage.data.bean.MortgageTransaction;
 import com.abhishek.fmanage.mortgage.data.container.MortgageTransactionViewContainer;
+import com.abhishek.fmanage.retail.dto.CustomerDTO;
 import com.vaadin.data.Item;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
@@ -232,7 +232,7 @@ public class MortgageTransactionView extends VerticalLayout implements View
             mTrans.setTransactionId(1);
             mTrans.setTransactionOpenedDate("20140114");
             mTrans.setAmountPaidToCustomer(500210.10);
-            Customer cus = new Customer();
+            CustomerDTO cus = new CustomerDTO();
             cus.setZipcode("77054" + i);
             cus.setStreetAddress1(i + "Bakerganj");
             cus.setStreetAddress2(i + "Nageshwar colony");

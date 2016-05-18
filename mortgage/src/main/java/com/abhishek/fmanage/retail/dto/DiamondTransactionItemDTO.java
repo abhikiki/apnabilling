@@ -1,11 +1,11 @@
 
-package com.abhishek.fmanage.retail.bean;
+package com.abhishek.fmanage.retail.dto;
 
 /**
  * @author GUPTAA6
  *
  */
-public class DiamondTransactionItemBean {
+public class DiamondTransactionItemDTO {
 
 	private String itemName;
 	private int quantity;
@@ -16,9 +16,9 @@ public class DiamondTransactionItemBean {
 	private boolean certified;
 	private Double itemPrice;
 	
-	public DiamondTransactionItemBean() {}
+	public DiamondTransactionItemDTO() {}
 	
-	public DiamondTransactionItemBean(
+	public DiamondTransactionItemDTO(
 			String itemName,
 			int quantity,
 			String piecePair,

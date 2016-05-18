@@ -14,6 +14,8 @@ package com.abhishek.fmanage.mortgage.data.bean;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.abhishek.fmanage.retail.dto.CustomerDTO;
+
 /**
  * Abstract class for transaction. This class holds transaction fields common to all module
  * transaction
@@ -27,7 +29,7 @@ public class AbstractTransaction
     private long transactionId;
 
     // Customer associated with this transaction
-    private Customer customer;
+    private CustomerDTO customer;
 
     // List of items associated with this transaction
     private List<MortgageItem> itemList = new ArrayList<>();
@@ -56,21 +58,21 @@ public class AbstractTransaction
     }
 
     /**
-     * Get the {@link Customer} instance
+     * Get the {@link CustomerDTO} instance
      * 
-     * @return the {@link Customer} associated with the transaction
+     * @return the {@link CustomerDTO} associated with the transaction
      */
-    public Customer getCustomer()
+    public CustomerDTO getCustomer()
     {
         return customer;
     }
 
     /**
-     * Set the {@link Customer} associated with this transaction
+     * Set the {@link CustomerDTO} associated with this transaction
      * 
-     * @param customer {@link Customer} associated with this transaction
+     * @param customer {@link CustomerDTO} associated with this transaction
      */
-    public void setCustomer(final Customer customer)
+    public void setCustomer(final CustomerDTO customer)
     {
         this.customer = customer;
     }

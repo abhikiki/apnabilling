@@ -8,7 +8,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
-import com.abhishek.fmanage.retail.bean.GoldTransactionItemBean;
+import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -96,7 +96,7 @@ public class GoldItemContainer extends IndexedContainer implements CustomItemCon
 
 	
 	@SuppressWarnings("unchecked")
-	public void addCustomItem(GoldTransactionItemBean goldItemBean) {
+	public void addCustomItem(GoldTransactionItemDTO goldItemBean) {
 		Object goldItemRowId = addItem();
 		Item item = getItem(goldItemRowId);
 		if (item != null) {

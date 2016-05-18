@@ -13,14 +13,14 @@ import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
-import com.abhishek.fmanage.mortgage.data.bean.Customer;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.mortgage.data.container.ItemContainerType;
-import com.abhishek.fmanage.retail.bean.RetailTransactionBean;
 import com.abhishek.fmanage.retail.data.container.DiamondItemContainer;
 import com.abhishek.fmanage.retail.data.container.GeneralItemContainer;
 import com.abhishek.fmanage.retail.data.container.GoldItemContainer;
 import com.abhishek.fmanage.retail.data.container.SilverItemContainer;
+import com.abhishek.fmanage.retail.dto.CustomerDTO;
+import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.form.PriceForm;
 import com.abhishek.fmanage.retail.pdf.InvoiceGenerator;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -82,7 +82,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	private HorizontalLayout priceLayout = new HorizontalLayout();
 	private Panel p = new Panel();
 	ComboBox staffNameComboBox = new ComboBox("Staff Name");
-	private Customer cusBean = new Customer();
+	private CustomerDTO cusBean = new CustomerDTO();
 	private CheckBox includePrice = new CheckBox("Include Price", true);
 	private FlexibleOptionGroup billType;
 	private TextArea notes = new TextArea("Invoice Notes");
@@ -219,8 +219,8 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 		FormLayout personDetailFormlayout2 = new FormLayout();
 		FormLayout personDetailFormlayout3 = new FormLayout();
 		
-		final BeanFieldGroup<Customer> binder = new BeanFieldGroup<Customer>(
-				Customer.class);
+		final BeanFieldGroup<CustomerDTO> binder = new BeanFieldGroup<CustomerDTO>(
+				CustomerDTO.class);
 		binder.setItemDataSource(cusBean);
 		binder.setBuffered(false);
 		
@@ -402,7 +402,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 		return staffNameComboBox;
 	}
 
-	private Button getGenerateBillBtn(Customer cusBean) {
+	private Button getGenerateBillBtn(CustomerDTO cusBean) {
 		Button generateBillBtn = new Button("Generate Bill");
 		generateBillBtn.setSizeUndefined();
 		generateBillBtn.addStyleName("sidebar");
@@ -420,7 +420,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 						invoiceNumber = invoiceNumberTxt.getValue().toString();
 					}
 					boolean isInvoiceCancelled = false;
-					RetailTransactionBean retailTransaction = new ExtractRetailTransaction(
+					TransactionDTO retailTransaction = new ExtractRetailTransaction(
 							goldBillingTable,
 							 silverBillingTable,
 							 diamondBillingTable,
