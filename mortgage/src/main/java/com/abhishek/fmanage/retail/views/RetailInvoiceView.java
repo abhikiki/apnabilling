@@ -1,14 +1,19 @@
 package com.abhishek.fmanage.retail.views;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.client.RestTemplate;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
 import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
@@ -23,6 +28,9 @@ import com.abhishek.fmanage.retail.dto.CustomerDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.form.PriceForm;
 import com.abhishek.fmanage.retail.pdf.InvoiceGenerator;
+import com.abhishek.fmanage.retail.pdf.InvoiceGeneratorInMemory;
+import com.abhishek.fmanage.retail.restclient.response.BillCreationResponse;
+import com.itextpdf.text.DocumentException;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
@@ -37,6 +45,7 @@ import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ResourceReference;
+import com.vaadin.server.StreamResource;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -334,7 +343,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				pfForm.advancePayment.setValue(String.format("%.3f", 0.000f));
 				pfForm.advancePayment.setEnabled(false);
 				pfForm.balanceAmount.setEnabled(false);
-				invoiceNumberTxt.setVisible(true);
+				//invoiceNumberTxt.setVisible(true);
 			}else{
 				tinLabel.setStyleName("vinHiddenLabel");
 				pfForm.isInvoiceEnabled = false;
@@ -343,7 +352,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				pfForm.vatOnNewItemPrice.setEnabled(false);
 				pfForm.advancePayment.setEnabled(true);
 				pfForm.balanceAmount.setEnabled(true);
-				invoiceNumberTxt.setVisible(false);
+				//invoiceNumberTxt.setVisible(false);
 				
 			}
 			});
@@ -369,7 +378,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 //		shopLogoImage.setDescription("Logo");
 		toolbar.addComponent(optionGroupLayout);
 		toolbar.addComponent(tinLabel);
-		toolbar.addComponent(invoiceNumberTxt);
+		//toolbar.addComponent(invoiceNumberTxt);
 		
 		
 		//toolbar.addComponent(shopLogoImage);
@@ -379,13 +388,13 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 	    toolbar.setExpandRatio(optionGroupLayout, 1);
 	    //toolbar.setExpandRatio(shopLogoImage, 1.5f);
 	    toolbar.setExpandRatio(tinLabel, 1);
-	    toolbar.setExpandRatio(invoiceNumberTxt, 1);
+	    //toolbar.setExpandRatio(invoiceNumberTxt, 1);
 	    toolbar.setComponentAlignment(newBillBtn, Alignment.MIDDLE_LEFT);
 	    toolbar.setComponentAlignment(staffListCombo, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(billPopUpDate, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(optionGroupLayout, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(tinLabel, Alignment.MIDDLE_LEFT);
-		toolbar.setComponentAlignment(invoiceNumberTxt, Alignment.MIDDLE_LEFT);
+		//toolbar.setComponentAlignment(invoiceNumberTxt, Alignment.MIDDLE_LEFT);
 		//toolbar.setComponentAlignment(shopLogoImage, Alignment.TOP_CENTER);
         return toolbar;
 	}
@@ -409,18 +418,19 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 		generateBillBtn.setData(this);
 		generateBillBtn.addClickListener(new Button.ClickListener() {
             private static final long serialVersionUID = 1L;
+            TransactionDTO retailTransaction = null;
 			public void buttonClick(ClickEvent event) {
 				String fileName = "";
 				try {
 					boolean isEstimateBill = billType.getValue().equals(ESTIMATE_BILL);
 					Date invoiceDate = billPopUpDate.getValue();
-					String invoiceNumber = "0";
-					if(!isEstimateBill)
-					{
-						invoiceNumber = invoiceNumberTxt.getValue().toString();
-					}
+					String invoiceNumber = "-1";
+//					if(!isEstimateBill)
+//					{
+//						invoiceNumber = invoiceNumberTxt.getValue().toString();
+//					}
 					boolean isInvoiceCancelled = false;
-					TransactionDTO retailTransaction = new ExtractRetailTransaction(
+					retailTransaction = new ExtractRetailTransaction(
 							goldBillingTable,
 							 silverBillingTable,
 							 diamondBillingTable,
@@ -435,8 +445,11 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 							 includePrice.getValue(), 
 							 notes.getValue(), 
 							 isInvoiceCancelled).extract();
-					
-					
+					 Map<String, Object> paramMap = new  HashMap<String, Object>();
+				        paramMap.put("shopId", 100);
+					  BillCreationResponse response= new RestTemplate().postForObject(
+				          		"http://localhost:8090/bill/create/{shopId}", retailTransaction, BillCreationResponse.class, paramMap);
+					  retailTransaction.setInvoiceNumber(response.getInvoiceId());
 					 fileName = new InvoiceGenerator(retailTransaction).createPdf();
 
 				} catch (Exception e) {
@@ -449,13 +462,32 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				    ResourceReference rr = ResourceReference.create(pdf, (RetailInvoiceView)generateBillBtn.getData(), "help");
 				    Page.getCurrent().open(rr.getURL(), "blank_");
 				}else{
-				File pdfFile = new File(fileName);
-                Embedded pdf = new Embedded("", new FileResource(pdfFile));
-                pdf.setMimeType("application/pdf");
-                pdf.setType(Embedded.TYPE_BROWSER);
-                pdf.setWidth("100%");
-                pdf.setHeight("90%");
-                
+//				File pdfFile = new File(fileName);
+//                Embedded pdf = new Embedded("", new FileResource(pdfFile));
+//                pdf.setMimeType("application/pdf");
+//                pdf.setType(Embedded.TYPE_BROWSER);
+//                pdf.setWidth("100%");
+//                pdf.setHeight("90%");
+//                
+					Embedded e = new Embedded();
+			        e.setSizeFull();
+			        e.setType(Embedded.TYPE_BROWSER);
+
+			        // Here we create a new StreamResource which downloads our StreamSource,
+			        // which is our pdf.
+			        InvoiceGeneratorInMemory inmem =new InvoiceGeneratorInMemory(retailTransaction);
+			        String suffix = new Date().toString().replace(" ", "");
+			        StreamResource resource = new StreamResource(inmem, "test" + suffix + ".pdf");
+			        // Set the right mime type
+			        resource.setMIMEType("application/pdf");
+			        resource.getStream().setParameter(
+		                    "Content-Disposition",
+		                    "attachment; filename="+"test.pdf");
+			        e.setType(Embedded.TYPE_BROWSER);
+			        e.setWidth("100%");
+			        e.setHeight("90%");
+			        e.setSource(resource);
+			       
                 String windowName = "Invoice Bill";
                 if(billType.getValue().equals(ESTIMATE_BILL)){
                 	windowName = "Estimate Letter";
@@ -470,7 +502,7 @@ public class RetailInvoiceView extends VerticalLayout implements View{
 				w.setClosable(true);
 				w.addStyleName("no-vertical-drag-hints");
 				w.addStyleName("no-horizontal-drag-hints");
-				w.setContent(pdf);
+				w.setContent(e);
 	            UI.getCurrent().addWindow(w);
 	            w.focus();
 			}

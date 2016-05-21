@@ -19,9 +19,9 @@ public class TransactionDTO {
 	private CustomerDTO customer;
 	private PriceDTO priceBean;
 	private boolean isEstimateBill;
-	private Date invoiceDate;
+	private Date transactionDate;
 	private String vinNumber;
-	private Long invoiceNumber;
+	private Long invoiceNumber = -1L;
 	private String dealingStaffName;
 	private Boolean includePrice;
 	private String notes;
@@ -53,7 +53,7 @@ public class TransactionDTO {
 		this.customer = customer;
 		this.priceBean = priceBean;
 		this.isEstimateBill = isEstimateBill;
-		this.invoiceDate = invoiceDate;
+		this.transactionDate = invoiceDate;
 		this.vinNumber = vinNumber;
 		this.invoiceNumber = invoiceNumber;
 		this.dealingStaffName = dealingStaffName;
@@ -103,6 +103,48 @@ public class TransactionDTO {
 		this.dealingStaffName = dealingStaffName;
 	}
 
+	
+	public void setGoldTransactionItemBeanList(
+			List<GoldTransactionItemDTO> goldTransactionItemBeanList) {
+		this.goldTransactionItemBeanList = goldTransactionItemBeanList;
+	}
+
+	public void setSilverTransactionItemBeanList(
+			List<SilverTransactionItemDTO> silverTransactionItemBeanList) {
+		this.silverTransactionItemBeanList = silverTransactionItemBeanList;
+	}
+
+	public void setDiamondTransactionItemBeanList(
+			List<DiamondTransactionItemDTO> diamondTransactionItemBeanList) {
+		this.diamondTransactionItemBeanList = diamondTransactionItemBeanList;
+	}
+
+	public void setGeneralTransactionItemBeanList(
+			List<GeneralTransactionItemDTO> generalTransactionItemBeanList) {
+		this.generalTransactionItemBeanList = generalTransactionItemBeanList;
+	}
+
+	public void setPriceBean(PriceDTO priceBean) {
+		this.priceBean = priceBean;
+	}
+
+	public void setEstimateBill(boolean isEstimateBill) {
+		this.isEstimateBill = isEstimateBill;
+	}
+
+
+	public Date getTransactionDate() {
+		return transactionDate;
+	}
+
+	public void setTransactionDate(Date transactionDate) {
+		this.transactionDate = transactionDate;
+	}
+
+	public void setVinNumber(String vinNumber) {
+		this.vinNumber = vinNumber;
+	}
+
 	public List<GoldTransactionItemDTO> getGoldTransactionItemBeanList() {
 		return goldTransactionItemBeanList;
 	}
@@ -125,10 +167,6 @@ public class TransactionDTO {
 
 	public boolean isEstimateBill() {
 		return isEstimateBill;
-	}
-
-	public Date getInvoiceDate() {
-		return invoiceDate;
 	}
 
 	public String getVinNumber() {

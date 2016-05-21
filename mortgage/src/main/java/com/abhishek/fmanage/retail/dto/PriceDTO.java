@@ -9,7 +9,7 @@ package com.abhishek.fmanage.retail.dto;
  */
 public class PriceDTO {
 
-	private Double vatPercentage;
+	private Double vatPercentage = 1.0d;
 	private Double totalItemsPrice;
 	private Double discount;
 	private Double vatCharge;

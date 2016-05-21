@@ -1,9 +1,11 @@
 package com.abhishek.fmanage.retail.pdf;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,8 +24,8 @@ import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.PriceDTO;
-import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -41,8 +43,9 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPTableEvent;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.vaadin.server.StreamResource.StreamSource;
 
-public class InvoiceGenerator implements PdfPTableEvent {
+public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 
 	private final Logger logger = LoggerFactory
 			.getLogger(InvoiceGenerator.class);
@@ -67,90 +70,13 @@ public class InvoiceGenerator implements PdfPTableEvent {
 
 	private TransactionDTO retailTransaction;
 
-	public InvoiceGenerator(TransactionDTO retailTransaction) {
+	private final ByteArrayOutputStream os = new ByteArrayOutputStream();
+	
+	public InvoiceGeneratorInMemory(TransactionDTO retailTransaction) {
 		this.retailTransaction = retailTransaction;
 	}
 
 
-	/**
-	 * Creates a PDF document.
-	 * 
-	 * @param isEstimateBill
-	 * @param vinNumber
-	 * @param includePrice
-	 * @param invoiceDate
-	 * @param notes
-	 * @param invoiceNumber
-	 * @param filename
-	 *            the path to the new PDF document
-	 * @throws DocumentException
-	 * @throws IOException
-	 * @throws SQLException
-	 */
-	public String createPdf() throws SQLException, DocumentException, IOException {
-		Date invoiceDate = retailTransaction.getTransactionDate();
-		Boolean isEstimateBill = retailTransaction.isEstimateBill();
-		String invoiceNumber = retailTransaction.getInvoiceNumber().toString();
-		String staffName = retailTransaction.getDealingStaffName();
-		Boolean includePrice = retailTransaction.getIncludePrice();
-		String vinNumber = retailTransaction.getVinNumber();
-		String notes = retailTransaction.getNotes();
-		cal.setTime(invoiceDate);
-		Document document = new Document(PageSize.A4);
-		String filePath = getFilePath(isEstimateBill, invoiceDate);
-		File file = new File(filePath);
-		PdfWriter.getInstance(document, new FileOutputStream(file));
-
-		// step 3
-		document.open();
-		// step 4
-		document.add(new Paragraph(" "));
-		document.add(new Paragraph(" "));
-		document.add(new Paragraph(" "));
-		document.add(new Paragraph(" "));
-
-		// document.add(generateBarCode(writer));
-		addInvoiceType(document, isEstimateBill, invoiceDate, invoiceNumber);
-		document.add(new Paragraph(" "));
-		addDateVinInformation(document, invoiceDate, isEstimateBill, vinNumber);
-		document.add(new Paragraph(" "));
-
-		addCustomerInformation(document);
-		document.add(new Paragraph(" "));
-
-		addGoldItemsInformation(document, includePrice);
-		document.add(new Paragraph(" "));
-
-		addSilverItemsInformation(document, includePrice);
-		document.add(new Paragraph(" "));
-
-		addDiamondItemsInformation(document, includePrice);
-		document.add(new Paragraph(" "));
-
-		addGeneralItemsInformation(document, includePrice);
-		document.add(new Paragraph(" "));
-
-		addPriceInformationTable(document, isEstimateBill);
-		document.add(new Paragraph(" "));
-
-		addNotes(document, notes);
-		document.add(new Paragraph(" "));
-
-		if (!isEstimateBill) {
-			document.add(new Paragraph(" "));
-
-		}
-		addSignature(document, isEstimateBill, staffName);
-		document.add(new Paragraph(" "));
-
-		document.newPage();
-
-		// step 5
-		document.close();
-		saveCustomerInformation(retailTransaction.getCustomer(), invoiceDate);
-		return filePath;
-
-	}
 
 	private void addSignature(Document document, boolean isEstimateBill,
 			String staffName) throws DocumentException, IOException {
@@ -823,10 +749,10 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				result = true;
 			} catch (SecurityException se) {
 
-				logger.error("Error creating directory ", se);
+				logger.error("Error creating directory ",  se);
 			}
 			if (result) {
-				System.out.println("Directory created");
+				System.out.println("Directory created") ;
 			}
 		}
 		return directoryName;
@@ -836,7 +762,7 @@ public class InvoiceGenerator implements PdfPTableEvent {
 		cal.setTime(invoiceDate);
 		String dir = String.valueOf(cal.get(Calendar.YEAR));
 		if (isEstimateBill) {
-			dir += File.separator + "ESTIMATE";
+			dir += File.separator + "ESTIMATE" ;
 		} else {
 			dir += File.separator + "INVOICE";
 		}
@@ -847,4 +773,76 @@ public class InvoiceGenerator implements PdfPTableEvent {
 				+ String.valueOf(cal.get(Calendar.YEAR));
 		return dir;
 	}
+
+
+	@Override
+    public InputStream getStream() {
+		Date invoiceDate = retailTransaction.getTransactionDate();
+		Boolean isEstimateBill = retailTransaction.isEstimateBill();
+		String invoiceNumber = retailTransaction.getInvoiceNumber().toString();
+		String staffName = retailTransaction.getDealingStaffName();
+		Boolean includePrice = retailTransaction.getIncludePrice();
+		String vinNumber = retailTransaction.getVinNumber();
+		String notes = retailTransaction.getNotes();
+		cal.setTime(invoiceDate);
+		Document document = new Document(PageSize.A4);
+		String filePath = getFilePath(isEstimateBill, invoiceDate);
+		File file = new File(filePath);
+		try{
+			PdfWriter.getInstance(document, os);
+
+		// step 3
+		document.open();
+		// step 4
+		document.add(new Paragraph(" "));
+		document.add(new Paragraph(" "));
+		document.add(new Paragraph(" "));
+		document.add(new Paragraph(" "));
+
+		// document.add(generateBarCode(writer));
+		addInvoiceType(document, isEstimateBill, invoiceDate, invoiceNumber);
+		document.add(new Paragraph(" "));
+		addDateVinInformation(document, invoiceDate, isEstimateBill, vinNumber);
+		document.add(new Paragraph(" "));
+
+		addCustomerInformation(document);
+		document.add(new Paragraph(" "));
+
+		addGoldItemsInformation(document, includePrice);
+		document.add(new Paragraph(" "));
+
+		addSilverItemsInformation(document, includePrice);
+		document.add(new Paragraph(" "));
+
+		addDiamondItemsInformation(document, includePrice);
+		document.add(new Paragraph(" "));
+
+		addGeneralItemsInformation(document, includePrice);
+		document.add(new Paragraph(" "));
+
+		addPriceInformationTable(document, isEstimateBill);
+		document.add(new Paragraph(" "));
+
+		addNotes(document, notes);
+		document.add(new Paragraph(" "));
+
+		if (!isEstimateBill) {
+			document.add(new Paragraph(" "));
+
+		}
+		addSignature(document, isEstimateBill, staffName);
+		document.add(new Paragraph(" "));
+
+		document.newPage();
+
+		// step 5
+		document.close();
+		//saveCustomerInformation(retailTransaction.getCustomer(), invoiceDate);
+		}catch(Exception e){
+			System.out.println("BHAi ERROR HAI!!!!!!");
+		}
+        // Here we return the pdf contents as a byte-array
+        return new ByteArrayInputStream(os.toByteArray());
+    }
+
 }
