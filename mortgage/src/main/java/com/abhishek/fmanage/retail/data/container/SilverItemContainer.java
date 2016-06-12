@@ -8,6 +8,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
+import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -76,17 +77,12 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 	public void addCustomItem() {
 		Object silverItemRowId = addItem();
 		Item item = getItem(silverItemRowId);
-		final Image image = new Image("", removeItemImageResource);
-		image.setHeight("20px");
-		image.setWidth("20px");
-		image.setDescription("Remove Item");
-		image.setData(silverItemRowId);
-		image.addClickListener((event -> removeItem(image.getData())));
+		
 		if (item != null) {
-			item.getItemProperty(DELETE).setValue(image);
+			item.getItemProperty(DELETE).setValue(getRemoveItemImage(silverItemRowId));
 			item.getItemProperty(ITEM_NAME).setValue(getItemNameList(silverItemRowId));
 			item.getItemProperty(QUANTITY).setValue(getQuantity(silverItemRowId));
-			item.getItemProperty(PIECE_PAIR).setValue(getPiecePair());
+			item.getItemProperty(PIECE_PAIR).setValue(getPiecePair(silverItemRowId));
 			item.getItemProperty(WEIGHT).setValue(getWeight(silverItemRowId));
 			item.getItemProperty(MAKING_CHARGE_TYPE).setValue(getMakingChargeType(silverItemRowId));
 			item.getItemProperty(MAKING_CHARGE).setValue(getMakingCharge(silverItemRowId));
@@ -95,6 +91,61 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		}
 	}
 
+	private Image getRemoveItemImage(Object silverItemRowId) {
+		final Image image = new Image("", removeItemImageResource);
+		image.setHeight("20px");
+		image.setWidth("20px");
+		image.setDescription("Remove Item");
+		image.setData(silverItemRowId);
+		image.addClickListener((event -> removeItem(image.getData())));
+		return image;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void addCustomItem(SilverTransactionItemDTO silverItemBean) {
+		Object silverItemRowId = addItem();
+		Item item = getItem(silverItemRowId);
+		if (item != null) {
+			item.getItemProperty(DELETE).setValue(getRemoveItemImage(silverItemRowId));
+			
+					
+			ComboBox itemNameCombo = getItemNameList(silverItemRowId);
+			itemNameCombo.addItem(silverItemBean.getItemName());
+			itemNameCombo.setValue(silverItemBean.getItemName());
+			item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
+			
+			TextField quantity = getQuantity(silverItemRowId);
+			quantity.setValue(String.valueOf(silverItemBean.getQuantity()));
+			item.getItemProperty(QUANTITY).setValue(quantity);
+			
+			ComboBox piecePairCombo = getPiecePair(silverItemRowId);
+			piecePairCombo.addItem(silverItemBean.getPiecepair());
+			piecePairCombo.setValue(silverItemBean.getPiecepair());
+			item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
+			
+			TextField silverWeightTxt = (TextField) getWeight(silverItemRowId);
+			silverWeightTxt.setValue(String.valueOf(silverItemBean.getWeight()));
+			item.getItemProperty(WEIGHT).setValue(silverWeightTxt);
+			
+			TextField makingChargeText = (TextField) getMakingCharge(silverItemRowId);
+			makingChargeText.setValue(String.valueOf(silverItemBean.getMakingCharge()));
+			item.getItemProperty(MAKING_CHARGE).setValue(makingChargeText);
+			
+			ComboBox makingChargeTypeCombo = getMakingChargeType(silverItemRowId);
+			makingChargeTypeCombo.addItem(silverItemBean.getMakingChargeType());
+			makingChargeTypeCombo.setValue(silverItemBean.getMakingChargeType());
+			item.getItemProperty(MAKING_CHARGE_TYPE).setValue(makingChargeTypeCombo);
+			
+			TextField silverRateTxt = (TextField) getSilverRate(silverItemRowId);
+			silverRateTxt.setValue(String.valueOf(silverItemBean.getSilverRate()));
+			item.getItemProperty(SILVER_RATE).setValue(silverRateTxt);
+			
+			TextField silverItemPriceTxt = (TextField) getPrice();
+			silverItemPriceTxt.setValue(String.valueOf(silverItemBean.getSilverItemPrice()));
+			item.getItemProperty(PRICE).setValue(silverItemPriceTxt);
+		}
+	}
+	
 	private Object getPrice() {
 		TextField itemPrice = new TextField();
 		itemPrice.setImmediate(true);
@@ -236,9 +287,10 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		return weight;
 	}
 
-	private ComboBox getPiecePair() {
+	private ComboBox getPiecePair(final Object currentItemId) {
 		ComboBox itemName = new ComboBox();
 		itemName.setNullSelectionAllowed(false);
+		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
 		itemName.addItem("Piece");
 		itemName.addItem("Pair");
 		itemName.setValue("Piece");

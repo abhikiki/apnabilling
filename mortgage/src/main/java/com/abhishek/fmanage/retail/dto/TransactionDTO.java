@@ -3,6 +3,7 @@
  */
 package com.abhishek.fmanage.retail.dto;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -10,8 +11,12 @@ import java.util.List;
  * @author GUPTAA6
  *
  */
-public class TransactionDTO {
+public class TransactionDTO implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private List<GoldTransactionItemDTO> goldTransactionItemBeanList;
 	private List<SilverTransactionItemDTO> silverTransactionItemBeanList;
 	private List<DiamondTransactionItemDTO> diamondTransactionItemBeanList;
@@ -25,7 +30,7 @@ public class TransactionDTO {
 	private String dealingStaffName;
 	private Boolean includePrice;
 	private String notes;
-	private boolean isInvoiceCancelled;
+	private boolean isTransactionActive;
 	
 	public TransactionDTO() {
 	}
@@ -44,7 +49,7 @@ public class TransactionDTO {
 		String dealingStaffName,
 		final Boolean includePrice,
 		final String notes,
-		boolean isInvoiceCancelled)
+		boolean isTransactionActive)
 	{
 		this.goldTransactionItemBeanList = goldTransactionItemBeanList;
 		this.silverTransactionItemBeanList = silverTransactionItemBeanList;
@@ -59,7 +64,7 @@ public class TransactionDTO {
 		this.dealingStaffName = dealingStaffName;
 		this.includePrice = includePrice;
 		this.notes = notes;
-		this.isInvoiceCancelled = isInvoiceCancelled;
+		this.isTransactionActive = isTransactionActive;
 	}
 
 	
@@ -173,11 +178,11 @@ public class TransactionDTO {
 		return vinNumber;
 	}
 
-	public boolean isInvoiceCancelled() {
-		return isInvoiceCancelled;
+	public boolean isTransactionActive() {
+		return isTransactionActive;
 	}
 
-	public void setInvoiceCancelled(boolean isInvoiceCancelled) {
-		this.isInvoiceCancelled = isInvoiceCancelled;
+	public void setTransactionActive(boolean isTransactionActive) {
+		this.isTransactionActive = isTransactionActive;
 	}
 }

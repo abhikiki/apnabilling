@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
+import com.abhishek.fmanage.retail.dto.ShopDTO;
+import com.abhishek.fmanage.retail.restclient.service.RestLoginService;
 import com.abhishek.fmanage.retail.views.RetailInvoiceView;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -19,6 +21,7 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.AbstractSelect.AcceptItem;
@@ -101,8 +104,8 @@ public class DashboardUI extends UI {
         }
         helpManager.closeAll();
         HelpOverlay w = helpManager.addOverlay(
-                        "Welcome to the Apna Jewellery Billing",
-                        "<p>No username or password is required currently at this time, just click the (Sign In) button to continue.</p>",
+                        "Welcome to the Abhishek Retail Billing",
+                        "<p>Enter your login credentials</p>",
                         "login");
         w.center();
         addWindow(w);
@@ -166,10 +169,17 @@ public class DashboardUI extends UI {
 
 			@Override
             public void buttonClick(ClickEvent event) {
-                if (username.getValue() != null
-                        && username.getValue().equals("")
-                        && password.getValue() != null
-                        && password.getValue().equals("")) {
+				String userName = username.getValue();
+				String userPassword = password.getValue();
+//				RestTemplate rest = new RestTemplate();
+//		        Map<String, Object> paramMap = new  HashMap<String, Object>();
+//		        paramMap.put("username", userName);
+//		        paramMap.put("password", userPassword);
+//		        ShopDTO shopDto = rest.getForObject("http://localhost:8090/login/{username}/{password}", ShopDTO.class, paramMap);
+				ShopDTO shopDto = new RestLoginService().retailLogin(userName, userPassword);
+                if (shopDto.getShopId() != -1L) {
+                	VaadinService.getCurrentRequest().getWrappedSession().setAttribute("shopdto", shopDto);
+                	//getUI().getSession().setAttribute("shopdto", shopDto);
                     signin.removeShortcutListener(enter);
                     buildMainView();
                 } else {
@@ -177,7 +187,7 @@ public class DashboardUI extends UI {
                         loginPanel.removeComponent(loginPanel.getComponent(2));
                     }
                     Label error = new Label(
-                            "Wrong username or password. <span>Hint: try empty values</span>",
+                            "Wrong username or password",
                             ContentMode.HTML);
                     error.addStyleName("error");
                     error.setSizeUndefined();
@@ -216,8 +226,10 @@ public class DashboardUI extends UI {
                         addComponent(new CssLayout() {
                             {
                                 addStyleName("branding");
+                                ShopDTO shopDto = (ShopDTO)VaadinService.getCurrentRequest().getWrappedSession().getAttribute("shopdto");
+                                //ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute("shopdto");
                                 Label logo = new Label(
-                                        "<span>Apna Jewellery</span> Dashboard",
+                                        "<span>" + shopDto.getShopName() + "</span> Dashboard",
                                         ContentMode.HTML);
                                 logo.setSizeUndefined();
                                 addComponent(logo);

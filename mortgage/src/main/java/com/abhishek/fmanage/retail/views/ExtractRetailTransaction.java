@@ -44,7 +44,7 @@ public class ExtractRetailTransaction {
 	private String dealingStaffName;
 	private Boolean includePrice;
 	private String notes;
-	private boolean isInvoiceCancelled;
+	private boolean isTransactionActive;
 	
 	
 	public ExtractRetailTransaction(
@@ -61,7 +61,7 @@ public class ExtractRetailTransaction {
 			final String dealingStaffName,
 			final Boolean includePrice,
 			final String notes,
-			final boolean isInvoiceCancelled) {
+			final boolean isTransactionActive) {
 		this.goldBillingTable = goldBillingTable;
 		this.silverBillingTable = silverBillingTable;
 		this.diamondBillingTable = diamondBillingTable;
@@ -75,7 +75,7 @@ public class ExtractRetailTransaction {
 		this.dealingStaffName = dealingStaffName;
 		this.includePrice = includePrice;
 		this.notes = notes;
-		this.isInvoiceCancelled = isInvoiceCancelled;
+		this.isTransactionActive = isTransactionActive;
 	}
 
 	public TransactionDTO extract() {
@@ -101,7 +101,7 @@ public class ExtractRetailTransaction {
 				dealingStaffName,
 				includePrice,
 				notes,
-				isInvoiceCancelled);
+				isTransactionActive);
 	}
 
 	private List<GeneralTransactionItemDTO> extractGeneralTransItem() {

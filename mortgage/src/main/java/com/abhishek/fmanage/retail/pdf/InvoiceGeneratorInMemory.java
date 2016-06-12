@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,15 +37,23 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.Rectangle;
 import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.ColumnText;
+import com.itextpdf.text.pdf.GrayColor;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPTableEvent;
+import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.fonts.otf.TableHeader;
 import com.vaadin.server.StreamResource.StreamSource;
 
 public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final Logger logger = LoggerFactory
 			.getLogger(InvoiceGenerator.class);
 	private static final String BILL_PATH = "BILL_PATH";
@@ -69,11 +76,13 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 	private Calendar cal = Calendar.getInstance();
 
 	private TransactionDTO retailTransaction;
+	private long transId = -1L;
 
 	private final ByteArrayOutputStream os = new ByteArrayOutputStream();
 	
-	public InvoiceGeneratorInMemory(TransactionDTO retailTransaction) {
+	public InvoiceGeneratorInMemory(long transId, TransactionDTO retailTransaction) {
 		this.retailTransaction = retailTransaction;
+		this.transId = transId;
 	}
 
 
@@ -207,7 +216,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 	private void addInvoiceType(Document document, boolean isEstimateBill,
 			Date invoiceDate, String invoiceNumber) throws DocumentException,
 			IOException {
-		PdfPTable footerTable = getPDFTable(!isEstimateBill, 2);
+		PdfPTable footerTable = getPDFTable(!isEstimateBill, 3);
 		footerTable.getDefaultCell().setBackgroundColor(
 				new BaseColor(252, 175, 175));
 		footerTable.getDefaultCell().setHorizontalAlignment(
@@ -216,6 +225,9 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 				BaseFont.CP1252, BaseFont.EMBEDDED);
 		Font headerFont = new Font(baseFont, 11, Font.BOLD);
 		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
+		Phrase transIdPhrase = new Phrase(new Chunk("Transaction No. : ", headerFont));
+		transIdPhrase.add(new Chunk(String.valueOf(transId), rowFont));
+		footerTable.addCell(transIdPhrase);
 		Phrase notePhrase = new Phrase();
 		if (isEstimateBill) {
 
@@ -236,7 +248,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			// + String.valueOf(cal.get(Calendar.MINUTE)) + "-"
 			// + String.valueOf(cal.get(Calendar.SECOND)) + "-"
 			// + String.valueOf(cal.get(Calendar.MILLISECOND));
-			Phrase p = new Phrase(new Chunk("Invoice Id: ", headerFont));
+			Phrase p = new Phrase(new Chunk("Invoice No: ", headerFont));
 			p.add(new Chunk(invoiceNumber, rowFont));
 			footerTable.addCell(p);
 		}
@@ -788,9 +800,13 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		Document document = new Document(PageSize.A4);
 		String filePath = getFilePath(isEstimateBill, invoiceDate);
 		File file = new File(filePath);
+		PdfWriter writer;
 		try{
-			PdfWriter.getInstance(document, os);
-
+			writer = PdfWriter.getInstance(document, os);
+			if(!retailTransaction.isTransactionActive()){
+				writer.setPageEvent(new Watermark());
+			}
+	        
 		// step 3
 		document.open();
 		// step 4
@@ -808,6 +824,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		addCustomerInformation(document);
 		document.add(new Paragraph(" "));
 
+		
 		addGoldItemsInformation(document, includePrice);
 		document.add(new Paragraph(" "));
 
@@ -839,10 +856,21 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		document.close();
 		//saveCustomerInformation(retailTransaction.getCustomer(), invoiceDate);
 		}catch(Exception e){
-			System.out.println("BHAi ERROR HAI!!!!!!");
+			System.out.println("Error Generating invoice");
+			e.printStackTrace();
 		}
         // Here we return the pdf contents as a byte-array
         return new ByteArrayInputStream(os.toByteArray());
     }
 
+	class Watermark extends PdfPageEventHelper {
+		 
+        Font FONT = new Font(FontFamily.HELVETICA, 52, Font.BOLD, new GrayColor(0.75f));
+ 
+        public void onEndPage(PdfWriter writer, Document document) {
+            ColumnText.showTextAligned(writer.getDirectContent(),
+                    Element.ALIGN_CENTER, new Phrase("CANCELLED CANCELLED", FONT),
+                    297.5f, 421, writer.getPageNumber() % 2 == 1 ? 45 : -45);
+        }
+    }
 }

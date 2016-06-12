@@ -8,6 +8,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
+import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -84,20 +85,13 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
     public void addCustomItem()
     {
         Object diamondItemRowId = addItem();
-        final Image image = new Image("", removeItemImageResource);
-        image.setHeight("20px");
-        image.setWidth("20px");
-        image.setDescription("Remove Item");
-        image.setData(diamondItemRowId);
-        image.addClickListener((event -> removeItem(image.getData())));
-
         Item item = getItem(diamondItemRowId);
         if (item != null)
         {
-        	item.getItemProperty(DELETE).setValue(image);
+        	item.getItemProperty(DELETE).setValue(getRemoveItemImage(diamondItemRowId));
         	item.getItemProperty(ITEM_NAME).setValue(getItemNameList(diamondItemRowId));
         	item.getItemProperty(QUANTITY).setValue(getQuantity(diamondItemRowId));
-        	item.getItemProperty(PIECE_PAIR).setValue(getPiecePair());
+        	item.getItemProperty(PIECE_PAIR).setValue(getPiecePair(diamondItemRowId));
         	item.getItemProperty(GOLD_WEIGHT).setValue(getWeight(diamondItemRowId));
         	item.getItemProperty(DIAMOND_WEIGHT).setValue(getWeight(diamondItemRowId));
         	item.getItemProperty(DIAMOND_PIECE).setValue(getQuantity(diamondItemRowId));
@@ -106,7 +100,62 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
         }
     }
 
-	private Object getCertificate(final Object diamondItemRowId) {
+	@SuppressWarnings("unchecked")
+	public void addCustomItem(DiamondTransactionItemDTO diamondItemBean) {
+		Object diamondItemRowId = addItem();
+		Item item = getItem(diamondItemRowId);
+		if (item != null) {
+			item.getItemProperty(DELETE).setValue(getRemoveItemImage(diamondItemRowId));
+
+			ComboBox itemNameCombo = getItemNameList(diamondItemRowId);
+			itemNameCombo.addItem(diamondItemBean.getItemName());
+			itemNameCombo.setValue(diamondItemBean.getItemName());
+			item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
+			
+			TextField quantity = getQuantity(diamondItemRowId);
+			quantity.setValue(String.valueOf(diamondItemBean.getQuantity()));
+			item.getItemProperty(QUANTITY).setValue(quantity);
+			
+			ComboBox piecePairCombo = getPiecePair(diamondItemRowId);
+			piecePairCombo.addItem(diamondItemBean.getPiecePair());
+			piecePairCombo.setValue(diamondItemBean.getPiecePair());
+			item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
+			
+			TextField goldWeightTxt = (TextField) getWeight(diamondItemRowId);
+			goldWeightTxt.setValue(String.valueOf(diamondItemBean.getGoldWeight()));
+			item.getItemProperty(GOLD_WEIGHT).setValue(goldWeightTxt);
+			
+			TextField diamondWeightTxt = (TextField) getWeight(diamondItemRowId);
+			diamondWeightTxt.setValue(String.valueOf(diamondItemBean.getDiamondWeightCarat()));
+			item.getItemProperty(DIAMOND_WEIGHT).setValue(diamondWeightTxt);
+			
+			TextField diamondPieceTxt = (TextField) getQuantity(diamondItemRowId);
+			diamondPieceTxt.setValue(String.valueOf(diamondItemBean.getQuantity()));
+			item.getItemProperty(DIAMOND_PIECE).setValue(diamondPieceTxt);
+			
+			ComboBox certificateCombo = getCertificate(diamondItemRowId);
+			certificateCombo.addItem(diamondItemBean.isCertified() ? "Yes" : "No");
+			certificateCombo.setValue(diamondItemBean.isCertified() ? "Yes" : "No");
+			item.getItemProperty(CERTIFICATE).setValue(certificateCombo);
+			
+			TextField itemPriceTxt = (TextField) getPrice();
+			itemPriceTxt.setValue(String.valueOf(diamondItemBean.getItemPrice()));
+			item.getItemProperty(PRICE).setValue(itemPriceTxt);
+		
+		}
+	}
+	
+	private Image getRemoveItemImage(Object diamondItemRowId) {
+		final Image image = new Image("", removeItemImageResource);
+        image.setHeight("20px");
+        image.setWidth("20px");
+        image.setDescription("Remove Item");
+        image.setData(diamondItemRowId);
+        image.addClickListener((event -> removeItem(image.getData())));
+		return image;
+	}
+
+	private ComboBox getCertificate(final Object diamondItemRowId) {
 		ComboBox itemName = new ComboBox();
 		itemName.setNullSelectionAllowed(false);
 		itemName.addItem("Yes");
@@ -134,7 +183,6 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 				}
 			});
 		return itemPrice;
-
 	}
 
 	private Object getWeight(final Object currentItemId) {
@@ -175,8 +223,9 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 		return weight;
 	}
 
-	private ComboBox getPiecePair() {
+	private ComboBox getPiecePair(final Object currentItemId) {
 		ComboBox itemName = new ComboBox();
+		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
 		itemName.setNullSelectionAllowed(false);
 		itemName.addItem("Piece");
 		itemName.addItem("Pair");
