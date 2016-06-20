@@ -3,6 +3,7 @@
  */
 package com.retail.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.retail.dao.TransactionDAO;
 import com.retail.dto.TransactionDTO;
+import com.retail.dto.TransactionSearchCriteriaDto;
+import com.retail.dto.TransactionSearchResultDto;
 import com.retail.response.BillCreationResponse;
+import com.retail.response.TransactionSearchResponse;
 import com.retail.service.BillService;
 
 /**
@@ -46,6 +50,15 @@ public class BillResource {
 	public TransactionDTO findBill(@PathVariable long transId) {
 		return billService.findBill(transId);
 	}
+	
+	@RequestMapping(value = "/findbills", method = RequestMethod.POST)
+	public TransactionSearchResponse  findBills(@RequestBody TransactionSearchCriteriaDto transDto) {
+		List<TransactionSearchResultDto> searchResultList = billService.findBills(transDto);
+		TransactionSearchResponse searchResponse = new TransactionSearchResponse();
+		searchResponse.setTransactionSearchResultList(searchResultList);
+		return searchResponse;
+	}
+	
 	
 	@RequestMapping(value = "/deletebill/{transId}", method = RequestMethod.DELETE)
 	public Boolean deleteBill(@PathVariable long transId) {

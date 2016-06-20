@@ -1,10 +1,10 @@
 package com.abhishek.fmanage.retail.views;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,8 +23,11 @@ import com.abhishek.fmanage.retail.data.container.GeneralItemContainer;
 import com.abhishek.fmanage.retail.data.container.GoldItemContainer;
 import com.abhishek.fmanage.retail.data.container.SilverItemContainer;
 import com.abhishek.fmanage.retail.dto.CustomerDTO;
+import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
+import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.form.PriceForm;
 import com.abhishek.fmanage.retail.restclient.response.BillCreationResponse;
@@ -43,10 +46,7 @@ import com.vaadin.data.util.PropertysetItem;
 import com.vaadin.event.MouseEvents;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileResource;
 import com.vaadin.server.Page;
-import com.vaadin.server.Resource;
-import com.vaadin.server.ResourceReference;
 import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -70,7 +70,8 @@ import com.vaadin.ui.VerticalSplitPanel;
 
 public class RetailInvoiceView extends VerticalLayout implements View {
 
-	private final Logger logger = LoggerFactory.getLogger(RetailInvoiceView.class);
+	private final Logger logger = LoggerFactory
+			.getLogger(RetailInvoiceView.class);
 	private static final String INVOICE_BILL = "Invoice Bill";
 	public static final String ESTIMATE_BILL = "Estimate Bill";
 	public static final String INDIAN_DATE_FORMAT = "dd/MM/yyyy";
@@ -87,6 +88,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	private Table generalBillingTable = new Table();
 	private final PopupDateField billPopUpDate = new PopupDateField();
 	private VerticalLayout retailViewVerticalLayout = new VerticalLayout();
+	private Component customerLayout;
 	private PriceForm pfForm = new PriceForm(getPricePropertyItem());
 	private HorizontalLayout priceLayout = new HorizontalLayout();
 	private Panel p = new Panel();
@@ -98,6 +100,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	private TextField transactionSearchTxt;
 	long transId = -1L;
 	private ShopDTO shopDto;
+	private Button generateBillBtn;
 	private static final String TIN_NUMBER = CustomShopSettingFileUtility
 			.getInstance().getTinNumber();
 
@@ -123,8 +126,9 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		VerticalLayout generalBillingLayout = getBillingLayout(
 				generalBillingTable, generalItemContainer,
 				ItemContainerType.GENERAL);
-
-		retailViewVerticalLayout.addComponent(new CustomerInfoLayout(cusBean).getUserDetailFormLayout());
+		customerLayout = new CustomerInfoLayout(cusBean)
+				.getUserDetailFormLayout();
+		retailViewVerticalLayout.addComponent(customerLayout);
 		retailViewVerticalLayout.addComponent(goldBillingLayout);
 		retailViewVerticalLayout.addComponent(silverBillingLayout);
 		retailViewVerticalLayout.addComponent(diamondBillingLayout);
@@ -152,8 +156,10 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	}
 
 	private Table getGeneralTable() {
-		GeneralItemTable generalItemTable = new GeneralItemTable(generalItemContainer);
-		addCustomTableDataContainerPriceItemCountValueChange(generalItemTable, generalItemContainer);
+		GeneralItemTable generalItemTable = new GeneralItemTable(
+				generalItemContainer);
+		addCustomTableDataContainerPriceItemCountValueChange(generalItemTable,
+				generalItemContainer);
 		generalItemTable.setImmediate(true);
 		return generalItemTable;
 	}
@@ -164,12 +170,12 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		priceLayout.addStyleName("sidebar");
 		priceLayout.addComponent(pfForm);
 		notes.setSizeFull();
-		Button generateBillBtn = getGenerateBillBtn(cusBean);
+		Button generateBillBtn = getGenerateBillBtn();
 		Button deleteBillBtn = getDeleteBillBtn();
 		priceLayout.addComponent(notes);
 		priceLayout.addComponent(includePrice);
 		priceLayout.addComponent(generateBillBtn);
-		//priceLayout.addComponent(deleteBillBtn);
+		// priceLayout.addComponent(deleteBillBtn);
 		priceLayout.setSpacing(true);
 		priceLayout.setExpandRatio(notes, 1);
 		priceLayout.setExpandRatio(includePrice, 0.8f);
@@ -209,8 +215,6 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		return item;
 	}
 
-	
-
 	private HorizontalLayout getToolbar() {
 		HorizontalLayout toolbar = new HorizontalLayout();
 		toolbar.setWidth("100%");
@@ -247,7 +251,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		billPopUpDate.setValue(new Date());
 		toolbar.addComponent(billPopUpDate);
 
-		Label tinLabel = new Label("<b>TIN VAT NO:</b>" + shopDto.getTinNumber(), ContentMode.HTML);
+		Label tinLabel = new Label("<b>TIN VAT NO:</b>"
+				+ shopDto.getTinNumber(), ContentMode.HTML);
 		tinLabel.setStyleName("vinHiddenLabel");
 		tinLabel.setImmediate(true);
 
@@ -282,7 +287,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						pfForm.getTotalNetAmount()));
 				pfForm.vatOnNewItemPrice.setEnabled(false);
 				pfForm.advancePayment.setEnabled(true);
-				pfForm.balanceAmount.setEnabled(true);
+				//pfForm.balanceAmount.setEnabled(true);
 
 			}
 		});
@@ -312,18 +317,73 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 			public void buttonClick(ClickEvent event) {
 				if (!StringUtils.isEmpty(transactionSearchTxt.getValue())
 						&& NumberUtils.isDigits(transactionSearchTxt.getValue())) {
-					long transId = Long.parseLong(transactionSearchTxt.getValue());
-					TransactionDTO tDto = new RestTransactionService().getBill(transId);
+					transId = Long.parseLong(transactionSearchTxt
+							.getValue());
+					TransactionDTO tDto = new RestTransactionService()
+							.getBill(transId);
 					if (tDto != null) {
-						goldItemContainer.addCustomItem(tDto.getGoldTransactionItemBeanList());
-						getBillWindow(Long.parseLong(transactionSearchTxt.getValue()), tDto);
-					}else{
-						 Notification.show("Transaction Number " + transId + " not found");
+						cusBean = tDto.getCustomer();
+						retailViewVerticalLayout.replaceComponent(customerLayout, customerLayout = new CustomerInfoLayout(cusBean).getUserDetailFormLayout());
+						reloadGoldItems(tDto);
+						reloadSilverItems(tDto);
+						reloadDiamondItems(tDto);
+						reloadGeneralItems(tDto);
+						staffNameComboBox.addItem(tDto.getDealingStaffName());
+						staffNameComboBox.setValue(tDto.getDealingStaffName());
+						billPopUpDate.setValue(tDto.getTransactionDate());
+						billType.setValue(tDto.isEstimateBill() ? ESTIMATE_BILL : INVOICE_BILL);
+						pfForm.oldPurchasePrice.setValue(String.valueOf(tDto.getPriceBean().getOldPurchase()));
+						pfForm.discountPrice.setValue(String.valueOf(tDto.getPriceBean().getDiscount()));
+						pfForm.balanceAmount.setValue(String.valueOf(tDto.getPriceBean().getBalanceAmount()));
+						notes.setValue(tDto.getNotes());
+						includePrice.setValue(tDto.getIncludePrice());
+						transId =-1L;
+						generateBillBtn.setCaption("Generate Bill");
+						//getBillWindow(Long.parseLong(transactionSearchTxt.getValue()), tDto);
+					} else {
+						goldItemContainer.removeAllItems();
+						goldBillingTable.setColumnFooter(GoldItemContainer.WEIGHT, "0.000");
+						goldBillingTable.setColumnFooter(GoldItemContainer.PRICE, "0.000");
+						goldBillingTable.setPageLength(goldBillingTable.size());
+						goldBillingTable.setColumnFooter(GoldItemContainer.DELETE, ("Items=" + goldBillingTable.size()));
+						
+						silverItemContainer.removeAllItems();
+						silverBillingTable.setColumnFooter(SilverItemContainer.WEIGHT, "0.000");
+						silverBillingTable.setColumnFooter(SilverItemContainer.PRICE, "0.000");
+						silverBillingTable.setPageLength(silverBillingTable.size());
+						silverBillingTable.setColumnFooter(SilverItemContainer.DELETE, ("Items=" + silverBillingTable.size()));
+						
+						diamondItemContainer.removeAllItems();
+						diamondBillingTable.setColumnFooter(DiamondItemContainer.PRICE, "0.000");
+						diamondBillingTable.setColumnFooter(DiamondItemContainer.GOLD_WEIGHT, "0.000");
+						diamondBillingTable.setColumnFooter(DiamondItemContainer.DIAMOND_WEIGHT, "0.00");
+						diamondBillingTable.setPageLength(diamondBillingTable.size());
+						diamondBillingTable.setColumnFooter(DiamondItemContainer.DELETE, ("Items=" + diamondBillingTable.size()));
+						
+						//diamondBillingTable.setColumnFooter(DiamondItemContainer.PRICE, "0.000");
+						generalItemContainer.removeAllItems();
+						generalBillingTable.setColumnFooter(GeneralItemContainer.PRICE, "0.000");
+						generalBillingTable.setPageLength(generalBillingTable.size());
+						generalBillingTable.setColumnFooter(GeneralItemContainer.DELETE, ("Items=" + generalBillingTable.size()));
+						
+						cusBean = new CustomerDTO();
+						retailViewVerticalLayout.replaceComponent(customerLayout, customerLayout = new CustomerInfoLayout(cusBean).getUserDetailFormLayout());
+						priceLayout.replaceComponent(pfForm, pfForm = new PriceForm(getPricePropertyItem()));
+						billType.setValue(ESTIMATE_BILL);
+						includePrice.setValue(true);
+						notes.setValue("");
+						staffNameComboBox.addItem("STAFF");
+						staffNameComboBox.setValue("STAFF");
+						billPopUpDate.setValue(new Date());
+						Notification.show("Transaction " + transId  + " not found");
 					}
 				} else {
-					 Notification.show("Transaction Number is not valid");
+					Notification.show("Transaction Number is not valid");
 				}
+				generateBillBtn.setCaption("Generate Bill");
 			}
+
+			
 		});
 
 		toolbar.addComponent(optionGroupLayout);
@@ -351,6 +411,105 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		return toolbar;
 	}
 
+	private void reloadGeneralItems(TransactionDTO tDto){
+		generalItemContainer.removeAllItems();
+		List<GeneralTransactionItemDTO> generalItemBeanList = tDto.getGeneralTransactionItemBeanList();
+		generalItemContainer.addCustomItem(generalItemBeanList);
+		addCustomTableDataContainerPriceItemCountValueChange(generalBillingTable, generalItemContainer);
+		if(!generalItemBeanList.isEmpty()){
+			for (int i = 0; i < generalItemBeanList.size(); i++) {
+				TextField itemPriceTxtField = (TextField) ((generalItemContainer.getItem(generalItemContainer.getIdByIndex(i)).getItemProperty(DiamondItemContainer.PRICE).getValue()));
+				itemPriceTxtField.setValue("-1.0");
+				itemPriceTxtField.setValue(String.valueOf(generalItemBeanList.get(i).getItemPrice()));
+			}
+
+		}
+	}
+	
+	private void reloadDiamondItems(TransactionDTO tDto){
+		diamondItemContainer.removeAllItems();
+		List<DiamondTransactionItemDTO> diamondItemBeanList = tDto.getDiamondTransactionItemBeanList();
+		diamondItemContainer.addCustomItem(diamondItemBeanList);
+		addCustomTableDataContainerPriceItemCountValueChange(diamondBillingTable, diamondItemContainer);
+		diamondTableWeightContainerValueChange();
+		if (!diamondItemBeanList.isEmpty()) {
+			for (int i = 0; i < diamondItemBeanList.size(); i++) {
+				TextField itemPriceTxtField = (TextField) ((diamondItemContainer.getItem(diamondItemContainer.getIdByIndex(i)).getItemProperty(DiamondItemContainer.PRICE).getValue()));
+				itemPriceTxtField.setValue("-1.0");
+				itemPriceTxtField.setValue(String.valueOf(diamondItemBeanList.get(i).getItemPrice()));
+				TextField itemGoldWeightTxtField = (TextField) ((diamondItemContainer.getItem(diamondItemContainer.getIdByIndex(i)).getItemProperty(DiamondItemContainer.GOLD_WEIGHT)
+						.getValue()));
+				itemGoldWeightTxtField.setValue("999999.0");
+				itemGoldWeightTxtField.setValue(String.valueOf(diamondItemBeanList.get(i).getGoldWeight()));
+				
+				TextField itemDiamondWeightTxtField = (TextField) ((diamondItemContainer.getItem(diamondItemContainer.getIdByIndex(i)).getItemProperty(DiamondItemContainer.DIAMOND_WEIGHT)
+						.getValue()));
+				itemDiamondWeightTxtField.setValue("999999.0");
+				itemDiamondWeightTxtField.setValue(String.valueOf(diamondItemBeanList.get(i).getDiamondWeightCarat()));
+			}
+		}
+		
+	}
+	
+	private void reloadSilverItems(TransactionDTO tDto){
+		silverItemContainer.removeAllItems();
+		List<SilverTransactionItemDTO> silverItemBeanList = tDto.getSilverTransactionItemBeanList();
+		silverItemContainer.addCustomItem(silverItemBeanList);
+		addCustomTableDataContainerPriceItemCountValueChange(silverBillingTable, silverItemContainer);
+		silverTableWeightContainerValueChange();
+		if (!silverItemBeanList.isEmpty()) {
+
+			for (int i = 0; i < silverItemBeanList.size(); i++) {
+
+				TextField itemPriceTxtField = (TextField) ((silverItemContainer.getItem(silverItemContainer.getIdByIndex(i))
+						.getItemProperty(SilverItemContainer.PRICE).getValue()));
+				itemPriceTxtField.setValue("-1.0");
+				itemPriceTxtField.setValue(String.valueOf(silverItemBeanList.get(i).getSilverItemPrice()));
+
+				TextField itemWeightTxtField = (TextField) ((silverItemContainer.getItem(silverItemContainer.getIdByIndex(i)).getItemProperty(SilverItemContainer.WEIGHT)
+						.getValue()));
+				itemWeightTxtField.setValue("999999.0");
+				itemWeightTxtField.setValue(String.valueOf(silverItemBeanList.get(i).getWeight()));
+			}
+		}
+	}
+	
+	
+	private void reloadGoldItems(TransactionDTO tDto) {
+		goldItemContainer.removeAllItems();
+		List<GoldTransactionItemDTO> goldItemBeanList = tDto.getGoldTransactionItemBeanList();
+		goldItemContainer.addCustomItem(goldItemBeanList);
+		addCustomTableDataContainerPriceItemCountValueChange(goldBillingTable, goldItemContainer);
+		goldTableWeightContainerValueChange();
+		if (!goldItemBeanList.isEmpty()) {
+
+			for (int i = 0; i < goldItemBeanList.size(); i++) {
+
+				TextField itemPriceTxtField = (TextField) ((goldItemContainer
+						.getItem(
+								goldItemContainer
+										.getIdByIndex(i))
+						.getItemProperty(
+								GoldItemContainer.PRICE)
+						.getValue()));
+				itemPriceTxtField.setValue("-1.0");
+				itemPriceTxtField.setValue(String.valueOf(goldItemBeanList
+						.get(i).getGoldItemPrice()));
+
+				TextField itemWeightTxtField = (TextField) ((goldItemContainer
+						.getItem(
+								goldItemContainer
+										.getIdByIndex(i))
+						.getItemProperty(
+								GoldItemContainer.WEIGHT)
+						.getValue()));
+				itemWeightTxtField.setValue("999999.0");
+				itemWeightTxtField.setValue(String.valueOf(tDto
+						.getGoldTransactionItemBeanList()
+						.get(i).getWeight()));
+			}
+		}
+	}
 	private ComboBox getStaffListComboBox() {
 
 		staffNameComboBox.setNullSelectionAllowed(false);
@@ -364,8 +523,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		return staffNameComboBox;
 	}
 
-	private Button getGenerateBillBtn(CustomerDTO cusBean) {
-		Button generateBillBtn = new Button("Generate Bill");
+	private Button getGenerateBillBtn() {
+		generateBillBtn = new Button("Generate Bill");
 		generateBillBtn.setSizeUndefined();
 		generateBillBtn.setImmediate(true);
 		generateBillBtn.addStyleName("sidebar");
@@ -393,29 +552,35 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 							.getCurrentRequest().getWrappedSession()
 							.getAttribute("shopdto");
 
-					
 					if (transId == -1L) {
-						BillCreationResponse response = new RestTransactionService().createBill(shopDto, retailTransaction);
-						retailTransaction.setInvoiceNumber(response.getInvoiceId());
+						BillCreationResponse response = new RestTransactionService()
+								.createBill(shopDto, retailTransaction);
+						retailTransaction.setInvoiceNumber(response
+								.getInvoiceId());
 						transId = response.getTransId();
-						
+
 					} else {// update
 						retailTransaction.setEstimateBill(isEstimateBill);
-						retailTransaction.setTransactionDate(billPopUpDate.getValue());
-						BillCreationResponse response = new RestTransactionService().updateBill(transId, shopDto.getShopId(), retailTransaction);
-						retailTransaction.setInvoiceNumber(response.getInvoiceId());
+						retailTransaction.setTransactionDate(billPopUpDate
+								.getValue());
+						BillCreationResponse response = new RestTransactionService()
+								.updateBill(transId, shopDto.getShopId(),
+										retailTransaction);
+						retailTransaction.setInvoiceNumber(response
+								.getInvoiceId());
 					}
 				} catch (Exception e) {
 					logger.error("Error generating invoice", e);
 				}
 
 				if (Page.getCurrent().getWebBrowser().isTouchDevice()) {
-					Resource pdf = new FileResource(new File(fileName));
-					setResource("help", pdf);
-					ResourceReference rr = ResourceReference.create(pdf,
-							(RetailInvoiceView) generateBillBtn.getData(),
-							"help");
-					Page.getCurrent().open(rr.getURL(), "blank_");
+					// Resource pdf = new FileResource(new File(fileName));
+					// setResource("help", pdf);
+					// ResourceReference rr = ResourceReference.create(pdf,
+					// (RetailInvoiceView) generateBillBtn.getData(),
+					// "help");
+					// Page.getCurrent().open(rr.getURL(), "blank_");
+					getBillWindow(transId, retailTransaction);
 				} else {
 					getBillWindow(transId, retailTransaction);
 				}
@@ -426,7 +591,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	}
 
 	private void getBillWindow(long transId, TransactionDTO retailTransaction) {
-		
+
 		BillWindow bw = new BillWindow(transId, retailTransaction);
 		UI.getCurrent().addWindow(bw);
 		bw.focus();
@@ -465,6 +630,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 				goldTableWeightContainerValueChange();
 				silverTableWeightContainerValueChange();
 				diamondTableWeightContainerValueChange();
+
 			}
 		});
 		VerticalLayout itemHolderLayout = new VerticalLayout();
@@ -474,17 +640,21 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	}
 
 	private Table getDiamondTable() {
-		DiamondItemTable diamondItemTable = new DiamondItemTable(diamondItemContainer);
+		DiamondItemTable diamondItemTable = new DiamondItemTable(
+				diamondItemContainer);
 		diamondTableWeightContainerValueChange();
-		addCustomTableDataContainerPriceItemCountValueChange(diamondItemTable, diamondItemContainer);
+		addCustomTableDataContainerPriceItemCountValueChange(diamondItemTable,
+				diamondItemContainer);
 		diamondItemTable.setImmediate(true);
 		return diamondItemTable;
 	}
 
 	private Table getSilverItemTable() {
-		SilverItemTable silverItemTable = new SilverItemTable(silverItemContainer);
+		SilverItemTable silverItemTable = new SilverItemTable(
+				silverItemContainer);
 		silverTableWeightContainerValueChange();
-		addCustomTableDataContainerPriceItemCountValueChange(silverItemTable, silverItemContainer);
+		addCustomTableDataContainerPriceItemCountValueChange(silverItemTable,
+				silverItemContainer);
 		silverItemTable.setImmediate(true);
 		return silverItemTable;
 	}
@@ -492,7 +662,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	private Table getGoldBillingTable() {
 		GoldItemTable goldItemTable = new GoldItemTable(goldItemContainer);
 		goldTableWeightContainerValueChange();
-		addCustomTableDataContainerPriceItemCountValueChange(goldItemTable, goldItemContainer);
+		addCustomTableDataContainerPriceItemCountValueChange(goldItemTable,
+				goldItemContainer);
 		goldItemTable.setImmediate(true);
 		return goldItemTable;
 	}
@@ -684,7 +855,6 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 				 * 
 				 */
 				private static final long serialVersionUID = -1429589095114426407L;
-
 
 				@Override
 				public void click(com.vaadin.event.MouseEvents.ClickEvent event) {

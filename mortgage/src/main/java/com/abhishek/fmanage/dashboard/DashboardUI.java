@@ -7,6 +7,7 @@ import java.util.Locale;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestLoginService;
 import com.abhishek.fmanage.retail.views.RetailInvoiceView;
+import com.abhishek.fmanage.retail.views.RetailTransactionSearchView;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -72,9 +73,8 @@ public class DashboardUI extends UI {
     HashMap<String, Class<? extends View>> routes = new HashMap<String, Class<? extends View>>() {
 		private static final long serialVersionUID = -8100418558296244344L;
 		{
-            //put("/dashboard", DashboardView.class);
-            //put("/transactions", MortgageTransactionView.class);
             put("/retailbilling", RetailInvoiceView.class);
+            put("/transactions", RetailTransactionSearchView.class);
         }
     };
 
@@ -171,15 +171,9 @@ public class DashboardUI extends UI {
             public void buttonClick(ClickEvent event) {
 				String userName = username.getValue();
 				String userPassword = password.getValue();
-//				RestTemplate rest = new RestTemplate();
-//		        Map<String, Object> paramMap = new  HashMap<String, Object>();
-//		        paramMap.put("username", userName);
-//		        paramMap.put("password", userPassword);
-//		        ShopDTO shopDto = rest.getForObject("http://localhost:8090/login/{username}/{password}", ShopDTO.class, paramMap);
 				ShopDTO shopDto = new RestLoginService().retailLogin(userName, userPassword);
                 if (shopDto.getShopId() != -1L) {
                 	VaadinService.getCurrentRequest().getWrappedSession().setAttribute("shopdto", shopDto);
-                	//getUI().getSession().setAttribute("shopdto", shopDto);
                     signin.removeShortcutListener(enter);
                     buildMainView();
                 } else {
@@ -295,7 +289,7 @@ public class DashboardUI extends UI {
 
         menu.removeAllComponents();
         //for (final String view : new String[] { "dashboard", "transactions", "retailbilling"}) {
-        for (final String view : new String[] {"retailbilling"}) {
+        for (final String view : new String[] {"retailbilling", "transactions"}) {
             Button b = new NativeButton(view.substring(0, 1).toUpperCase()
                     + view.substring(1).replace('-', ' '));
             b.addStyleName("icon-" + view);
@@ -305,43 +299,11 @@ public class DashboardUI extends UI {
                 if (!nav.getState().equals("/" + view))
                     nav.navigateTo("/" + view);
             });
-
-            if (view.equals("reports")) {
-                DragAndDropWrapper reports = new DragAndDropWrapper(b);
-                reports.setDragStartMode(DragStartMode.NONE);
-                reports.setDropHandler(new DropHandler() {
-
-                    @Override
-                    public void drop(DragAndDropEvent event) {
-                        clearMenuSelection();
-                        viewNameToMenuButton.get("/reports").addStyleName(
-                                "selected");
-                        Transferable items = event.getTransferable();
-                        nav.navigateTo("/reports");
-                    }
-
-                    @Override
-                    public AcceptCriterion getAcceptCriterion() {
-                        return AcceptItem.ALL;
-                    }
-
-                });
-                menu.addComponent(reports);
-                menu.addStyleName("no-vertical-drag-hints");
-                menu.addStyleName("no-horizontal-drag-hints");
-            } else {
-                menu.addComponent(b);
-            }
-
+            menu.addComponent(b);
             viewNameToMenuButton.put("/" + view, b);
         }
         menu.addStyleName("menu");
         menu.setHeight("100%");
-
-//        viewNameToMenuButton.get("/dashboard").setHtmlContentAllowed(true);
-//        viewNameToMenuButton.get("/dashboard").setCaption(
-//                "Dashboard<span class=\"badge\">2</span>");
-        
 
         String uriFragment = Page.getCurrent().getUriFragment();
         if (uriFragment != null && uriFragment.startsWith("!")) {

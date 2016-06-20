@@ -1,5 +1,6 @@
 package com.retail.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.retail.dao.RetailTransactionDAO;
 import com.retail.dao.TransactionDAO;
 import com.retail.dto.TransactionDTO;
+import com.retail.dto.TransactionSearchCriteriaDto;
+import com.retail.dto.TransactionSearchResultDto;
 
 @Component
 public class BillService {
@@ -29,6 +32,10 @@ public class BillService {
 	
 	public TransactionDTO findBill(@PathVariable long transId) {
 		return transDao.getTransaction(transId);
+	}
+	
+	public List<TransactionSearchResultDto> findBills(TransactionSearchCriteriaDto tt) {
+		return transDao.getTransaction(tt.getShopId(), tt.getBillType(), tt.getBillStatus(), tt.getStartDate(), tt.getEndDate());
 	}
 	
 	public Map<String, Long> updateBill(long shopId, long transId, TransactionDTO transDto){

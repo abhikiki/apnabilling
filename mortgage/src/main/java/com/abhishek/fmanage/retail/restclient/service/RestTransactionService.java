@@ -1,13 +1,19 @@
 package com.abhishek.fmanage.retail.restclient.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.client.RestTemplate;
 
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
+import com.abhishek.fmanage.retail.dto.TransactionSearchCriteriaDto;
+import com.abhishek.fmanage.retail.dto.TransactionSearchResultDto;
 import com.abhishek.fmanage.retail.restclient.response.BillCreationResponse;
+import com.abhishek.fmanage.retail.restclient.response.TransactionSearchResponse;
 
 public class RestTransactionService {
 
@@ -29,6 +35,21 @@ public class RestTransactionService {
 						retailTransaction,
 						BillCreationResponse.class, paramMap);
 		
+	}
+	
+	public List<TransactionSearchResultDto> findBills(TransactionSearchCriteriaDto dto){
+		final String uri = "http://localhost:8090/bill/findbills";
+		TransactionSearchResponse transResponse = null;
+		try {
+			URI url = new URI(uri);
+			transResponse =  new RestTemplate().postForObject(
+	 				url,
+					dto,
+					TransactionSearchResponse.class);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+		return transResponse.getTransactionSearchResultList();
 	}
 	
 	public BillCreationResponse updateBill(long transId, int shopId, TransactionDTO retailTransaction){

@@ -1,5 +1,8 @@
 package com.retail.dao;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.retail.dto.RetailTaxInvoiceDTO;
 import com.retail.dto.RetailTransactionDTO;
 import com.retail.dto.TransactionDTO;
+import com.retail.dto.TransactionSearchResultDto;
 
 @Repository
 public class TransactionDAO {
@@ -83,6 +87,50 @@ public class TransactionDAO {
 		
 		return transDto;
 	}
+	
+	public List<TransactionSearchResultDto> getTransaction(long shopId, String billType, String billStatus, Date startDate, Date endDate){
+		final String sql = "SELECT " 
+				+ "RT.TRANSDATE,"
+				+ "RT.TRANSID,"
+				+ "RT.BILLTYPE,"
+				+ "RT.TRANSACTIONSTATUS,"
+				+ "CONCAT(RC.FIRSTNAME, ' ', RC.LASTNAME) CUSTOMERNAME,"
+				+ "RC.CONTACTNUMBER,"
+				+ "RC.EMAILID,"
+				+ "CONCAT(RC.STREETADDRESS1, ' ', RC.STREETADDRESS2, ' ', RC.CITY , ' ', RC.STATE, ' ', RC.ZIPCODE, ' ', RC.COUNTRY) ADDRESS,"
+				+ "RP.TOTALITEMSPRICE "
+			+ "FROM SHOP S, RETAILTRANSACTION RT, RETAILCUSTOMER RC, RETAILTRANSACTIONPRICE RP "
+			+ "WHERE S.SHOPID = RT.SHOPID "
+			+ "AND RC.TRANSID = RT.TRANSID "
+			+ "AND RP.TRANSID = RT.TRANSID "
+			+ "AND S.SHOPID = ? "
+			+ "AND RT.BILLTYPE in (?, ?) "
+			+ "AND RT.TRANSACTIONSTATUS in(?, ?) "
+			+ "AND RT.TRANSDATE BETWEEN ? AND ? "
+			+ "ORDER BY RT.TRANSDATE DESC";
+		String billType1 = "E"; //estimate
+		String billType2= "I";  //invoice
+		if(billType.equals("E")){
+			billType2 = "E";
+		}else if(billType.equals("I")){
+			billType1 = "I";
+		}
+		String billStatus1 = "A"; //active
+		String billStatus2 = "I"; //inactive
+		if(billStatus.equals("A")){
+			billStatus2 = "A";
+		}else if (billStatus.equals("I")){
+			billStatus1 = "I";
+		}
+		return jdbcTemplate.query(sql, new Object[]{
+				shopId,
+				billType1,
+				billType2,
+				billStatus1,
+				billStatus2,
+				new java.sql.Timestamp(startDate.getTime()),
+				new java.sql.Timestamp(endDate.getTime())}, this::transSearchResultItemMapRow);
+	}
 
 	@Transactional
 	public Map<String, Long> saveTransaction(long shopId, TransactionDTO tDto){
@@ -145,7 +193,23 @@ public class TransactionDAO {
 		return transIdInvoiceIdMap;
 	}
 	
+	
+	
 	public boolean deleteTransaction(long transId){
 		return retailTransDAO.deleteTransaction(transId);
+	}
+	
+	private TransactionSearchResultDto transSearchResultItemMapRow(ResultSet resultSet, int rowNumber) throws SQLException {
+		TransactionSearchResultDto transSearchResultDto = new TransactionSearchResultDto();
+		transSearchResultDto.setTransDate(new Date(resultSet.getTimestamp("TRANSDATE").getTime()));
+		transSearchResultDto.setTransId(resultSet.getLong("TRANSID"));
+		transSearchResultDto.setBillType(resultSet.getString("BILLTYPE"));
+		transSearchResultDto.setTransactionStatus(resultSet.getString("TRANSACTIONSTATUS"));
+		transSearchResultDto.setCustomerName(resultSet.getString("CUSTOMERNAME"));
+		transSearchResultDto.setContactNumber(resultSet.getString("CONTACTNUMBER"));
+		transSearchResultDto.setCustomerAddress(resultSet.getString("ADDRESS"));
+		transSearchResultDto.setEmailId(resultSet.getString("EMAILID"));
+		transSearchResultDto.setTotalItemsPrice(resultSet.getDouble("TOTALITEMSPRICE"));
+		return transSearchResultDto;
 	}
 }

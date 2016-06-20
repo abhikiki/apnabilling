@@ -20,10 +20,12 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.TextField;
 
-public class SilverItemContainer extends IndexedContainer implements CustomItemContainerInterface {
+public class SilverItemContainer extends IndexedContainer implements
+		CustomItemContainerInterface {
 
 	private static final long serialVersionUID = 1L;
-	public static final ThemeResource removeItemImageResource = new ThemeResource("img/removeButtonSmall.jpg");
+	public static final ThemeResource removeItemImageResource = new ThemeResource(
+			"img/removeButtonSmall.jpg");
 	public static final String DELETE = "Delete";
 	public static final String PRICE = "Price(INR)";
 	public static final String SILVER_RATE = "SilverRate(pergm)";
@@ -37,7 +39,7 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 	private static final String MAKING_COST_TYPE_NET = "net";
 	private static final String MAKING_COST_TYPE_PER_GM = "per gm";
 	private static final String MAKING_COST_TYPE_PERCENT = "%";
-	
+
 	public SilverItemContainer() {
 		addContainerProperty(DELETE, Image.class, new Image());
 		addContainerProperty(ITEM_NAME, ComboBox.class, new ComboBox());
@@ -54,9 +56,11 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 	public Double getTotalPrice() {
 		double totalCost = 0.0;
 		for (Object obj : getAllItemIds()) {
-			TextField goldPriceTxtField = (TextField) getItem(obj).getItemProperty(PRICE).getValue();
+			TextField goldPriceTxtField = (TextField) getItem(obj)
+					.getItemProperty(PRICE).getValue();
 			String itemPrice = goldPriceTxtField.getValue();
-			totalCost += NumberUtils.isNumber(itemPrice) ? NumberUtils.toDouble(itemPrice) : 0.0;
+			totalCost += NumberUtils.isNumber(itemPrice) ? NumberUtils
+					.toDouble(itemPrice) : 0.0;
 		}
 		return totalCost;
 	}
@@ -65,9 +69,11 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		double totalWeight = 0.0;
 		List<Object> itemIdsList = getAllItemIds();
 		for (Object obj : itemIdsList) {
-			TextField weightPriceTxtField = (TextField) getItem(obj).getItemProperty(WEIGHT).getValue();
+			TextField weightPriceTxtField = (TextField) getItem(obj)
+					.getItemProperty(WEIGHT).getValue();
 			String weight = weightPriceTxtField.getValue();
-			totalWeight += NumberUtils.isNumber(weight) ? NumberUtils.toDouble(weight) : 0.0;
+			totalWeight += NumberUtils.isNumber(weight) ? NumberUtils
+					.toDouble(weight) : 0.0;
 		}
 		return totalWeight;
 	}
@@ -77,16 +83,23 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 	public void addCustomItem() {
 		Object silverItemRowId = addItem();
 		Item item = getItem(silverItemRowId);
-		
+
 		if (item != null) {
-			item.getItemProperty(DELETE).setValue(getRemoveItemImage(silverItemRowId));
-			item.getItemProperty(ITEM_NAME).setValue(getItemNameList(silverItemRowId));
-			item.getItemProperty(QUANTITY).setValue(getQuantity(silverItemRowId));
-			item.getItemProperty(PIECE_PAIR).setValue(getPiecePair(silverItemRowId));
+			item.getItemProperty(DELETE).setValue(
+					getRemoveItemImage(silverItemRowId));
+			item.getItemProperty(ITEM_NAME).setValue(
+					getItemNameList(silverItemRowId));
+			item.getItemProperty(QUANTITY).setValue(
+					getQuantity(silverItemRowId));
+			item.getItemProperty(PIECE_PAIR).setValue(
+					getPiecePair(silverItemRowId));
 			item.getItemProperty(WEIGHT).setValue(getWeight(silverItemRowId));
-			item.getItemProperty(MAKING_CHARGE_TYPE).setValue(getMakingChargeType(silverItemRowId));
-			item.getItemProperty(MAKING_CHARGE).setValue(getMakingCharge(silverItemRowId));
-			item.getItemProperty(SILVER_RATE).setValue(getSilverRate(silverItemRowId));
+			item.getItemProperty(MAKING_CHARGE_TYPE).setValue(
+					getMakingChargeType(silverItemRowId));
+			item.getItemProperty(MAKING_CHARGE).setValue(
+					getMakingCharge(silverItemRowId));
+			item.getItemProperty(SILVER_RATE).setValue(
+					getSilverRate(silverItemRowId));
 			item.getItemProperty(PRICE).setValue(getPrice());
 		}
 	}
@@ -102,50 +115,60 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 	}
 
 	@SuppressWarnings("unchecked")
-	public void addCustomItem(SilverTransactionItemDTO silverItemBean) {
-		Object silverItemRowId = addItem();
-		Item item = getItem(silverItemRowId);
-		if (item != null) {
-			item.getItemProperty(DELETE).setValue(getRemoveItemImage(silverItemRowId));
-			
-					
-			ComboBox itemNameCombo = getItemNameList(silverItemRowId);
-			itemNameCombo.addItem(silverItemBean.getItemName());
-			itemNameCombo.setValue(silverItemBean.getItemName());
-			item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
-			
-			TextField quantity = getQuantity(silverItemRowId);
-			quantity.setValue(String.valueOf(silverItemBean.getQuantity()));
-			item.getItemProperty(QUANTITY).setValue(quantity);
-			
-			ComboBox piecePairCombo = getPiecePair(silverItemRowId);
-			piecePairCombo.addItem(silverItemBean.getPiecepair());
-			piecePairCombo.setValue(silverItemBean.getPiecepair());
-			item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
-			
-			TextField silverWeightTxt = (TextField) getWeight(silverItemRowId);
-			silverWeightTxt.setValue(String.valueOf(silverItemBean.getWeight()));
-			item.getItemProperty(WEIGHT).setValue(silverWeightTxt);
-			
-			TextField makingChargeText = (TextField) getMakingCharge(silverItemRowId);
-			makingChargeText.setValue(String.valueOf(silverItemBean.getMakingCharge()));
-			item.getItemProperty(MAKING_CHARGE).setValue(makingChargeText);
-			
-			ComboBox makingChargeTypeCombo = getMakingChargeType(silverItemRowId);
-			makingChargeTypeCombo.addItem(silverItemBean.getMakingChargeType());
-			makingChargeTypeCombo.setValue(silverItemBean.getMakingChargeType());
-			item.getItemProperty(MAKING_CHARGE_TYPE).setValue(makingChargeTypeCombo);
-			
-			TextField silverRateTxt = (TextField) getSilverRate(silverItemRowId);
-			silverRateTxt.setValue(String.valueOf(silverItemBean.getSilverRate()));
-			item.getItemProperty(SILVER_RATE).setValue(silverRateTxt);
-			
-			TextField silverItemPriceTxt = (TextField) getPrice();
-			silverItemPriceTxt.setValue(String.valueOf(silverItemBean.getSilverItemPrice()));
-			item.getItemProperty(PRICE).setValue(silverItemPriceTxt);
+	public void addCustomItem(List<SilverTransactionItemDTO> silverItemBeanList) {
+		for (SilverTransactionItemDTO silverItemBean : silverItemBeanList) {
+			Object silverItemRowId = addItem();
+			Item item = getItem(silverItemRowId);
+			if (item != null) {
+				item.getItemProperty(DELETE).setValue(
+						getRemoveItemImage(silverItemRowId));
+
+				ComboBox itemNameCombo = getItemNameList(silverItemRowId);
+				itemNameCombo.addItem(silverItemBean.getItemName());
+				itemNameCombo.setValue(silverItemBean.getItemName());
+				item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
+
+				TextField quantity = getQuantity(silverItemRowId);
+				quantity.setValue(String.valueOf(silverItemBean.getQuantity()));
+				item.getItemProperty(QUANTITY).setValue(quantity);
+
+				ComboBox piecePairCombo = getPiecePair(silverItemRowId);
+				piecePairCombo.addItem(silverItemBean.getPiecepair());
+				piecePairCombo.setValue(silverItemBean.getPiecepair());
+				item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
+
+				TextField silverWeightTxt = (TextField) getWeight(silverItemRowId);
+				silverWeightTxt.setValue(String.valueOf(silverItemBean
+						.getWeight()));
+				item.getItemProperty(WEIGHT).setValue(silverWeightTxt);
+
+				TextField makingChargeText = (TextField) getMakingCharge(silverItemRowId);
+				makingChargeText.setValue(String.valueOf(silverItemBean
+						.getMakingCharge()));
+				item.getItemProperty(MAKING_CHARGE).setValue(makingChargeText);
+
+				ComboBox makingChargeTypeCombo = getMakingChargeType(silverItemRowId);
+				makingChargeTypeCombo.addItem(silverItemBean
+						.getMakingChargeType());
+				makingChargeTypeCombo.setValue(silverItemBean
+						.getMakingChargeType());
+				item.getItemProperty(MAKING_CHARGE_TYPE).setValue(
+						makingChargeTypeCombo);
+
+				TextField silverRateTxt = (TextField) getSilverRate(silverItemRowId);
+				silverRateTxt.setValue(String.valueOf(silverItemBean
+						.getSilverRate()));
+				item.getItemProperty(SILVER_RATE).setValue(silverRateTxt);
+
+				TextField silverItemPriceTxt = (TextField) getPrice();
+				silverItemPriceTxt.setValue(String.valueOf(silverItemBean
+						.getSilverItemPrice()));
+				item.getItemProperty(PRICE).setValue(silverItemPriceTxt);
+
+			}
 		}
 	}
-	
+
 	private Object getPrice() {
 		TextField itemPrice = new TextField();
 		itemPrice.setImmediate(true);
@@ -154,16 +177,18 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		itemPrice.setValidationVisible(true);
 		itemPrice.setEnabled(false);
 		itemPrice.setStyleName("my-disabled");
-		itemPrice.addValidator(new DoubleRangeValidator("Must be number and > 0", 0.1, null));
-		itemPrice.addValidator((value) -> {
-			if (!NumberUtils.isNumber(String.valueOf(value))
-					|| (NumberUtils.isNumber(String.valueOf(value))
-						&& (NumberUtils.toDouble(String.valueOf(value)) <= 0.0))) {
-				itemPrice.addStyleName("v-textfield-fail");
-			} else {
-				itemPrice.removeStyleName("v-textfield-fail");
-			}
-		});
+		itemPrice.addValidator(new DoubleRangeValidator(
+				"Must be number and > 0", 0.1, null));
+		itemPrice
+				.addValidator((value) -> {
+					if (!NumberUtils.isNumber(String.valueOf(value))
+							|| (NumberUtils.isNumber(String.valueOf(value)) && (NumberUtils
+									.toDouble(String.valueOf(value)) <= 0.0))) {
+						itemPrice.addStyleName("v-textfield-fail");
+					} else {
+						itemPrice.removeStyleName("v-textfield-fail");
+					}
+				});
 		return itemPrice;
 
 	}
@@ -174,7 +199,8 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		silverRate.setRequired(true);
 		silverRate.setValidationVisible(true);
 		silverRate.setWidth("80%");
-		silverRate.addValueChangeListener(getCustomValueChangeListener(currentItemId));
+		silverRate
+				.addValueChangeListener(getCustomValueChangeListener(currentItemId));
 		silverRate.addValueChangeListener(new Property.ValueChangeListener() {
 			private static final long serialVersionUID = 2301555384588108852L;
 
@@ -182,21 +208,23 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 				String value = (String) event.getProperty().getValue();
 				if (StringUtils.isEmpty(value)) {
 					silverRate.addStyleName("v-textfield-fail");
-					TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+					TextField silverPriceTextField = (TextField) getItem(
+							currentItemId).getItemProperty(PRICE).getValue();
 					silverPriceTextField.setValue("");
 					silverPriceTextField.removeStyleName("v-textfield-success");
 				}
 			}
 		});
-		silverRate.addValidator((value) -> {
-			if (!NumberUtils.isNumber(String.valueOf(value))
-					|| (NumberUtils.isNumber(String.valueOf(value))
-							&& (NumberUtils.toDouble(String.valueOf(value)) <= 0.0))) {
+		silverRate
+				.addValidator((value) -> {
+					if (!NumberUtils.isNumber(String.valueOf(value))
+							|| (NumberUtils.isNumber(String.valueOf(value)) && (NumberUtils
+									.toDouble(String.valueOf(value)) <= 0.0))) {
 						silverRate.addStyleName("v-textfield-fail");
-			} else {
-					silverRate.removeStyleName("v-textfield-fail");
-			}
-		});
+					} else {
+						silverRate.removeStyleName("v-textfield-fail");
+					}
+				});
 		return silverRate;
 	}
 
@@ -206,8 +234,10 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		makingCharge.setRequired(true);
 		makingCharge.setValidationVisible(true);
 		makingCharge.setWidth("100%");
-		makingCharge.addValueChangeListener(getCustomValueChangeListener(currentItemId));
-		makingCharge.addValidator(new DoubleRangeValidator("Must be number and >= 0", 0.0, null));
+		makingCharge
+				.addValueChangeListener(getCustomValueChangeListener(currentItemId));
+		makingCharge.addValidator(new DoubleRangeValidator(
+				"Must be number and >= 0", 0.0, null));
 		makingCharge.addValueChangeListener(new Property.ValueChangeListener() {
 
 			private static final long serialVersionUID = -2834457288572556392L;
@@ -216,26 +246,31 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 				String value = (String) event.getProperty().getValue();
 				if (StringUtils.isEmpty(value)) {
 					makingCharge.addStyleName("v-textfield-fail");
-					TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+					TextField silverPriceTextField = (TextField) getItem(
+							currentItemId).getItemProperty(PRICE).getValue();
 					silverPriceTextField.setValue("");
 					silverPriceTextField.removeStyleName("v-textfield-success");
 				}
 			}
 		});
-		makingCharge.addValidator((value) -> {
-			if (!NumberUtils.isNumber(String.valueOf(value))
-				|| (NumberUtils.isNumber(String.valueOf(value))
-					&& (NumberUtils.toDouble(String.valueOf(value)) < 0.0))) {
+		makingCharge
+				.addValidator((value) -> {
+					if (!NumberUtils.isNumber(String.valueOf(value))
+							|| (NumberUtils.isNumber(String.valueOf(value)) && (NumberUtils
+									.toDouble(String.valueOf(value)) < 0.0))) {
 						makingCharge.addStyleName("v-textfield-fail");
-						TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+						TextField silverPriceTextField = (TextField) getItem(
+								currentItemId).getItemProperty(PRICE)
+								.getValue();
 						silverPriceTextField.setValue("");
-						silverPriceTextField.removeStyleName("v-textfield-success");
+						silverPriceTextField
+								.removeStyleName("v-textfield-success");
 
-			} else {
-					makingCharge.setComponentError(null);
-					makingCharge.removeStyleName("v-textfield-fail");
-			}
-		});
+					} else {
+						makingCharge.setComponentError(null);
+						makingCharge.removeStyleName("v-textfield-fail");
+					}
+				});
 		return makingCharge;
 	}
 
@@ -258,14 +293,17 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		weight.setValidationVisible(true);
 		weight.setWidth("100%");
 		weight.addValueChangeListener(getCustomValueChangeListener(currentItemId));
-		weight.addValidator(new DoubleRangeValidator("Must be number and > 0", 0.0001, null));
+		weight.addValidator(new DoubleRangeValidator("Must be number and > 0",
+				0.0001, null));
 		weight.addValueChangeListener(new Property.ValueChangeListener() {
 			private static final long serialVersionUID = 8048545363261290937L;
+
 			public void valueChange(ValueChangeEvent event) {
 				String value = (String) event.getProperty().getValue();
 				if (StringUtils.isEmpty(value)) {
 					weight.addStyleName("v-textfield-fail");
-					TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+					TextField silverPriceTextField = (TextField) getItem(
+							currentItemId).getItemProperty(PRICE).getValue();
 					silverPriceTextField.setValue("");
 					silverPriceTextField.removeStyleName("v-textfield-success");
 				}
@@ -273,10 +311,11 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		});
 		weight.addValidator((value) -> {
 			if (!NumberUtils.isNumber(String.valueOf(value))
-					|| (NumberUtils.isNumber(String.valueOf(value))
-						&& (NumberUtils.toDouble(String.valueOf(value)) <= 0.0))) {
+					|| (NumberUtils.isNumber(String.valueOf(value)) && (NumberUtils
+							.toDouble(String.valueOf(value)) <= 0.0))) {
 				weight.addStyleName("v-textfield-fail");
-				TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+				TextField silverPriceTextField = (TextField) getItem(
+						currentItemId).getItemProperty(PRICE).getValue();
 				silverPriceTextField.setValue("");
 				silverPriceTextField.removeStyleName("v-textfield-success");
 			} else {
@@ -304,14 +343,17 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		quantity.setValidationVisible(true);
 		quantity.setWidth("90%");
 		quantity.addValueChangeListener(getCustomValueChangeListener(currentItemId));
-		quantity.addValidator(new DoubleRangeValidator("Must be number and > 0", 1.0, null));
+		quantity.addValidator(new DoubleRangeValidator(
+				"Must be number and > 0", 1.0, null));
 		quantity.addValueChangeListener(new Property.ValueChangeListener() {
 			private static final long serialVersionUID = 2059828274806164304L;
+
 			public void valueChange(ValueChangeEvent event) {
 				String value = (String) event.getProperty().getValue();
 				if (StringUtils.isEmpty(value)) {
 					quantity.addStyleName("v-textfield-fail");
-					TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+					TextField silverPriceTextField = (TextField) getItem(
+							currentItemId).getItemProperty(PRICE).getValue();
 					silverPriceTextField.setValue("");
 					silverPriceTextField.removeStyleName("v-textfield-success");
 				}
@@ -319,10 +361,11 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		});
 		quantity.addValidator((value) -> {
 			if (!NumberUtils.isDigits(String.valueOf(value))
-					|| (NumberUtils.isDigits(String.valueOf(value))
-						&& (NumberUtils.toInt(String.valueOf(value)) <= 0))) {
+					|| (NumberUtils.isDigits(String.valueOf(value)) && (NumberUtils
+							.toInt(String.valueOf(value)) <= 0))) {
 				quantity.addStyleName("v-textfield-fail");
-				TextField silverPriceTextField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
+				TextField silverPriceTextField = (TextField) getItem(
+						currentItemId).getItemProperty(PRICE).getValue();
 				silverPriceTextField.setValue("");
 				silverPriceTextField.removeStyleName("v-textfield-success");
 			} else {
@@ -333,33 +376,56 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 		return quantity;
 	}
 
-	private ValueChangeListener getCustomValueChangeListener(final Object currentItemId) {
+	private ValueChangeListener getCustomValueChangeListener(
+			final Object currentItemId) {
 		return new Property.ValueChangeListener() {
 			private static final long serialVersionUID = 1L;
+
 			public void valueChange(ValueChangeEvent event) {
-				ComboBox itemNameField = (ComboBox) getItem(currentItemId).getItemProperty(ITEM_NAME).getValue();
-				ComboBox piecePairField = (ComboBox) getItem(currentItemId).getItemProperty(PIECE_PAIR).getValue();
-				ComboBox makingChargeType = (ComboBox) getItem(currentItemId).getItemProperty(MAKING_CHARGE_TYPE).getValue();
-				TextField quantityTxtField = (TextField) getItem(currentItemId).getItemProperty(QUANTITY).getValue();
-				TextField weightTxtField = (TextField) getItem(currentItemId).getItemProperty(WEIGHT).getValue();
-				TextField makingChargeTxtField = (TextField) getItem(currentItemId).getItemProperty(MAKING_CHARGE).getValue();
-				TextField silverRateTxtField = (TextField) getItem(currentItemId).getItemProperty(SILVER_RATE).getValue();
-				TextField silverPriceTxtField = (TextField) getItem(currentItemId).getItemProperty(PRICE).getValue();
-				int quantity = NumberUtils.isDigits(quantityTxtField.getValue()) ? NumberUtils.toInt(quantityTxtField.getValue()) : 0;
-				double weight = NumberUtils.isNumber(weightTxtField.getValue()) ? NumberUtils.toDouble(weightTxtField.getValue()) : 0.0;
-				double makingCharge = NumberUtils.isNumber(makingChargeTxtField.getValue()) ? NumberUtils.toDouble(makingChargeTxtField.getValue()) : 0.0;
-				double silverRate = NumberUtils.isNumber(silverRateTxtField.getValue()) ? NumberUtils.toDouble(silverRateTxtField.getValue()) : 0.0;
+				ComboBox itemNameField = (ComboBox) getItem(currentItemId)
+						.getItemProperty(ITEM_NAME).getValue();
+				ComboBox piecePairField = (ComboBox) getItem(currentItemId)
+						.getItemProperty(PIECE_PAIR).getValue();
+				ComboBox makingChargeType = (ComboBox) getItem(currentItemId)
+						.getItemProperty(MAKING_CHARGE_TYPE).getValue();
+				TextField quantityTxtField = (TextField) getItem(currentItemId)
+						.getItemProperty(QUANTITY).getValue();
+				TextField weightTxtField = (TextField) getItem(currentItemId)
+						.getItemProperty(WEIGHT).getValue();
+				TextField makingChargeTxtField = (TextField) getItem(
+						currentItemId).getItemProperty(MAKING_CHARGE)
+						.getValue();
+				TextField silverRateTxtField = (TextField) getItem(
+						currentItemId).getItemProperty(SILVER_RATE).getValue();
+				TextField silverPriceTxtField = (TextField) getItem(
+						currentItemId).getItemProperty(PRICE).getValue();
+				int quantity = NumberUtils
+						.isDigits(quantityTxtField.getValue()) ? NumberUtils
+						.toInt(quantityTxtField.getValue()) : 0;
+				double weight = NumberUtils.isNumber(weightTxtField.getValue()) ? NumberUtils
+						.toDouble(weightTxtField.getValue()) : 0.0;
+				double makingCharge = NumberUtils.isNumber(makingChargeTxtField
+						.getValue()) ? NumberUtils
+						.toDouble(makingChargeTxtField.getValue()) : 0.0;
+				double silverRate = NumberUtils.isNumber(silverRateTxtField
+						.getValue()) ? NumberUtils.toDouble(silverRateTxtField
+						.getValue()) : 0.0;
 				if ((NumberUtils.isDigits(quantityTxtField.getValue()) && quantity > 0)
 						&& (NumberUtils.isNumber(weightTxtField.getValue()) && weight > 0.0)
-						&& (NumberUtils.isNumber(makingChargeTxtField.getValue()) && makingCharge >= 0.0)
+						&& (NumberUtils.isNumber(makingChargeTxtField
+								.getValue()) && makingCharge >= 0.0)
 						&& (NumberUtils.isNumber(silverRateTxtField.getValue()) && silverRate > 0.0)
-						&& !StringUtils.isBlank((String)piecePairField.getValue())
-						&& !StringUtils.isBlank((String)makingChargeType.getValue())
-						&& !StringUtils.isBlank((String)itemNameField.getValue())) {
+						&& !StringUtils.isBlank((String) piecePairField
+								.getValue())
+						&& !StringUtils.isBlank((String) makingChargeType
+								.getValue())
+						&& !StringUtils.isBlank((String) itemNameField
+								.getValue())) {
 					double silverPrice = 0.0;
 					switch (String.valueOf(makingChargeType.getValue())) {
 					case MAKING_COST_TYPE_PERCENT:
-						silverPrice = (weight * silverRate) * (1 + makingCharge/100.0f) ;
+						silverPrice = (weight * silverRate)
+								* (1 + makingCharge / 100.0f);
 						break;
 					case MAKING_COST_TYPE_PER_GM:
 						silverPrice = weight * (silverRate + makingCharge);
@@ -367,10 +433,11 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 					case MAKING_COST_TYPE_NET:
 						silverPrice = (weight * silverRate) + makingCharge;
 					}
-					silverPriceTxtField.setValue(String.format("%.3f",silverPrice));
+					silverPriceTxtField.setValue(String.format("%.3f",
+							silverPrice));
 					silverPriceTxtField.addStyleName("v-textfield-success");
 					silverPriceTxtField.setImmediate(true);
-					//Notification.show("Item entry complete");
+					// Notification.show("Item entry complete");
 				} else {
 					silverPriceTxtField.clear();
 					silverPriceTxtField.removeStyleName("v-textfield-success");
@@ -384,8 +451,9 @@ public class SilverItemContainer extends IndexedContainer implements CustomItemC
 	private ComboBox getItemNameList(final Object currentItemId) {
 		ComboBox itemName = new ComboBox();
 		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
-		ArrayList<String> silverItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getSilverItemsList();
-		for(String silverItem : silverItemListFromCsvFile){
+		ArrayList<String> silverItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility
+				.getInstance().getSilverItemsList();
+		for (String silverItem : silverItemListFromCsvFile) {
 			itemName.addItem(silverItem);
 		}
 		itemName.setWidth("100%");

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -101,48 +102,51 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
     }
 
 	@SuppressWarnings("unchecked")
-	public void addCustomItem(DiamondTransactionItemDTO diamondItemBean) {
-		Object diamondItemRowId = addItem();
-		Item item = getItem(diamondItemRowId);
-		if (item != null) {
-			item.getItemProperty(DELETE).setValue(getRemoveItemImage(diamondItemRowId));
+	public void addCustomItem(List<DiamondTransactionItemDTO> diamondItemBeanList) {
+		for (DiamondTransactionItemDTO diamondItemBean : diamondItemBeanList) {
+			Object diamondItemRowId = addItem();
+			Item item = getItem(diamondItemRowId);
+			if (item != null) {
+				item.getItemProperty(DELETE).setValue(getRemoveItemImage(diamondItemRowId));
 
-			ComboBox itemNameCombo = getItemNameList(diamondItemRowId);
-			itemNameCombo.addItem(diamondItemBean.getItemName());
-			itemNameCombo.setValue(diamondItemBean.getItemName());
-			item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
-			
-			TextField quantity = getQuantity(diamondItemRowId);
-			quantity.setValue(String.valueOf(diamondItemBean.getQuantity()));
-			item.getItemProperty(QUANTITY).setValue(quantity);
-			
-			ComboBox piecePairCombo = getPiecePair(diamondItemRowId);
-			piecePairCombo.addItem(diamondItemBean.getPiecePair());
-			piecePairCombo.setValue(diamondItemBean.getPiecePair());
-			item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
-			
-			TextField goldWeightTxt = (TextField) getWeight(diamondItemRowId);
-			goldWeightTxt.setValue(String.valueOf(diamondItemBean.getGoldWeight()));
-			item.getItemProperty(GOLD_WEIGHT).setValue(goldWeightTxt);
-			
-			TextField diamondWeightTxt = (TextField) getWeight(diamondItemRowId);
-			diamondWeightTxt.setValue(String.valueOf(diamondItemBean.getDiamondWeightCarat()));
-			item.getItemProperty(DIAMOND_WEIGHT).setValue(diamondWeightTxt);
-			
-			TextField diamondPieceTxt = (TextField) getQuantity(diamondItemRowId);
-			diamondPieceTxt.setValue(String.valueOf(diamondItemBean.getQuantity()));
-			item.getItemProperty(DIAMOND_PIECE).setValue(diamondPieceTxt);
-			
-			ComboBox certificateCombo = getCertificate(diamondItemRowId);
-			certificateCombo.addItem(diamondItemBean.isCertified() ? "Yes" : "No");
-			certificateCombo.setValue(diamondItemBean.isCertified() ? "Yes" : "No");
-			item.getItemProperty(CERTIFICATE).setValue(certificateCombo);
-			
-			TextField itemPriceTxt = (TextField) getPrice();
-			itemPriceTxt.setValue(String.valueOf(diamondItemBean.getItemPrice()));
-			item.getItemProperty(PRICE).setValue(itemPriceTxt);
-		
+				ComboBox itemNameCombo = getItemNameList(diamondItemRowId);
+				itemNameCombo.addItem(diamondItemBean.getItemName());
+				itemNameCombo.setValue(diamondItemBean.getItemName());
+				item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
+				
+				TextField quantity = getQuantity(diamondItemRowId);
+				quantity.setValue(String.valueOf(diamondItemBean.getQuantity()));
+				item.getItemProperty(QUANTITY).setValue(quantity);
+				
+				ComboBox piecePairCombo = getPiecePair(diamondItemRowId);
+				piecePairCombo.addItem(diamondItemBean.getPiecePair());
+				piecePairCombo.setValue(diamondItemBean.getPiecePair());
+				item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
+				
+				TextField goldWeightTxt = (TextField) getWeight(diamondItemRowId);
+				goldWeightTxt.setValue(String.valueOf(diamondItemBean.getGoldWeight()));
+				item.getItemProperty(GOLD_WEIGHT).setValue(goldWeightTxt);
+				
+				TextField diamondWeightTxt = (TextField) getWeight(diamondItemRowId);
+				diamondWeightTxt.setValue(String.valueOf(diamondItemBean.getDiamondWeightCarat()));
+				item.getItemProperty(DIAMOND_WEIGHT).setValue(diamondWeightTxt);
+				
+				TextField diamondPieceTxt = (TextField) getQuantity(diamondItemRowId);
+				diamondPieceTxt.setValue(String.valueOf(diamondItemBean.getQuantity()));
+				item.getItemProperty(DIAMOND_PIECE).setValue(diamondPieceTxt);
+				
+				ComboBox certificateCombo = getCertificate(diamondItemRowId);
+				certificateCombo.addItem(diamondItemBean.isCertified() ? "Yes" : "No");
+				certificateCombo.setValue(diamondItemBean.isCertified() ? "Yes" : "No");
+				item.getItemProperty(CERTIFICATE).setValue(certificateCombo);
+				
+				TextField itemPriceTxt = (TextField) getPrice();
+				itemPriceTxt.setValue(String.valueOf(diamondItemBean.getItemPrice()));
+				item.getItemProperty(PRICE).setValue(itemPriceTxt);
+			}
+
 		}
+
 	}
 	
 	private Image getRemoveItemImage(Object diamondItemRowId) {

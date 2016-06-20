@@ -70,39 +70,42 @@ public class GeneralItemContainer extends IndexedContainer implements CustomItem
 	}
 
 	@SuppressWarnings("unchecked")
-	public void addCustomItem(GeneralTransactionItemDTO generalItemBean) {
-		Object generalItemRowId = addItem();
-		Item item = getItem(generalItemRowId);
-		if (item != null) {
-			item.getItemProperty(DELETE).setValue(getRemoveItemImage(generalItemRowId));
+	public void addCustomItem(List<GeneralTransactionItemDTO> generalItemBeanList) {
+		for(GeneralTransactionItemDTO generalItemBean : generalItemBeanList){
+			Object generalItemRowId = addItem();
+			Item item = getItem(generalItemRowId);
+			if (item != null) {
+				item.getItemProperty(DELETE).setValue(getRemoveItemImage(generalItemRowId));
 
-			ComboBox itemNameCombo = getItemNameList(generalItemRowId);
-			itemNameCombo.addItem(generalItemBean.getItemName());
-			itemNameCombo.setValue(generalItemBean.getItemName());
-			item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
+				ComboBox itemNameCombo = getItemNameList(generalItemRowId);
+				itemNameCombo.addItem(generalItemBean.getItemName());
+				itemNameCombo.setValue(generalItemBean.getItemName());
+				item.getItemProperty(ITEM_NAME).setValue(itemNameCombo);
+				
+				TextField quantity = getQuantity(generalItemRowId);
+				quantity.setValue(String.valueOf(generalItemBean.getQuantity()));
+				item.getItemProperty(QUANTITY).setValue(quantity);
+				
+				ComboBox piecePairCombo = getPiecePair(generalItemRowId);
+				piecePairCombo.addItem(generalItemBean.getPiecepair());
+				piecePairCombo.setValue(generalItemBean.getPiecepair());
+				item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
+				
+				TextField itemWeightTxt = (TextField) getWeight(generalItemRowId);
+				itemWeightTxt.setValue(String.valueOf(generalItemBean.getWeight()));
+				item.getItemProperty(WEIGHT).setValue(itemWeightTxt);
+				
+				TextField itemPricePerPiecePairTxt = (TextField) getPrice();
+				itemPricePerPiecePairTxt.setValue(String.valueOf(generalItemBean.getPricePerPiecepair()));
+				item.getItemProperty(PRICE_PER_PIECE_PAIR).setValue(itemPricePerPiecePairTxt);
+				
+				TextField itemPriceTxt = (TextField) getPrice();
+				itemPriceTxt.setValue(String.valueOf(generalItemBean.getItemPrice()));
+				item.getItemProperty(PRICE).setValue(itemPriceTxt);
 			
-			TextField quantity = getQuantity(generalItemRowId);
-			quantity.setValue(String.valueOf(generalItemBean.getQuantity()));
-			item.getItemProperty(QUANTITY).setValue(quantity);
-			
-			ComboBox piecePairCombo = getPiecePair(generalItemRowId);
-			piecePairCombo.addItem(generalItemBean.getPiecepair());
-			piecePairCombo.setValue(generalItemBean.getPiecepair());
-			item.getItemProperty(PIECE_PAIR).setValue(piecePairCombo);
-			
-			TextField itemWeightTxt = (TextField) getWeight(generalItemRowId);
-			itemWeightTxt.setValue(String.valueOf(generalItemBean.getWeight()));
-			item.getItemProperty(WEIGHT).setValue(itemWeightTxt);
-			
-			TextField itemPricePerPiecePairTxt = (TextField) getPrice();
-			itemPricePerPiecePairTxt.setValue(String.valueOf(generalItemBean.getPricePerPiecepair()));
-			item.getItemProperty(PRICE_PER_PIECE_PAIR).setValue(itemPricePerPiecePairTxt);
-			
-			TextField itemPriceTxt = (TextField) getPrice();
-			itemPriceTxt.setValue(String.valueOf(generalItemBean.getItemPrice()));
-			item.getItemProperty(PRICE).setValue(itemPriceTxt);
-		
+			}
 		}
+		
 	}
 	
 	private Object getPrice() {
