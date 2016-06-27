@@ -35,7 +35,7 @@ public class BillService {
 	}
 	
 	public List<TransactionSearchResultDto> findBills(TransactionSearchCriteriaDto tt) {
-		return transDao.getTransaction(tt.getShopId(), tt.getBillType(), tt.getBillStatus(), tt.getStartDate(), tt.getEndDate());
+		return transDao.getTransactionSearch(tt.getShopId(), tt.getBillType(), tt.getBillStatus(), tt.getStartDate(), tt.getEndDate());
 	}
 	
 	public Map<String, Long> updateBill(long shopId, long transId, TransactionDTO transDto){

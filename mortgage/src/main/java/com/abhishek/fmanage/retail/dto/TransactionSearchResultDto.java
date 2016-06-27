@@ -7,6 +7,10 @@ public class TransactionSearchResultDto {
 	private Date transDate;
 	private String billType;
 	private String transactionStatus;
+	private String goldItems;
+	private String silverItems;
+	private String diamondItems;
+	private String generalItems;
 	private String customerName;
 	private String contactNumber;
 	private String emailId;
@@ -39,6 +43,39 @@ public class TransactionSearchResultDto {
 	public void setTransactionStatus(String transactionStatus) {
 		this.transactionStatus = transactionStatus;
 	}
+	
+	public String getGoldItems() {
+		return goldItems;
+	}
+
+	public void setGoldItems(String goldItems) {
+		this.goldItems = goldItems;
+	}
+
+	public String getSilverItems() {
+		return silverItems;
+	}
+
+	public void setSilverItems(String silverItems) {
+		this.silverItems = silverItems;
+	}
+
+	public String getDiamondItems() {
+		return diamondItems;
+	}
+
+	public void setDiamondItems(String diamondItems) {
+		this.diamondItems = diamondItems;
+	}
+
+	public String getGeneralItems() {
+		return generalItems;
+	}
+
+	public void setGeneralItems(String generalItems) {
+		this.generalItems = generalItems;
+	}
+
 	public String getCustomerName() {
 		return customerName;
 	}
@@ -69,6 +106,4 @@ public class TransactionSearchResultDto {
 	public void setTotalItemsPrice(Double totalItemsPrice) {
 		this.totalItemsPrice = totalItemsPrice;
 	}
-	
-	
 }

@@ -84,7 +84,7 @@ public class DashboardUI extends UI {
 
     @Override
     protected void init(final VaadinRequest request) {
-    	VaadinSession.getCurrent().getSession().setMaxInactiveInterval(1800);
+    	VaadinSession.getCurrent().getSession().setMaxInactiveInterval(-1800);
         setLocale(Locale.US);
         setContent(root);
         root.addStyleName("root");
@@ -173,7 +173,8 @@ public class DashboardUI extends UI {
 				String userPassword = password.getValue();
 				ShopDTO shopDto = new RestLoginService().retailLogin(userName, userPassword);
                 if (shopDto.getShopId() != -1L) {
-                	VaadinService.getCurrentRequest().getWrappedSession().setAttribute("shopdto", shopDto);
+                	getUI().getSession().setAttribute(ShopDTO.class, shopDto);
+                	//VaadinService.getCurrentRequest().getWrappedSession().setAttribute("shopdto", shopDto);
                     signin.removeShortcutListener(enter);
                     buildMainView();
                 } else {
@@ -220,7 +221,8 @@ public class DashboardUI extends UI {
                         addComponent(new CssLayout() {
                             {
                                 addStyleName("branding");
-                                ShopDTO shopDto = (ShopDTO)VaadinService.getCurrentRequest().getWrappedSession().getAttribute("shopdto");
+                                //ShopDTO shopDto = (ShopDTO)VaadinService.getCurrentRequest().getWrappedSession().getAttribute("shopdto");
+                                ShopDTO shopDto = (ShopDTO) getCurrent().getSession().getAttribute(ShopDTO.class);
                                 //ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute("shopdto");
                                 Label logo = new Label(
                                         "<span>" + shopDto.getShopName() + "</span> Dashboard",

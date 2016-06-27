@@ -47,7 +47,6 @@ import com.vaadin.event.MouseEvents;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
-import com.vaadin.server.VaadinService;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -112,8 +111,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		diamondBillingTable = getDiamondTable();
 		generalBillingTable = getGeneralTable();
 
-		shopDto = (ShopDTO) VaadinService.getCurrentRequest()
-				.getWrappedSession().getAttribute("shopdto");
+		shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
 
 		VerticalLayout goldBillingLayout = getBillingLayout(goldBillingTable,
 				goldItemContainer, ItemContainerType.GOLD);
@@ -251,8 +249,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		billPopUpDate.setValue(new Date());
 		toolbar.addComponent(billPopUpDate);
 
-		Label tinLabel = new Label("<b>TIN VAT NO:</b>"
-				+ shopDto.getTinNumber(), ContentMode.HTML);
+		Label tinLabel = new Label("<b>TIN VAT NO:</b>" + shopDto.getTinNumber(), ContentMode.HTML);
 		tinLabel.setStyleName("vinHiddenLabel");
 		tinLabel.setImmediate(true);
 
@@ -308,10 +305,11 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 					Alignment.MIDDLE_LEFT);
 		}
 
-		Button searchTransBtn = new Button("Search");
-		searchTransBtn.setSizeUndefined();
-		searchTransBtn.addStyleName("sidebar");
-		searchTransBtn.addClickListener(new Button.ClickListener() {
+		Button autoFillTransBtn = new Button("AutoFill");
+		autoFillTransBtn.setSizeUndefined();
+		autoFillTransBtn.addStyleName("icon-search-1");
+		autoFillTransBtn.addStyleName("sidebar");
+		autoFillTransBtn.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 
 			public void buttonClick(ClickEvent event) {
@@ -389,7 +387,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		toolbar.addComponent(optionGroupLayout);
 		toolbar.addComponent(tinLabel);
 		toolbar.addComponent(transactionSearchTxt);
-		toolbar.addComponent(searchTransBtn);
+		toolbar.addComponent(autoFillTransBtn);
 
 		// toolbar.addComponent(shopLogoImage);
 		toolbar.setExpandRatio(newBillBtn, 1);
@@ -398,7 +396,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		toolbar.setExpandRatio(optionGroupLayout, 1);
 		toolbar.setExpandRatio(tinLabel, 1);
 		toolbar.setExpandRatio(transactionSearchTxt, 1);
-		toolbar.setExpandRatio(searchTransBtn, 1);
+		toolbar.setExpandRatio(autoFillTransBtn, 1);
 		toolbar.setComponentAlignment(newBillBtn, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(staffListCombo, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(billPopUpDate, Alignment.MIDDLE_LEFT);
@@ -407,7 +405,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		toolbar.setComponentAlignment(tinLabel, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(transactionSearchTxt,
 				Alignment.MIDDLE_LEFT);
-		toolbar.setComponentAlignment(searchTransBtn, Alignment.MIDDLE_LEFT);
+		toolbar.setComponentAlignment(autoFillTransBtn, Alignment.MIDDLE_LEFT);
 		return toolbar;
 	}
 
@@ -548,9 +546,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 							staffNameComboBox.getValue().toString(),
 							includePrice.getValue(), notes.getValue(),
 							isTransactionActive).extract();
-					ShopDTO shopDto = (ShopDTO) VaadinService
-							.getCurrentRequest().getWrappedSession()
-							.getAttribute("shopdto");
+					ShopDTO shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
 
 					if (transId == -1L) {
 						BillCreationResponse response = new RestTransactionService()

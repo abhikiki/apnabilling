@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,9 @@ public class TransactionDAO {
 	
 	@Autowired
 	private RetailTransactionPriceDAO priceDAO;
+	
+	@Autowired
+    protected NamedParameterJdbcTemplate namedJdbcTemplate;
 	
 	private final JdbcTemplate jdbcTemplate;
 
@@ -87,6 +92,46 @@ public class TransactionDAO {
 		
 		return transDto;
 	}
+	
+	
+	public List<TransactionSearchResultDto> getTransactionSearch(long shopId, String billType, String billStatus, Date startDate, Date endDate) {
+		String billType1 = "E"; //estimate
+		String billType2= "I";  //invoice
+		if(billType.equals("E")){
+			billType2 = "E";
+		}else if(billType.equals("I")){
+			billType1 = "I";
+		}
+		String billStatus1 = "A"; //active
+		String billStatus2 = "I"; //inactive
+		if(billStatus.equals("A")){
+			billStatus2 = "A";
+		}else if (billStatus.equals("I")){
+			billStatus1 = "I";
+		}
+		
+        return namedJdbcTemplate.query("call customtransactionsearch(:shopId, :billType1, :billType2, :billStatus1, :billStatus2, :startDate, :endDate)",
+        		new MapSqlParameterSource()
+        		.addValue("shopId", shopId)
+                .addValue("billType1", billType1)
+                .addValue("billType2", billType2)
+                .addValue("billStatus1", billStatus1)
+                .addValue("billStatus2", billStatus2)
+                .addValue("startDate", new java.sql.Timestamp(startDate.getTime()))
+                .addValue("endDate", new java.sql.Timestamp(endDate.getTime())),
+                this::transSearchResultItemMapRow);
+//            (rs, rowNum) -> {
+//            	LawFirmModel lawFirmModel = new LawFirmModel();
+//            	lawFirmModel.setEntityId(rs.getLong("entity_id"));
+//            	lawFirmModel.setStatusId(rs.getString("status_id"));
+//            	lawFirmModel.setStatusDate(rs.getDate("status_dt"));
+//            	lawFirmModel.setYearEstablised(rs.getInt("year_established"));
+//            	lawFirmModel.setAttorneyCount(rs.getInt("atty_count"));
+//            	lawFirmModel.setWebsiteUrl(rs.getString("web_site_url"));
+//            	lawFirmModel.setResume(rs.getString("resume"));
+//                return lawFirmModel;
+//            });
+    }
 	
 	public List<TransactionSearchResultDto> getTransaction(long shopId, String billType, String billStatus, Date startDate, Date endDate){
 		final String sql = "SELECT " 
@@ -205,6 +250,10 @@ public class TransactionDAO {
 		transSearchResultDto.setTransId(resultSet.getLong("TRANSID"));
 		transSearchResultDto.setBillType(resultSet.getString("BILLTYPE"));
 		transSearchResultDto.setTransactionStatus(resultSet.getString("TRANSACTIONSTATUS"));
+		transSearchResultDto.setGoldItems(resultSet.getString("GOLDITEMS"));
+		transSearchResultDto.setSilverItems(resultSet.getString("SILVERITEMS"));
+		transSearchResultDto.setDiamondItems(resultSet.getString("DIAMONDITEMS"));
+		transSearchResultDto.setGeneralItems(resultSet.getString("GENERALITEMS"));
 		transSearchResultDto.setCustomerName(resultSet.getString("CUSTOMERNAME"));
 		transSearchResultDto.setContactNumber(resultSet.getString("CONTACTNUMBER"));
 		transSearchResultDto.setCustomerAddress(resultSet.getString("ADDRESS"));
