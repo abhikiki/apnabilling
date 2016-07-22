@@ -3,7 +3,6 @@ package com.abhishek.fmanage.retail.views;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -12,8 +11,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
-import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroup;
-import org.vaadin.hene.flexibleoptiongroup.FlexibleOptionGroupItemComponent;
 
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
@@ -46,6 +43,7 @@ import com.vaadin.data.util.PropertysetItem;
 import com.vaadin.event.MouseEvents;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Alignment;
@@ -58,6 +56,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.OptionGroup;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.Table;
@@ -90,11 +89,10 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	private Component customerLayout;
 	private PriceForm pfForm = new PriceForm(getPricePropertyItem());
 	private HorizontalLayout priceLayout = new HorizontalLayout();
-	private Panel p = new Panel();
-	ComboBox staffNameComboBox = new ComboBox("Staff Name");
+	private ComboBox staffNameComboBox = new ComboBox("Staff Name");
 	private CustomerDTO cusBean = new CustomerDTO();
 	private CheckBox includePrice = new CheckBox("Include Price", true);
-	private FlexibleOptionGroup billType;
+	private OptionGroup billType;
 	private TextArea notes = new TextArea("Invoice Notes");
 	private TextField transactionSearchTxt;
 	long transId = -1L;
@@ -132,21 +130,21 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		retailViewVerticalLayout.addComponent(diamondBillingLayout);
 		retailViewVerticalLayout.addComponent(generalBillingLayout);
 		retailViewVerticalLayout.addComponent(getCalculatedPriceLayout());
+		retailViewVerticalLayout.addStyleName("customer-layout");
 		retailViewVerticalLayout.setSpacing(true);
 		retailViewVerticalLayout.setImmediate(true);
-		p.setSizeFull();
 
 		HorizontalLayout toolbarLayout = new HorizontalLayout();
 		toolbarLayout.addComponent(getToolbar());
 		toolbarLayout.setSizeUndefined();
 		toolbarLayout.setSizeFull();
-		toolbarLayout.addStyleName("sidebar");
+		toolbarLayout.addStyleName("mytoolbar");
 
 		VerticalSplitPanel vSplitPanel = new VerticalSplitPanel();
 		vSplitPanel.setFirstComponent(toolbarLayout);
 		vSplitPanel.setSecondComponent(retailViewVerticalLayout);
 		vSplitPanel.setSizeFull();
-		vSplitPanel.setSplitPosition(12, Unit.PERCENTAGE);
+		vSplitPanel.setSplitPosition(14, Unit.PERCENTAGE);
 		Panel toolBarPanel = new Panel();
 		toolBarPanel.setSizeUndefined();
 		toolBarPanel.setWidth("100%");
@@ -165,9 +163,10 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	private Component getCalculatedPriceLayout() {
 		priceLayout.setSizeFull();
 		priceLayout.setSpacing(true);
-		priceLayout.addStyleName("sidebar");
+		priceLayout.addStyleName("customer-layout");
 		priceLayout.addComponent(pfForm);
 		notes.setSizeFull();
+		notes.setIcon(FontAwesome.COMMENTS);
 		Button generateBillBtn = getGenerateBillBtn();
 		Button deleteBillBtn = getDeleteBillBtn();
 		priceLayout.addComponent(notes);
@@ -186,7 +185,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	private Button getDeleteBillBtn() {
 		Button deleteBillBtn = new Button("Delete Bill");
 		deleteBillBtn.setSizeUndefined();
-		deleteBillBtn.addStyleName("sidebar");
+		deleteBillBtn.addStyleName("default");
 		deleteBillBtn.setData(this);
 		deleteBillBtn.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
@@ -218,12 +217,12 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		toolbar.setWidth("100%");
 		toolbar.setSpacing(true);
 		toolbar.setMargin(true);
-		toolbar.addStyleName("toolbar");
+		//toolbar.addStyleName("toolbar");
 
 		Button newBillBtn = new Button("New Bill");
 		newBillBtn.setSizeUndefined();
 		newBillBtn.addStyleName("icon-newbill");
-		newBillBtn.addStyleName("sidebar");
+		newBillBtn.addStyleName("default");
 
 		newBillBtn.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
@@ -250,7 +249,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		toolbar.addComponent(billPopUpDate);
 
 		Label tinLabel = new Label("<b>TIN VAT NO:</b>" + shopDto.getTinNumber(), ContentMode.HTML);
-		tinLabel.setStyleName("vinHiddenLabel");
+		tinLabel.addStyleName("vinVisibleLabel");
 		tinLabel.setImmediate(true);
 
 		transactionSearchTxt = new TextField("Transaction Number");
@@ -261,54 +260,46 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		transactionSearchTxt.setWidth("60%");
 
 		// A single-select radio button group
-		billType = new FlexibleOptionGroup();
+		billType = new OptionGroup("Bill Type");
 		billType.addItems(ESTIMATE_BILL, INVOICE_BILL);
 		billType.setValue(ESTIMATE_BILL);
 
 		billType.addValueChangeListener((value) -> {
 			if (!value.getProperty().getValue().equals(ESTIMATE_BILL)) {
-				tinLabel.setStyleName("vinVisibleLabel");
+				tinLabel.addStyleName("vinHiddenLabel");
 				pfForm.isInvoiceEnabled = true;
 				pfForm.vatOnNewItemPrice.setValue((String.format("%.3f",
 						pfForm.getVatPrice())));
 				pfForm.netAmountToPay.setValue(String.format("%.3f",
 						pfForm.getTotalNetAmount()));
 				pfForm.advancePayment.setValue(String.format("%.3f", 0.000f));
-				pfForm.advancePayment.setEnabled(false);
-				pfForm.balanceAmount.setEnabled(false);
+				//pfForm.advancePayment.setEnabled(false);
+				pfForm.advancePayment.setIcon(null);
+				//pfForm.balanceAmount.setEnabled(false);
 			} else {
-				tinLabel.setStyleName("vinHiddenLabel");
+				tinLabel.addStyleName("vinVisibleLabel");
+				
 				pfForm.isInvoiceEnabled = false;
 				pfForm.vatOnNewItemPrice.setValue(String.format("%.3f", 0.000f));
 				pfForm.netAmountToPay.setValue(String.format("%.3f",
 						pfForm.getTotalNetAmount()));
-				pfForm.vatOnNewItemPrice.setEnabled(false);
-				pfForm.advancePayment.setEnabled(true);
+				//pfForm.vatOnNewItemPrice.setEnabled(false);
+				//pfForm.advancePayment.setEnabled(true);
+				pfForm.advancePayment.setIcon(FontAwesome.EDIT);
 				//pfForm.balanceAmount.setEnabled(true);
 
 			}
 		});
 		HorizontalLayout optionGroupLayout = new HorizontalLayout();
-		for (Iterator<FlexibleOptionGroupItemComponent> iter = billType
-				.getItemComponentIterator(); iter.hasNext();) {
-			FlexibleOptionGroupItemComponent comp = iter.next();
-
-			// Add FlexibleOptionGroupItemComponents instead
-			optionGroupLayout.addComponent(comp);
-			optionGroupLayout.setStyleName("myLabel");
-			Label captionLabel = new Label();
-			captionLabel.setIcon(comp.getIcon());
-			captionLabel.setCaption(comp.getCaption());
-			captionLabel.setStyleName("myLabel");
-			optionGroupLayout.addComponent(captionLabel);
-			optionGroupLayout.setComponentAlignment(captionLabel,
-					Alignment.MIDDLE_LEFT);
-		}
+		billType.addItems(ESTIMATE_BILL, INVOICE_BILL);
+		billType.setValue(ESTIMATE_BILL);
+		optionGroupLayout.addComponent(billType);
+		optionGroupLayout.setComponentAlignment(billType, Alignment.MIDDLE_LEFT);
 
 		Button autoFillTransBtn = new Button("AutoFill");
 		autoFillTransBtn.setSizeUndefined();
 		autoFillTransBtn.addStyleName("icon-search-1");
-		autoFillTransBtn.addStyleName("sidebar");
+		autoFillTransBtn.addStyleName("default");
 		autoFillTransBtn.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
 
@@ -337,7 +328,6 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						includePrice.setValue(tDto.getIncludePrice());
 						transId =-1L;
 						generateBillBtn.setCaption("Generate Bill");
-						//getBillWindow(Long.parseLong(transactionSearchTxt.getValue()), tDto);
 					} else {
 						goldItemContainer.removeAllItems();
 						goldBillingTable.setColumnFooter(GoldItemContainer.WEIGHT, "0.000");
@@ -358,7 +348,6 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						diamondBillingTable.setPageLength(diamondBillingTable.size());
 						diamondBillingTable.setColumnFooter(DiamondItemContainer.DELETE, ("Items=" + diamondBillingTable.size()));
 						
-						//diamondBillingTable.setColumnFooter(DiamondItemContainer.PRICE, "0.000");
 						generalItemContainer.removeAllItems();
 						generalBillingTable.setColumnFooter(GeneralItemContainer.PRICE, "0.000");
 						generalBillingTable.setPageLength(generalBillingTable.size());
@@ -385,11 +374,10 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		});
 
 		toolbar.addComponent(optionGroupLayout);
-		toolbar.addComponent(tinLabel);
 		toolbar.addComponent(transactionSearchTxt);
 		toolbar.addComponent(autoFillTransBtn);
+		toolbar.addComponent(tinLabel);
 
-		// toolbar.addComponent(shopLogoImage);
 		toolbar.setExpandRatio(newBillBtn, 1);
 		toolbar.setExpandRatio(staffListCombo, 1);
 		toolbar.setExpandRatio(billPopUpDate, 1);
@@ -403,8 +391,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		toolbar.setComponentAlignment(optionGroupLayout, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(tinLabel, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(tinLabel, Alignment.MIDDLE_LEFT);
-		toolbar.setComponentAlignment(transactionSearchTxt,
-				Alignment.MIDDLE_LEFT);
+		toolbar.setComponentAlignment(transactionSearchTxt, Alignment.MIDDLE_LEFT);
 		toolbar.setComponentAlignment(autoFillTransBtn, Alignment.MIDDLE_LEFT);
 		return toolbar;
 	}
@@ -525,7 +512,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		generateBillBtn = new Button("Generate Bill");
 		generateBillBtn.setSizeUndefined();
 		generateBillBtn.setImmediate(true);
-		generateBillBtn.addStyleName("sidebar");
+		generateBillBtn.addStyleName("default");
 		generateBillBtn.setData(this);
 		generateBillBtn.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;
@@ -597,23 +584,28 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 			CustomItemContainerInterface container,
 			ItemContainerType itemContainerType) {
 		String buttonType = "Gold";
+		String buttonStyle = "";
 		switch (itemContainerType.ordinal()) {
 		case 0:
-			buttonType = "Add Gold Item";
+			buttonType = "Gold Item";
+			buttonStyle = "gold-table";
 			break;
 		case 1:
-			buttonType = "Add Silver Item";
+			buttonType = "Silver Item";
+			buttonStyle = "silver-table";
 			break;
 		case 2:
-			buttonType = "Add Diamond Item";
+			buttonType = "Diamond Item";
+			buttonStyle = "diamond-table";
 			break;
 		case 3:
-			buttonType = "Add General Item";
+			buttonType = "General Item";
+			buttonStyle = "general-table";
 		}
 		Button newBillBtn = new Button(buttonType);
 		newBillBtn.setSizeUndefined();
 		newBillBtn.addStyleName("icon-newbill");
-		newBillBtn.addStyleName("sidebar");
+		newBillBtn.addStyleName(buttonStyle);
 
 		newBillBtn.addClickListener(new Button.ClickListener() {
 			private static final long serialVersionUID = 1L;

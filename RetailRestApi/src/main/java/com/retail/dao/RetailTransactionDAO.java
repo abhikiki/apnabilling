@@ -42,8 +42,7 @@ public class RetailTransactionDAO {
 	
 	public List<RetailTransactionDTO> getRetailTransaction(long transId) {
 		final String sql = "SELECT SHOPID, TRANSID, TRANSDATE, BILLTYPE, DEALINGSTAFFNAME, NOTES, INCLUDEPRICE, TRANSACTIONSTATUS FROM RETAILTRANSACTION WHERE TRANSID = ?";
-		return jdbcTemplate.query(sql, new Object[] { transId },
-				this::retailTransactionMapRow);
+		return jdbcTemplate.query(sql, new Object[] { transId }, this::retailTransactionMapRow);
 	}
 
 	public Long updateRetailTransaction(long transId, RetailTransactionDTO retailTransDTO) {

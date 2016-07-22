@@ -6,10 +6,12 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.abhishek.fmanage.cache.ItemCache;
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -279,22 +281,10 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 		ComboBox itemName = new ComboBox();
 		itemName.setWidth("100%");
 		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
-		ArrayList<String> diamondItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getDiamondItemsList();
-		for(String diamondItem : diamondItemListFromCsvFile){
-			itemName.addItem(diamondItem);
+		List<ItemDTO> itemDTOList = ItemCache.getInstance().getItemMap().get("DIAMOND");
+		for (ItemDTO itemDto : itemDTOList) {
+			itemName.addItem(itemDto.getItemName());
 		}
-		itemName.addItem("TOPS");
-		itemName.addItem("LADIES RING");
-		itemName.addItem("GENTS RING");
-		itemName.addItem("LOCKET SET");
-		itemName.addItem("PENDANT SET");
-		itemName.addItem("PENDANT");
-		itemName.addItem("LOCKET");
-		itemName.addItem("NECKLACE");
-		itemName.addItem("EARRING");
-		itemName.addItem("SET");
-		itemName.addItem("DIAMOND ITEM");
-		itemName.addItem("MISCELLANEOUS");
 		return itemName;
 	}
 

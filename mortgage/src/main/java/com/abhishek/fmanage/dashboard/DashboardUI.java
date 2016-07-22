@@ -6,26 +6,22 @@ import java.util.Locale;
 
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestLoginService;
+import com.abhishek.fmanage.retail.views.DashboardView;
 import com.abhishek.fmanage.retail.views.RetailInvoiceView;
 import com.abhishek.fmanage.retail.views.RetailTransactionSearchView;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.event.ShortcutListener;
-import com.vaadin.event.Transferable;
-import com.vaadin.event.dd.DragAndDropEvent;
-import com.vaadin.event.dd.DropHandler;
-import com.vaadin.event.dd.acceptcriteria.AcceptCriterion;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.AbstractSelect.AcceptItem;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -33,7 +29,6 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.DragAndDropWrapper;
-import com.vaadin.ui.DragAndDropWrapper.DragStartMode;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
@@ -70,9 +65,14 @@ public class DashboardUI extends UI {
     private CssLayout menu = new CssLayout();
     private CssLayout content = new CssLayout();
 
+    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions"};
+    private String[] staffViews = new String[] {"retailbilling"};
+    private String currentRole = "ADMIN";
+    
     HashMap<String, Class<? extends View>> routes = new HashMap<String, Class<? extends View>>() {
 		private static final long serialVersionUID = -8100418558296244344L;
 		{
+			put("/dashboard", DashboardView.class);
             put("/retailbilling", RetailInvoiceView.class);
             put("/transactions", RetailTransactionSearchView.class);
         }
@@ -144,10 +144,12 @@ public class DashboardUI extends UI {
         fields.addStyleName("fields");
 
         final TextField username = new TextField("Username");
+        username.setIcon(FontAwesome.USER);
         username.focus();
         fields.addComponent(username);
 
         final PasswordField password = new PasswordField("Password");
+        password.setIcon(FontAwesome.LOCK);
         fields.addComponent(password);
 
         final Button signin = new Button(SIGN_IN);
@@ -174,6 +176,7 @@ public class DashboardUI extends UI {
 				ShopDTO shopDto = new RestLoginService().retailLogin(userName, userPassword);
                 if (shopDto.getShopId() != -1L) {
                 	getUI().getSession().setAttribute(ShopDTO.class, shopDto);
+                	currentRole = shopDto.getRole();
                 	//VaadinService.getCurrentRequest().getWrappedSession().setAttribute("shopdto", shopDto);
                     signin.removeShortcutListener(enter);
                     buildMainView();
@@ -203,6 +206,20 @@ public class DashboardUI extends UI {
 
     private void buildMainView() {
         nav = new Navigator(this, content);
+        String[] currentView = null;
+        if(currentRole.equalsIgnoreCase("Admin")){
+        	currentView = adminViews;
+        	
+        	routes.put("/dashboard", DashboardView.class);
+        	routes.put("/transactions", RetailTransactionSearchView.class);
+            
+        	
+        }else{
+        	currentView = staffViews;
+        	routes.remove("/dashboard");
+         	routes.remove("/transactions");
+        }
+       
         for (String route : routes.keySet()) {
             nav.addView(route, routes.get(route));
         }
@@ -290,15 +307,15 @@ public class DashboardUI extends UI {
         });
 
         menu.removeAllComponents();
-        //for (final String view : new String[] { "dashboard", "transactions", "retailbilling"}) {
-        for (final String view : new String[] {"retailbilling", "transactions"}) {
-            Button b = new NativeButton(view.substring(0, 1).toUpperCase()
-                    + view.substring(1).replace('-', ' '));
+        
+        for (final String view : currentView) {
+            Button b = new NativeButton(view.substring(0, 1).toUpperCase() + view.substring(1).replace('-', ' '));
             b.addStyleName("icon-" + view);
             b.addClickListener(event->{
             	clearMenuSelection();
                 event.getButton().addStyleName("selected");
                 if (!nav.getState().equals("/" + view))
+                	
                     nav.navigateTo("/" + view);
             });
             menu.addComponent(b);
@@ -312,10 +329,21 @@ public class DashboardUI extends UI {
             uriFragment = uriFragment.substring(1);
         }
         if (uriFragment == null || uriFragment.equals("") || uriFragment.equals("/")) {
-            nav.navigateTo("/retailbilling");
+        	if(currentRole.equalsIgnoreCase("ADMIN")){
+        		nav.navigateTo("/dashboard");
+        	}else{
+        		nav.navigateTo("/retailbilling");
+        	}
+            
             menu.getComponent(0).addStyleName("selected");
         } else {
-            nav.navigateTo(uriFragment);
+        	if(currentRole.equalsIgnoreCase("STAFF")){
+        		uriFragment = "/retailbilling";
+        		nav.navigateTo(uriFragment);
+        	}else{
+        		uriFragment = "/dashboard";
+        		nav.navigateTo(uriFragment);
+        	}
             viewNameToMenuButton.get(uriFragment).addStyleName("selected");
         }
 

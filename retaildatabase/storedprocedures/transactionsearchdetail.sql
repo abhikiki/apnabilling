@@ -51,12 +51,13 @@ INSERT INTO TRANSANCTION_SEARCH_RESULT(TRANSDATE, TRANSID, BILLTYPE, TRANSACTION
 			AND S.SHOPID = SHOPID
 			AND RT.BILLTYPE in (BILLTYPE1, BILLTYPE2)
 			AND RT.TRANSACTIONSTATUS in(TRANSSTATUS1, TRANSSTATUS2)
-			AND RT.TRANSDATE BETWEEN CAST(STARTDATE AS DATE) AND CAST(ENDDATE AS DATETIME)
+			AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(STARTDATE AS DATE) AND CAST(ENDDATE AS DATE)
 			ORDER BY RT.TRANSDATE DESC;
 INSERT INTO TRANSANCTION_ID_HOLDER(TRANSID) SELECT TRANSID FROM TRANSANCTION_SEARCH_RESULT;
 CREATE TEMPORARY TABLE ITEM_TABLE(
 	ITEMNAME VARCHAR(255) DEFAULT '',
-	QUANTITY DECIMAL(4) UNSIGNED
+	QUANTITY DECIMAL(4) UNSIGNED,
+	PIECEPAIR VARCHAR(8) DEFAULT ''
 );
 OPEN transId_cursor;
     get_transId: LOOP
@@ -68,18 +69,19 @@ OPEN transId_cursor;
 		DECLARE v_finished_inner INTEGER DEFAULT 0;
 		DECLARE itemname_inner  VARCHAR(255);
 		DECLARE quantity_inner DECIMAL(4);
+		DECLARE piecepair_inner VARCHAR(8);
 		DECLARE itemnamelist VARCHAR(2048) DEFAULT NULL;
-		DECLARE item_cursor CURSOR FOR  SELECT ITEMNAME, QUANTITY FROM ITEM_TABLE;
+		DECLARE item_cursor CURSOR FOR  SELECT ITEMNAME, QUANTITY, PIECEPAIR FROM ITEM_TABLE;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_finished_inner = 1;
 		SET itemnamelist = NULL;
-		INSERT INTO ITEM_TABLE(ITEMNAME, QUANTITY) SELECT ITEMNAME, QUANTITY FROM RETAILGOLDITEMTRANSACTION WHERE TRANSID = v_transId;
+		INSERT INTO ITEM_TABLE(ITEMNAME, QUANTITY, PIECEPAIR) SELECT ITEMNAME, QUANTITY, PIECEPAIR FROM RETAILGOLDITEMTRANSACTION WHERE TRANSID = v_transId;
 		OPEN item_cursor;
 			 get_item: LOOP
-				FETCH item_cursor INTO itemname_inner, quantity_inner;
+				FETCH item_cursor INTO itemname_inner, quantity_inner, piecepair_inner;
 				IF v_finished_inner = 1 THEN 
 					LEAVE get_item;
 				END IF;
-				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '(', quantity_inner, ')'), itemnamelist);
+				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '(', quantity_inner, ' ', piecepair_inner, ')'), itemnamelist);
 			 END LOOP get_item;
 		    UPDATE TRANSANCTION_SEARCH_RESULT SET GOLDITEMS = itemnamelist WHERE TRANSID = v_transId;
 		CLOSE item_cursor;
@@ -87,14 +89,14 @@ OPEN transId_cursor;
 		
 		SET v_finished_inner = 0;
 		SET itemnamelist = NULL;
-		INSERT INTO ITEM_TABLE(ITEMNAME, QUANTITY) SELECT ITEMNAME, QUANTITY FROM RETAILSILVERITEMTRANSACTION WHERE TRANSID = v_transId;
+		INSERT INTO ITEM_TABLE(ITEMNAME, QUANTITY, PIECEPAIR) SELECT ITEMNAME, QUANTITY, PIECEPAIR FROM RETAILSILVERITEMTRANSACTION WHERE TRANSID = v_transId;
 		OPEN item_cursor;
 			 get_item: LOOP
-				FETCH item_cursor INTO itemname_inner, quantity_inner;
+				FETCH item_cursor INTO itemname_inner, quantity_inner, piecepair_inner;
 				IF v_finished_inner = 1 THEN 
 					LEAVE get_item;
 				END IF;
-				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '(', quantity_inner, ')'), itemnamelist);
+				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '(', quantity_inner, ' ', piecepair_inner, ')'), itemnamelist);
 			 END LOOP get_item;
 			 UPDATE TRANSANCTION_SEARCH_RESULT SET SILVERITEMS = itemnamelist WHERE TRANSID = v_transId;
 		CLOSE item_cursor;
@@ -102,14 +104,14 @@ OPEN transId_cursor;
 		
 		SET v_finished_inner = 0;
 		SET itemnamelist = NULL;
-		INSERT INTO ITEM_TABLE(ITEMNAME, QUANTITY) SELECT ITEMNAME, QUANTITY FROM RETAILDIAMONDITEMTRANSACTION WHERE TRANSID = v_transId;
+		INSERT INTO ITEM_TABLE(ITEMNAME, QUANTITY, PIECEPAIR) SELECT ITEMNAME, QUANTITY, PIECEPAIR FROM RETAILDIAMONDITEMTRANSACTION WHERE TRANSID = v_transId;
 		OPEN item_cursor;
 			 get_item: LOOP
-				FETCH item_cursor INTO itemname_inner, quantity_inner;
+				FETCH item_cursor INTO itemname_inner, quantity_inner, piecepair_inner;
 				IF v_finished_inner = 1 THEN 
 					LEAVE get_item;
 				END IF;
-				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '(', quantity_inner, ')'), itemnamelist);
+				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '(', quantity_inner, ' ', piecepair_inner, ')'), itemnamelist);
 			 END LOOP get_item;
 			 UPDATE TRANSANCTION_SEARCH_RESULT SET DIAMONDITEMS = itemnamelist WHERE TRANSID = v_transId;
 		CLOSE item_cursor;
@@ -117,14 +119,14 @@ OPEN transId_cursor;
 		
 		SET v_finished_inner = 0;
 		SET itemnamelist = NULL;
-		INSERT INTO ITEM_TABLE(ITEMNAME, QUANTITY) SELECT ITEMNAME, QUANTITY FROM RETAILGENERALITEMTRANSACTION WHERE TRANSID = v_transId;
+		INSERT INTO ITEM_TABLE(ITEMNAME, QUANTITY, PIECEPAIR) SELECT ITEMNAME, QUANTITY, PIECEPAIR FROM RETAILGENERALITEMTRANSACTION WHERE TRANSID = v_transId;
 		OPEN item_cursor;
 			 get_item: LOOP
-				FETCH item_cursor INTO itemname_inner, quantity_inner;
+				FETCH item_cursor INTO itemname_inner, quantity_inner, piecepair_inner;
 				IF v_finished_inner = 1 THEN 
 					LEAVE get_item;
 				END IF;
-				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '(', quantity_inner, ')'), itemnamelist);
+				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '(', quantity_inner, ' ', piecepair_inner, ')'), itemnamelist);
 			 END LOOP get_item;
 			 UPDATE TRANSANCTION_SEARCH_RESULT SET GENERALITEMS = itemnamelist WHERE TRANSID = v_transId;
 		CLOSE item_cursor;

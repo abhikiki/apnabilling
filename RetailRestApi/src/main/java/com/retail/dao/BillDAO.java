@@ -25,13 +25,13 @@ public class BillDAO {
 	
 	@Transactional
 	public void saveBill(){
-		ShopDTO sdto = new ShopDTO();
-		sdto.setShopName("AbhishekSHOP");
-		sdto.setTinNumber("2000");
-		sdto.setUserName("abhikiki");
-		sdto.setPassword("guptaa6");
-		sdto.setRole("Staff");
-		long shopId = shopDao.saveShopInformation(sdto);
+//		ShopDTO sdto = new ShopDTO();
+//		sdto.setShopName("AbhishekSHOP");
+//		sdto.setTinNumber("2000");
+//		sdto.setUserName("abhikiki");
+//		sdto.setPassword("guptaa6");
+//		sdto.setRole("Staff");
+//		long shopId = shopDao.saveShopInformation(sdto);
 		//rDao.saveRetailTransaction(shopId, new Date(), "I");
 	}
 }

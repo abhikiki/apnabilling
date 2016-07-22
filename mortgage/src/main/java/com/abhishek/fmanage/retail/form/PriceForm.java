@@ -16,6 +16,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.converter.StringToDoubleConverter;
 import com.vaadin.data.validator.DoubleRangeValidator;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextField;
 
@@ -26,8 +27,8 @@ import com.vaadin.ui.TextField;
 public class PriceForm extends FormLayout{
 
 	private static final long serialVersionUID = -5016984459457685827L;
-	public TextField totalItemPrice = new TextField("Total New Items Price", "0.0");
-	public TextField vatOnNewItemPrice = new TextField("Vat On New Items Price(" + String.valueOf(CustomShopSettingFileUtility.getInstance().getVatPercentage()) + "%)", "0.0");
+	public TextField totalItemPrice = new TextField("Sales Price", "0.0");
+	public TextField vatOnNewItemPrice = new TextField("Vat(" + String.valueOf(CustomShopSettingFileUtility.getInstance().getVatPercentage()) + "%)", "0.0");
     public TextField oldPurchasePrice = new TextField("Old Purchase Price(-)", "0.0");
     public TextField discountPrice =  new TextField("Discount(-)", "0.0");
     public TextField netAmountToPay = new TextField("Net Payable Price", "0.0");
@@ -37,14 +38,17 @@ public class PriceForm extends FormLayout{
     public int invoiceNumber = 0;
 
     public PriceForm(Item item){
-    	addStyleName("sidebar");
+    	addStyleName("customer-layout");
     	StringToDoubleConverter plainDoubleConverter = CustomStringToDoubleConverter();
     	totalItemPrice.setConverter(plainDoubleConverter);
     	vatOnNewItemPrice.setConverter(plainDoubleConverter);
     	oldPurchasePrice.setConverter(plainDoubleConverter);
+    	oldPurchasePrice.setIcon(FontAwesome.EDIT);
     	discountPrice.setConverter(plainDoubleConverter);
+    	discountPrice.setIcon(FontAwesome.EDIT);
     	netAmountToPay.setConverter(plainDoubleConverter);
     	advancePayment.setConverter(plainDoubleConverter);
+    	advancePayment.setIcon(FontAwesome.EDIT);
     	balanceAmount.setConverter(plainDoubleConverter);
     	addComponent(totalItemPrice);
     	addComponent(discountPrice);
@@ -64,13 +68,13 @@ public class PriceForm extends FormLayout{
         customNumericValidator(advancePayment);
         customNumericValidator(balanceAmount);
         
-        netAmountToPay.setEnabled(false);
+        //netAmountToPay.setEnabled(false);
         netAmountToPay.addStyleName("price-disabled");
-        totalItemPrice.setEnabled(false);;
+        //totalItemPrice.setEnabled(false);;
         totalItemPrice.setStyleName("price-disabled");
-        vatOnNewItemPrice.setEnabled(false);
+        vatOnNewItemPrice.setEnabled(true);
         vatOnNewItemPrice.setStyleName("price-disabled");
-        balanceAmount.setEnabled(false);
+        //balanceAmount.setEnabled(false);
         balanceAmount.setStyleName("price-disabled");
         
     	totalItemPrice.addValueChangeListener(new ValueChangeListener() {

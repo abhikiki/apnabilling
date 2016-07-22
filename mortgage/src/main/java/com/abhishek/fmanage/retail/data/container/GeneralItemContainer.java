@@ -9,9 +9,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.abhishek.fmanage.cache.ItemCache;
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -296,16 +298,12 @@ public class GeneralItemContainer extends IndexedContainer implements CustomItem
 	
 	private ComboBox getItemNameList(final Object currentItemId) {
 		ComboBox itemName = new ComboBox();
-		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
-		ArrayList<String> generalItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility.getInstance().getGeneralItemsList();
-		for(String generalItem : generalItemListFromCsvFile){
-			itemName.addItem(generalItem);
-		}
-		itemName.addItem("SILVER COIN");
-		itemName.addItem("GOLD COIN");
-		itemName.addItem("SILVER PEN");
-		itemName.addItem("PEN");
 		itemName.setWidth("100%");
+		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
+		List<ItemDTO> itemDTOList = ItemCache.getInstance().getItemMap().get("GENERAL");
+		for (ItemDTO itemDto : itemDTOList) {
+			itemName.addItem(itemDto.getItemName());
+		}
 		return itemName;
 	}
 

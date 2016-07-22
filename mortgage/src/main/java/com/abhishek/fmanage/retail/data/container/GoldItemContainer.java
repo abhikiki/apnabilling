@@ -6,9 +6,11 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import com.abhishek.fmanage.cache.ItemCache;
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -483,60 +485,10 @@ public class GoldItemContainer extends IndexedContainer implements
 	private ComboBox getItemNameList(final Object currentItemId) {
 		ComboBox itemName = new ComboBox();
 		itemName.addValueChangeListener(getCustomValueChangeListener(currentItemId));
-		ArrayList<String> goldItemListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility
-				.getInstance().getGoldItemsList();
-		for (String goldItem : goldItemListFromCsvFile) {
-			itemName.addItem(goldItem);
+		List<ItemDTO> itemDTOList = ItemCache.getInstance().getItemMap().get("GOLD");
+		for (ItemDTO itemDto : itemDTOList) {
+			itemName.addItem(itemDto.getItemName());
 		}
-		itemName.setWidth("100%");
-		itemName.addItem("AD NOSEPIN");
-		itemName.addItem("BABY BALA");
-		itemName.addItem("BABY RING");
-		itemName.addItem("BALI");
-		itemName.addItem("CHAIN");
-		itemName.addItem("CHAND");
-		itemName.addItem("CHURI");
-		itemName.addItem("DHOLNA");
-		itemName.addItem("EAR LARI");
-		itemName.addItem("EARRING");
-		itemName.addItem("GENTS BRACELET");
-		itemName.addItem("GENTS RING");
-		itemName.addItem("GOD LOCKET");
-		itemName.addItem("GOLD ITEM");
-		itemName.addItem("JAL EARRING");
-		itemName.addItem("JHUMKA");
-		itemName.addItem("JHUMKI");
-		itemName.addItem("JITIYA");
-		itemName.addItem("KADA");
-		itemName.addItem("KAMARDHANI");
-		itemName.addItem("KANGAN");
-		itemName.addItem("KANTHI CHAIN");
-		itemName.addItem("KANTHI SET");
-		itemName.addItem("LADIES BRACELET");
-		itemName.addItem("LADIES RING");
-		itemName.addItem("LOCKET");
-		itemName.addItem("M.S.LARI");
-		itemName.addItem("NATHIA");
-		itemName.addItem("NATHIA LARI");
-		itemName.addItem("NECKLACE");
-		itemName.addItem("NOSEPIN");
-		itemName.addItem("NOSERING");
-		itemName.addItem("PASSA (TOPS)");
-		itemName.addItem("PATLA");
-		itemName.addItem("PENDANT");
-		itemName.addItem("POLA CHURI");
-		itemName.addItem("SET");
-		itemName.addItem("SETTING NOSEPIN");
-		itemName.addItem("SETTING TOPS");
-		itemName.addItem("SUI-DHAGA");
-		itemName.addItem("TANA");
-		itemName.addItem("TIKA");
-		itemName.addItem("TOPS");
-		itemName.addItem("POLA CHURI");
-		itemName.addItem("RULY BALA");
-		itemName.addItem("JAL PATLA");
-		itemName.addItem("Gold Item");
-		itemName.addItem("MISCELLANEOUS");
 		return itemName;
 	}
 }

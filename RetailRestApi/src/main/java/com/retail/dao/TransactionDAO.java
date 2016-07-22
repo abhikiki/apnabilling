@@ -118,67 +118,13 @@ public class TransactionDAO {
                 .addValue("billStatus1", billStatus1)
                 .addValue("billStatus2", billStatus2)
                 .addValue("startDate", new java.sql.Timestamp(startDate.getTime()))
-                .addValue("endDate", new java.sql.Timestamp(endDate.getTime())),
-                this::transSearchResultItemMapRow);
-//            (rs, rowNum) -> {
-//            	LawFirmModel lawFirmModel = new LawFirmModel();
-//            	lawFirmModel.setEntityId(rs.getLong("entity_id"));
-//            	lawFirmModel.setStatusId(rs.getString("status_id"));
-//            	lawFirmModel.setStatusDate(rs.getDate("status_dt"));
-//            	lawFirmModel.setYearEstablised(rs.getInt("year_established"));
-//            	lawFirmModel.setAttorneyCount(rs.getInt("atty_count"));
-//            	lawFirmModel.setWebsiteUrl(rs.getString("web_site_url"));
-//            	lawFirmModel.setResume(rs.getString("resume"));
-//                return lawFirmModel;
-//            });
+                .addValue("endDate", new java.sql.Timestamp(endDate.getTime())), this::transSearchResultItemMapRow);
     }
 	
-	public List<TransactionSearchResultDto> getTransaction(long shopId, String billType, String billStatus, Date startDate, Date endDate){
-		final String sql = "SELECT " 
-				+ "RT.TRANSDATE,"
-				+ "RT.TRANSID,"
-				+ "RT.BILLTYPE,"
-				+ "RT.TRANSACTIONSTATUS,"
-				+ "CONCAT(RC.FIRSTNAME, ' ', RC.LASTNAME) CUSTOMERNAME,"
-				+ "RC.CONTACTNUMBER,"
-				+ "RC.EMAILID,"
-				+ "CONCAT(RC.STREETADDRESS1, ' ', RC.STREETADDRESS2, ' ', RC.CITY , ' ', RC.STATE, ' ', RC.ZIPCODE, ' ', RC.COUNTRY) ADDRESS,"
-				+ "RP.TOTALITEMSPRICE "
-			+ "FROM SHOP S, RETAILTRANSACTION RT, RETAILCUSTOMER RC, RETAILTRANSACTIONPRICE RP "
-			+ "WHERE S.SHOPID = RT.SHOPID "
-			+ "AND RC.TRANSID = RT.TRANSID "
-			+ "AND RP.TRANSID = RT.TRANSID "
-			+ "AND S.SHOPID = ? "
-			+ "AND RT.BILLTYPE in (?, ?) "
-			+ "AND RT.TRANSACTIONSTATUS in(?, ?) "
-			+ "AND RT.TRANSDATE BETWEEN ? AND ? "
-			+ "ORDER BY RT.TRANSDATE DESC";
-		String billType1 = "E"; //estimate
-		String billType2= "I";  //invoice
-		if(billType.equals("E")){
-			billType2 = "E";
-		}else if(billType.equals("I")){
-			billType1 = "I";
-		}
-		String billStatus1 = "A"; //active
-		String billStatus2 = "I"; //inactive
-		if(billStatus.equals("A")){
-			billStatus2 = "A";
-		}else if (billStatus.equals("I")){
-			billStatus1 = "I";
-		}
-		return jdbcTemplate.query(sql, new Object[]{
-				shopId,
-				billType1,
-				billType2,
-				billStatus1,
-				billStatus2,
-				new java.sql.Timestamp(startDate.getTime()),
-				new java.sql.Timestamp(endDate.getTime())}, this::transSearchResultItemMapRow);
-	}
+
 
 	@Transactional
-	public Map<String, Long> saveTransaction(long shopId, TransactionDTO tDto){
+	public Map<String, Long> saveTransaction(final long shopId, final TransactionDTO tDto){
 		
 		RetailTransactionDTO rtDto = new RetailTransactionDTO();
 		rtDto.setBillType(tDto.isEstimateBill() ? "E" : "I");
@@ -208,7 +154,7 @@ public class TransactionDAO {
 	}
 	
 	@Transactional
-	public Map<String, Long> updateTransaction(long shopId, long transId, TransactionDTO tDto){
+	public Map<String, Long> updateTransaction(final long shopId, final long transId, final TransactionDTO tDto){
 		RetailTransactionDTO rtDto = new RetailTransactionDTO();
 		rtDto.setBillType(tDto.isEstimateBill() ? "E" : "I");
 		rtDto.setDealingStaffName(tDto.getDealingStaffName());
@@ -240,7 +186,7 @@ public class TransactionDAO {
 	
 	
 	
-	public boolean deleteTransaction(long transId){
+	public boolean deleteTransaction(final long transId){
 		return retailTransDAO.deleteTransaction(transId);
 	}
 	

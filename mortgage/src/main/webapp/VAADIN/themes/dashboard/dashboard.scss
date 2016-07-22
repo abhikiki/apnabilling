@@ -172,7 +172,7 @@
 		white-space: normal;
 		font-size: 16px;
 		line-height: 1.1;
-		color: #FFF;
+		color: #FFF; 
 		text-shadow: 0 2px 2px rgba(0,0,0,.5);
 		
 		/* WTH? Why is inline-block forced as an inline style? */
@@ -234,7 +234,6 @@
 		border-bottom-color: rgba(0,0,0,.18);
 		
 		background: transparent;
-		
 		color: #888a8c;
 		font-weight: normal;
 		text-shadow: 0 1px 0 rgba(0,0,0,.5);
@@ -334,7 +333,8 @@
 		display: inline-block;
 		font-size: 11px;
 		line-height: 1;
-		color: #fff;
+		/*color: #fff;*/
+		color: #3044d9;
 		text-shadow: 0 1px 1px rgba(0,0,0,.3);
 		padding: .1em .4em .2em;
 		
@@ -704,5 +704,9 @@
 			vertical-align: middle;
 		}
 	}
+
+	.mydasboardsummary{
+    	background-color: #99ccff;
+    }
 
 }
