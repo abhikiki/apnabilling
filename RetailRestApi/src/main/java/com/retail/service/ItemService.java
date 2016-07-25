@@ -3,21 +3,26 @@ package com.retail.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.retail.dao.SellingItemsDAO;
-import com.retail.dto.SellingItemsDTO;
+import com.retail.dao.RetailItemStaffDAO;
+import com.retail.dto.RetailItemStaffDTO;
 
 @Component
 public class ItemService {
 
 	@Autowired
-	private SellingItemsDAO sellingItemDao;
+	private RetailItemStaffDAO retailItemStaffDao;
 	
-	public SellingItemsDTO getItems(long shopId){
-		SellingItemsDTO sellingItemDto = new SellingItemsDTO();
-		sellingItemDto.setGoldItemsList(sellingItemDao.getGoldItems(shopId));
-		sellingItemDto.setSilverItemsList(sellingItemDao.getSilverItems(shopId));
-		sellingItemDto.setDiamondItemsList(sellingItemDao.getDiamondItems(shopId));
-		sellingItemDto.setGeneralItemsList(sellingItemDao.getGeneralItems(shopId));
-		return sellingItemDto;
+	public RetailItemStaffDTO getItems(long shopId){
+		RetailItemStaffDTO retailItemStaffDto = new RetailItemStaffDTO();
+		retailItemStaffDto.setGoldItemsList(retailItemStaffDao.getGoldItems(shopId));
+		retailItemStaffDto.setSilverItemsList(retailItemStaffDao.getSilverItems(shopId));
+		retailItemStaffDto.setDiamondItemsList(retailItemStaffDao.getDiamondItems(shopId));
+		retailItemStaffDto.setGeneralItemsList(retailItemStaffDao.getGeneralItems(shopId));
+		retailItemStaffDto.setStaffList(retailItemStaffDao.getStaffList(shopId));
+		return retailItemStaffDto;
+	}
+	
+	public long addItem(long shopId, String itemName, String container){
+		return retailItemStaffDao.addItem(shopId, itemName, container);
 	}
 }

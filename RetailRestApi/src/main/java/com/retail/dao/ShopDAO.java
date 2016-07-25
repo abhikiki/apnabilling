@@ -38,7 +38,7 @@ public class ShopDAO {
 	}
 
 	public List<ShopDTO> getShopInformation(long shopId) {
-		final String sql = "SELECT SHOPID, SHOPNAME, TINNUMBER FROM SHOP WHERE SHOPID = ?";
+		final String sql = "SELECT S.SHOPID, S.SHOPNAME, S.TINNUMBER, U.FIRSTNAME, U.LASTNAME, U.USERID, U.USERPASSWORD, U.ROLE FROM SHOP S, USERINFORMATION U WHERE S.SHOPID = ?";
 		return jdbcTemplate.query(sql, new Object[]{shopId}, this::shopMapRow);
 	}
 	

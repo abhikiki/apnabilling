@@ -509,7 +509,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		goldItemsTransactionList
 			.forEach(golItem -> {
 				if (includePrice) {
-					table.addCell(new Phrase(golItem.getGoldItemPrice().toString(), rowFont));
+					table.addCell(new Phrase(String.valueOf(golItem.getGoldItemPrice()), rowFont));
 				}
 				table.addCell(new Phrase(String.valueOf(golItem.getGoldItemName()), rowFont));
 				table.addCell(new Phrase(golItem.getGoldType(), rowFont));

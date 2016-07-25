@@ -68,14 +68,15 @@ public class PriceForm extends FormLayout{
         customNumericValidator(advancePayment);
         customNumericValidator(balanceAmount);
         
-        //netAmountToPay.setEnabled(false);
-        netAmountToPay.addStyleName("price-disabled");
-        //totalItemPrice.setEnabled(false);;
-        totalItemPrice.setStyleName("price-disabled");
-        vatOnNewItemPrice.setEnabled(true);
-        vatOnNewItemPrice.setStyleName("price-disabled");
-        //balanceAmount.setEnabled(false);
-        balanceAmount.setStyleName("price-disabled");
+        netAmountToPay.setEnabled(false);
+        netAmountToPay.addStyleName("visible");
+       
+        totalItemPrice.setEnabled(false);;
+        totalItemPrice.setStyleName("visible");
+        vatOnNewItemPrice.setEnabled(false);
+        vatOnNewItemPrice.setStyleName("visible");
+        balanceAmount.setEnabled(false);
+        balanceAmount.setStyleName("visible");
         
     	totalItemPrice.addValueChangeListener(new ValueChangeListener() {
 			private static final long serialVersionUID = 5320925689852078782L;

@@ -3,14 +3,15 @@ package com.abhishek.fmanage.retail.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SellingItemsDTO {
+public class RetailItemStaffDTO {
 
 	private List<ItemDTO> goldItemsList = new ArrayList<>();
 	private List<ItemDTO> silverItemsList = new ArrayList<>();
 	private List<ItemDTO> diamondItemsList = new ArrayList<>();
 	private List<ItemDTO> generalItemsList = new ArrayList<>();
+	private List<ItemDTO> staffList = new ArrayList<>();
 
-	public SellingItemsDTO(){}
+	public RetailItemStaffDTO(){}
 
 	public List<ItemDTO> getGoldItemsList() {
 		return goldItemsList;
@@ -43,4 +44,14 @@ public class SellingItemsDTO {
 	public void setGeneralItemsList(List<ItemDTO> generalItemsList) {
 		this.generalItemsList = generalItemsList;
 	}
+
+	public List<ItemDTO> getStaffList() {
+		return staffList;
+	}
+
+	public void setStaffList(List<ItemDTO> staffList) {
+		this.staffList = staffList;
+	}
+	
+	
 }

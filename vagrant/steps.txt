@@ -1,0 +1,40 @@
+1. Install Java 8
+sudo add-apt-repository ppa:webupd8team/java
+sudo apt-get update
+sudo apt-get install oracle-java8-installer
+sudo apt-get install oracle-java8-set-default
+
+2. Change root password
+   SET PASSWORD FOR 'root'@'localhost' = PASSWORD('root');
+
+   
+4. Create a new test user
+	a.) mysql -u root -p
+	b.) CREATE USER 'apna'@'%' IDENTIFIED BY 'apna';
+	c.) GRANT ALL PRIVILEGES ON *.* TO 'apna'@'%' WITH GRANT OPTION;
+	d.) FLUSH PRIVILEGES;
+
+5. Create a new Database
+	CREATE DATABASE retailbilling;
+6. update /etc/mysql/my.cnf file. Comment out bind-address line
+
+7. Run database tables creation script (source *.sql)
+8. Run Create stored procedures script (source *.sql)
+9. Mount host(windows) directory to guest
+   a.) Add first the mapping in virtual box(by default vagrantfile location is mapped)
+   b.) sudo mount -t vboxsf vagrant /vagrant
+
+
+   cd etc/default 
+   nano tomcat7
+   JAVA_HOME=/usr/lib/jvm/java-7-oracle
+   service tomcat7 restart
+Help commands:
+	a.) netstat -tln (All listeners)
+	
+	export JAVA_HOME=/software/jdk1.8.0_91
+	export PATH=$JAVA_HOME/bin:$PATH
+	
+	--spring.config.location=/software/
+	
+	mysqladmin --user=root --password= password 'root';

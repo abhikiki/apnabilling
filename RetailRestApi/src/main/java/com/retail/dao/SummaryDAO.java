@@ -45,7 +45,8 @@ public class SummaryDAO {
 		 + " WHERE RT.TRANSACTIONSTATUS = 'A'"
 		 + " AND RTP.TRANSID = RT.TRANSID"
 		 + " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		return jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double totalSale = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		return totalSale == null ? 0.0f : totalSale;
 	}
 	
 	public Double getTotalGoldWeight(final Date startDate, final Date endDate){
@@ -59,7 +60,7 @@ public class SummaryDAO {
 				 " WHERE RT.TRANSACTIONSTATUS = 'A'" +
 				 " AND RDT.TRANSID = RT.TRANSID" +
 				  " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double goldWeightInDiamond=  jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double goldWeightInDiamond =  jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return (goldWeight == null ? 0.0f : goldWeight) + (goldWeightInDiamond == null ? 0.0f : goldWeightInDiamond);
 	}
 	
@@ -68,7 +69,9 @@ public class SummaryDAO {
 					 " WHERE RT.TRANSACTIONSTATUS = 'A'" +
 					 " AND RST.TRANSID = RT.TRANSID" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		return jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double silverWeight = jdbcTemplate.queryForObject(
+				sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		return silverWeight == null ? 0.0f : silverWeight;
 	}
 	
 	public List<ItemSummaryDTO> getGoldItemQuantitySummary(final Date startDate, final Date endDate){

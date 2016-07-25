@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.retail.dto.SellingItemsDTO;
+import com.retail.dto.RetailItemStaffDTO;
 import com.retail.service.ItemService;
 
 @RestController
@@ -17,7 +17,12 @@ public class ItemResource {
 	private ItemService itemService;
 	
 	@RequestMapping(value = "/{shopId}", method = RequestMethod.GET)
-	public SellingItemsDTO findBill(@PathVariable long shopId) {
+	public RetailItemStaffDTO findBill(@PathVariable long shopId) {
 		return itemService.getItems(shopId);
+	}
+	
+	@RequestMapping(value = "/{shopId}/{itemname}/{container}", method = RequestMethod.POST)
+	public long addItem(@PathVariable long shopId, @PathVariable String itemName, @PathVariable String container) {
+		return itemService.addItem(shopId, itemName, container);
 	}
 }

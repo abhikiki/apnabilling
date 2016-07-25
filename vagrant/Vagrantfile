@@ -1,0 +1,34 @@
+#
+# Vagrant VM for developing and testing memcache and memcache monitoring tools.
+#
+
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+	
+	config.vm.box = "trusty64"
+	config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+	
+	config.vm.provider "virtualbox" do |v|
+		v.gui = true
+		v.memory = 4096
+		v.cpus = 2
+	end
+	
+	# Memcached
+	#config.vm.network :forwarded_port, guest: 11211, host: 11211
+	config.vm.network :forwarded_port, guest: 3306, host: 9006
+	#config.vm.network :forwarded_port, guest: 11212, host: 11212
+	config.vm.network :forwarded_port, guest: 8080, host: 8888
+	# Apache
+	config.vm.network :forwarded_port, guest: 80, host: 88
+	# Tomcat / Solr
+	#config.vm.network :forwarded_port, guest: 8888, host: 8888
+	
+	# Install memcached, apache, php
+	config.vm.provision "shell", path: "install.sh"
+
+	# Install Solr
+	#config.vm.provision "shell", path: "install_solr.sh"
+end
+

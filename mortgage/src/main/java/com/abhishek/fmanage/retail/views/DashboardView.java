@@ -10,17 +10,19 @@ import org.apache.commons.lang3.StringUtils;
 import com.abhishek.fmanage.retail.charts.ItemSummaryChart;
 import com.abhishek.fmanage.retail.dto.SummaryDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestSummaryService;
-import com.vaadin.data.Item;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Alignment;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.Tree;
@@ -40,6 +42,10 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	private final PopupDateField startPopUpDate = new PopupDateField();
 	private final PopupDateField endPopUpDate = new PopupDateField();
     HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
+    private Label totalSaleLabel = null;
+    private Label silverWeightLabel = null;
+    private Label goldWeightLabel = null;
+    
 	@Override
 	public void enter(ViewChangeEvent event) {
 		setSizeFull();
@@ -90,6 +96,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 		 reportHead.addItem("General Quantity Sale");
 		 // Add ItemClickListener to the tree
 		 reportHead.addListener(this);
+		 
 	        // Contents from a (prefilled example) hierarchical container:
 	      //  sample.setContainerDataSource(ExampleUtil.getHardwareContainer());
 	 
@@ -102,23 +109,21 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	 }
 	 
 	 public void itemClick(ItemClickEvent event) {
-	        // Indicate which modifier keys are pressed
-	        String modifiers = "";
 	        if (event.isDoubleClick()) {
 	        	String eventName = event.getSource().toString();
 	        	if(!StringUtils.isEmpty(eventName) && eventName.equals("Gold Quantity Sale")){
 	        		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
-		    				new RestSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getGoldItemSummaryDtoList(), "Gold Items Sale"));
+	        				summary.getGoldItemSummaryDtoList(), "Gold Items Sale"));
 	        	}
 	        	else if(!StringUtils.isEmpty(eventName) && eventName.equals("Silver Quantity Sale")){
 	        		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
-		    				new RestSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getSilverItemSummaryDtoList(), "Silver Items Sale"));
+	        				summary.getSilverItemSummaryDtoList(), "Silver Items Sale"));
 	        	}else if(!StringUtils.isEmpty(eventName) && eventName.equals("Diamond Quantity Sale")){
 	        		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
-		    				new RestSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getDiamondItemSummaryDtoList(), "Diamond Items Sale"));
+	        				summary.getDiamondItemSummaryDtoList(), "Diamond Items Sale"));
 	        	}else if(!StringUtils.isEmpty(eventName) && eventName.equals("General Quantity Sale")){
 	        		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
-		    				new RestSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getGeneralItemSummaryDtoList(), "General Items Sale"));
+	        				summary.getGeneralItemSummaryDtoList(), "General Items Sale"));
 	        	}
            }
 	      
@@ -153,9 +158,33 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	        titleLabel.setSizeUndefined();
 	        titleLabel.addStyleName(ValoTheme.LABEL_H1);
 	        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
+	        
+	        Button searchButton = new Button("Search", new ClickListener()
+	        {
+	            private static final long serialVersionUID = 1L;
+
+	            @Override
+	            
+	            public void buttonClick(ClickEvent event)
+	            {
+	            	summary = new RestSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
+	            	silverWeightLabel.setValue(String .format("%.3f",summary.getTotalSilverWeight()));
+	            	goldWeightLabel.setValue(String .format("%.3f",summary.getTotalGoldWeight()));
+	            	totalSaleLabel.setValue(String .format("%.3f",summary.getTotalSale()));
+	            	hsplit.setSecondComponent(new ItemSummaryChart().getChart(
+	        				summary.getGoldItemSummaryDtoList(), "Gold Items Sale"));
+	            }
+
+				
+	        });
+	        searchButton.setWidth("80%");
+	        searchButton.addStyleName("default");
+	        searchButton.setIcon(FontAwesome.REFRESH);
+	        
 	        toolbar.addComponent(titleLabel);
 	        toolbar.addComponent(startPopUpDate);
 	        toolbar.addComponent(endPopUpDate);
+	        toolbar.addComponent(searchButton);
 	    return toolbar;
 	 }
 	 
@@ -169,15 +198,13 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	        sparks.setMargin(true);
 	        sparks.addStyleName("mydasboardsummary");
 
-	       // Responsive.makeResponsive(sparks);
-	        
-	        sparks.addComponent(buildSummaryLabels("Total Sale(INR)", String.format("%.3f", summary.getTotalSale())));
-	        sparks.addComponent(buildSummaryLabels("Total Gold Weight(gms)", String.format("%.3f", summary.getTotalGoldWeight())));
-	        sparks.addComponent(buildSummaryLabels("Total Silver Weight(gms)", String .format("%.3f",summary.getTotalSilverWeight())));
+	        sparks.addComponent(buildSummaryLabels("Total Sale(INR)", String.format("%.3f", summary.getTotalSale()), "SALE"));
+	        sparks.addComponent(buildSummaryLabels("Total Gold Weight(gms)", String.format("%.3f", summary.getTotalGoldWeight()), "GOLDWEIGHT"));
+	        sparks.addComponent(buildSummaryLabels("Total Silver Weight(gms)", String .format("%.3f",summary.getTotalSilverWeight()), "SILVERWEIGHT"));
 	        return sparks;
 	    }
 	
-	private Component buildSummaryLabels(String caption, String weight){
+	private Component buildSummaryLabels(String caption, String weight, String labelName){
 		Panel p = new Panel();
 		p.setHeight("100px");
 		p.setWidth("200px");
@@ -189,12 +216,30 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
         current.addStyleName(ValoTheme.LABEL_COLORED);
         vl.addComponent(current);
         vl.addStyleName("test");
+        Label l = new Label();
+        if(labelName.equals("SALE")){
+        	 totalSaleLabel = new Label(weight);
+        	 totalSaleLabel.setImmediate(true);
+        	 totalSaleLabel.setSizeUndefined();
+        	 totalSaleLabel.addStyleName(ValoTheme.LABEL_SMALL);
+        	 totalSaleLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+             vl.addComponent(totalSaleLabel);
+        }else if(labelName.equals("GOLDWEIGHT")){
+        	 goldWeightLabel = new Label(weight);
+        	 goldWeightLabel.setImmediate(true);
+        	 goldWeightLabel.setSizeUndefined();
+        	 goldWeightLabel.addStyleName(ValoTheme.LABEL_SMALL);
+        	 goldWeightLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+        	 vl.addComponent(goldWeightLabel);
+        }else{
+        	 silverWeightLabel = new Label(weight);
+        	 silverWeightLabel.setImmediate(true);
+        	 silverWeightLabel.setSizeUndefined();
+        	 silverWeightLabel.addStyleName(ValoTheme.LABEL_SMALL);
+        	 silverWeightLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+             vl.addComponent(silverWeightLabel);
+        }
         
-        Label title = new Label(weight);
-        title.setSizeUndefined();
-        title.addStyleName(ValoTheme.LABEL_SMALL);
-        title.addStyleName(ValoTheme.LABEL_LIGHT);
-        vl.addComponent(title);
         p.setContent(vl);
         p.addStyleName("mydasboardsummary");
 		return p;

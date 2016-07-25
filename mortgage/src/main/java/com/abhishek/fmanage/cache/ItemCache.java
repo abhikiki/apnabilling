@@ -7,11 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.abhishek.fmanage.retail.dto.ItemDTO;
-import com.abhishek.fmanage.retail.dto.SellingItemsDTO;
+import com.abhishek.fmanage.retail.dto.RetailItemStaffDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestItemService;
 import com.google.gwt.dev.util.collect.HashMap;
-import com.vaadin.server.VaadinService;
 import com.vaadin.ui.UI;
 
 /**
@@ -38,17 +37,32 @@ public class ItemCache {
 		return instance;
 	}
 
-	public Map<String, List<ItemDTO>> getItemMap(){
-		return itemMap;
-	}
-	
 	private void initializeCache() {
 		RestItemService service = new RestItemService();
 		ShopDTO shopDto =  (ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class);
-		SellingItemsDTO dto = service.getItems(shopDto.getShopId());
+		RetailItemStaffDTO dto = service.getItems(shopDto.getShopId());
 		itemMap.put("GOLD", dto.getGoldItemsList());
 		itemMap.put("SILVER", dto.getSilverItemsList());
 		itemMap.put("DIAMOND", dto.getDiamondItemsList());
 		itemMap.put("GENERAL", dto.getGeneralItemsList());
+		itemMap.put("STAFF", dto.getStaffList());
+		
+	}
+	
+	public Map<String, List<ItemDTO>> getItemMap(){
+		return itemMap;
+	}
+	
+	
+	public synchronized boolean addItem(final String itemName, final String containerName){
+		boolean isAdded = false;
+		switch(containerName){
+			case "GOLD": if(!itemMap.get(containerName).contains(itemName)){
+						
+							isAdded = true;
+						}
+				break;
+		}
+		return isAdded;
 	}
 }

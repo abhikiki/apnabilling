@@ -460,8 +460,7 @@ public class GoldItemContainer extends IndexedContainer implements
 	private ComboBox getHallMarkTypeList(final Object currentItemId) {
 		ComboBox hallMarkType = new ComboBox();
 		hallMarkType.setNullSelectionAllowed(false);
-		hallMarkType
-				.addValueChangeListener(getCustomValueChangeListener(currentItemId));
+		hallMarkType.addValueChangeListener(getCustomValueChangeListener(currentItemId));
 		hallMarkType.addItem("916");
 		hallMarkType.addItem("875");
 		hallMarkType.addItem("833");

@@ -1,0 +1,5 @@
+#!/bin/sh
+export JAVA_HOME=/software/jdk1.8.0_91
+export PATH=$JAVA_HOME/bin:$PATH
+java -jar /software/restapi/retailrestapi-0.0.1-SNAPSHOT.jar --spring.config.location=/software/ &
+#--spring.config.location=/software/restapi/ &

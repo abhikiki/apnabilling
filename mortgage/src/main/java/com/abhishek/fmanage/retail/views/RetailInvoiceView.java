@@ -1,6 +1,5 @@
 package com.abhishek.fmanage.retail.views;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -12,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestTemplate;
 
-import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
+import com.abhishek.fmanage.cache.ItemCache;
 import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.mortgage.data.container.ItemContainerType;
 import com.abhishek.fmanage.retail.data.container.DiamondItemContainer;
@@ -23,6 +22,7 @@ import com.abhishek.fmanage.retail.dto.CustomerDTO;
 import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
+import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
@@ -98,8 +98,6 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	long transId = -1L;
 	private ShopDTO shopDto;
 	private Button generateBillBtn;
-	private static final String TIN_NUMBER = CustomShopSettingFileUtility
-			.getInstance().getTinNumber();
 
 	@Override
 	public void enter(ViewChangeEvent event) {
@@ -248,8 +246,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		billPopUpDate.setValue(new Date());
 		toolbar.addComponent(billPopUpDate);
 
-		Label tinLabel = new Label("<b>TIN VAT NO:</b>" + shopDto.getTinNumber(), ContentMode.HTML);
-		tinLabel.addStyleName("vinVisibleLabel");
+		Label tinLabel = new Label("<font color=\"#D5CDCB\"><b>TIN VAT NO:</b>" + shopDto.getTinNumber() + "</font>", ContentMode.HTML);
+		//tinLabel.addStyleName("mytoolbar");
 		tinLabel.setImmediate(true);
 
 		transactionSearchTxt = new TextField("Transaction Number");
@@ -266,25 +264,24 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 
 		billType.addValueChangeListener((value) -> {
 			if (!value.getProperty().getValue().equals(ESTIMATE_BILL)) {
-				tinLabel.addStyleName("vinHiddenLabel");
+				tinLabel.setValue("<font color=\"blue\"><b>TIN VAT NO:</b>" + shopDto.getTinNumber() + "</font>");
 				pfForm.isInvoiceEnabled = true;
 				pfForm.vatOnNewItemPrice.setValue((String.format("%.3f",
 						pfForm.getVatPrice())));
 				pfForm.netAmountToPay.setValue(String.format("%.3f",
 						pfForm.getTotalNetAmount()));
 				pfForm.advancePayment.setValue(String.format("%.3f", 0.000f));
-				//pfForm.advancePayment.setEnabled(false);
+				pfForm.advancePayment.setEnabled(false);
 				pfForm.advancePayment.setIcon(null);
 				//pfForm.balanceAmount.setEnabled(false);
 			} else {
-				tinLabel.addStyleName("vinVisibleLabel");
-				
+				tinLabel.setValue("<font color=\"#D5CDCB\"><b>TIN VAT NO:</b>" + shopDto.getTinNumber() + "</font>");
 				pfForm.isInvoiceEnabled = false;
 				pfForm.vatOnNewItemPrice.setValue(String.format("%.3f", 0.000f));
 				pfForm.netAmountToPay.setValue(String.format("%.3f",
 						pfForm.getTotalNetAmount()));
 				//pfForm.vatOnNewItemPrice.setEnabled(false);
-				//pfForm.advancePayment.setEnabled(true);
+				pfForm.advancePayment.setEnabled(true);
 				pfForm.advancePayment.setIcon(FontAwesome.EDIT);
 				//pfForm.balanceAmount.setEnabled(true);
 
@@ -500,10 +497,9 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		staffNameComboBox.setNullSelectionAllowed(false);
 		staffNameComboBox.addItem("STAFF");
 		staffNameComboBox.setValue("STAFF");
-		ArrayList<String> staffNameListFromCsvFile = (ArrayList<String>) CustomShopSettingFileUtility
-				.getInstance().getStaffNameList();
-		for (String staffName : staffNameListFromCsvFile) {
-			staffNameComboBox.addItem(staffName);
+		List<ItemDTO> itemDTOList = ItemCache.getInstance().getItemMap().get("STAFF");
+		for (ItemDTO itemDto : itemDTOList) {
+			staffNameComboBox.addItem(itemDto.getItemName());
 		}
 		return staffNameComboBox;
 	}
@@ -529,7 +525,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 							goldBillingTable, silverBillingTable,
 							diamondBillingTable, generalBillingTable, cusBean,
 							pfForm, isEstimateBill, billPopUpDate.getValue(),
-							TIN_NUMBER, Long.parseLong(invoiceNumber),
+							shopDto.getTinNumber(), Long.parseLong(invoiceNumber),
 							staffNameComboBox.getValue().toString(),
 							includePrice.getValue(), notes.getValue(),
 							isTransactionActive).extract();
