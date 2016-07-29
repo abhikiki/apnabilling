@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.retail.dao.TransactionDAO;
+import com.retail.dto.RetailTaxInvoiceDTO;
 import com.retail.dto.TransactionDTO;
 import com.retail.dto.TransactionSearchCriteriaDto;
 import com.retail.dto.TransactionSearchResultDto;
@@ -49,6 +50,11 @@ public class BillResource {
 	@RequestMapping(value = "/findbill/{transId}", method = RequestMethod.GET)
 	public TransactionDTO findBill(@PathVariable long transId) {
 		return billService.findBill(transId);
+	}
+	
+	@RequestMapping(value = "/findbill/invoice/{invoiceId}", method = RequestMethod.GET)
+	public RetailTaxInvoiceDTO findBillByInvoiceId(@PathVariable long invoiceId) {
+		return billService.findBillByInvoiceId(invoiceId);
 	}
 	
 	@RequestMapping(value = "/findbills", method = RequestMethod.POST)

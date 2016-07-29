@@ -184,9 +184,7 @@ public class DashboardUI extends UI {
                     if (loginPanel.getComponentCount() > 2) {
                         loginPanel.removeComponent(loginPanel.getComponent(2));
                     }
-                    Label error = new Label(
-                            "Wrong username or password",
-                            ContentMode.HTML);
+                    Label error = new Label("Wrong username or password", ContentMode.HTML);
                     error.addStyleName("error");
                     error.setSizeUndefined();
                     error.addStyleName("light");

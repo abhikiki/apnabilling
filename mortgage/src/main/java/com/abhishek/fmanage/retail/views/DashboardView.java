@@ -54,25 +54,6 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
         addComponent(buildSaleSummary());
         addComponent(hsplit = getGraphSplitPanel());
         setExpandRatio(hsplit, 1);
-	        
-		//addStyleName(ValoTheme.PANEL_BORDERLESS);
-        //setSizeFull();
-       // root.addStyleName("dashboard-view");
-        
-       // Responsive.makeResponsive(root);
-       // root.addComponent();
-      //  root.addComponent();
-//        Component header = buildHeader();
-//        Component saleSummary = buildSaleSummary();
-//        addComponent(header);
-//        addComponent(saleSummary);
-//        addComponent(buildSaleSummary());
-//        addComponent(buildSaleSummary());
-//        setExpandRatio(header, 1);
-//        setExpandRatio(saleSummary, 1);
-//        setComponentAlignment(header, Alignment.MIDDLE_LEFT);
-//        setComponentAlignment(saleSummary,Alignment.MIDDLE_LEFT);
-//       
 	}
 
 	 private HorizontalSplitPanel getGraphSplitPanel(){
@@ -96,14 +77,6 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 		 reportHead.addItem("General Quantity Sale");
 		 // Add ItemClickListener to the tree
 		 reportHead.addListener(this);
-		 
-	        // Contents from a (prefilled example) hierarchical container:
-	      //  sample.setContainerDataSource(ExampleUtil.getHardwareContainer());
-	 
-	        // Add actions (context menu)
-	        //sample.addActionHandler(this);
-	 
-	        // Cause valueChange immediately when the user selects
 		 reportHead.setImmediate(true);
 		return reportHead; 
 	 }
@@ -179,7 +152,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	        });
 	        searchButton.setWidth("80%");
 	        searchButton.addStyleName("default");
-	        searchButton.setIcon(FontAwesome.REFRESH);
+	        searchButton.setIcon(FontAwesome.SEARCH);
 	        
 	        toolbar.addComponent(titleLabel);
 	        toolbar.addComponent(startPopUpDate);
@@ -216,7 +189,6 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
         current.addStyleName(ValoTheme.LABEL_COLORED);
         vl.addComponent(current);
         vl.addStyleName("test");
-        Label l = new Label();
         if(labelName.equals("SALE")){
         	 totalSaleLabel = new Label(weight);
         	 totalSaleLabel.setImmediate(true);
@@ -243,30 +215,6 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
         p.setContent(vl);
         p.addStyleName("mydasboardsummary");
 		return p;
-	}
-	
-	
-	private Component buildHeader(){
-		HorizontalLayout header = new HorizontalLayout();
-        header.addStyleName("sidebar");
-        header.setWidth("100%");
-        header.setSpacing(true);
-        header.setMargin(true);
-        Label titleLabel = new Label("Dashboard");
-        titleLabel.setId("dashboard-title");
-        titleLabel.setSizeUndefined();
-        titleLabel.addStyleName(ValoTheme.LABEL_H1);
-        titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
-        header.addComponent(titleLabel);
-        header.addComponent(startPopUpDate);
-        header.addComponent(endPopUpDate);
-        header.setExpandRatio(titleLabel, 1);
-        header.setExpandRatio(startPopUpDate, 1);
-        header.setExpandRatio(endPopUpDate, 1);
-        header.setComponentAlignment(titleLabel, Alignment.MIDDLE_LEFT);
-        header.setComponentAlignment(startPopUpDate, Alignment.MIDDLE_LEFT);
-        header.setComponentAlignment(endPopUpDate, Alignment.MIDDLE_LEFT);
-        return header;
 	}
 	
 	private Date getStartDate(Date endDate, int monthsBack){

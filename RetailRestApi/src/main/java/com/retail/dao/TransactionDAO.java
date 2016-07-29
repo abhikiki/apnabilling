@@ -93,6 +93,14 @@ public class TransactionDAO {
 		return transDto;
 	}
 	
+	public RetailTaxInvoiceDTO getTransactionByInvoiceId(long invoiceId) {
+		RetailTaxInvoiceDTO retailTaxInvoiceDto = null;
+		List<RetailTaxInvoiceDTO> retailTaxInvoiceDtoList = retailTaxInvoiceDAO.getRetailTaxInvoiceByInvoiceId(invoiceId);
+		if(!retailTaxInvoiceDtoList.isEmpty()){
+			retailTaxInvoiceDto = retailTaxInvoiceDtoList.get(0);
+		}
+		return retailTaxInvoiceDto;
+	}
 	
 	public List<TransactionSearchResultDto> getTransactionSearch(long shopId, String billType, String billStatus, Date startDate, Date endDate) {
 		String billType1 = "E"; //estimate
@@ -207,4 +215,6 @@ public class TransactionDAO {
 		transSearchResultDto.setTotalItemsPrice(resultSet.getDouble("TOTALITEMSPRICE"));
 		return transSearchResultDto;
 	}
+
+
 }

@@ -2,17 +2,13 @@ package com.abhishek.fmanage.retail.pdf;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +41,6 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfPTableEvent;
 import com.itextpdf.text.pdf.PdfPageEventHelper;
 import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.fonts.otf.TableHeader;
 import com.vaadin.server.StreamResource.StreamSource;
 
 public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
@@ -54,9 +49,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = LoggerFactory
-			.getLogger(InvoiceGenerator.class);
-	private static final String BILL_PATH = "BILL_PATH";
+	private final Logger logger = LoggerFactory.getLogger(InvoiceGenerator.class);
 	/** A font that will be used in our PDF. */
 	public static final Font BOLD_UNDERLINED = new Font(FontFamily.TIMES_ROMAN,
 			11, Font.BOLD | Font.UNDERLINE);
@@ -66,13 +59,6 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 	/** A font that will be used in our PDF. */
 	public static final Font NORMAL = new Font(FontFamily.TIMES_ROMAN, 10);
 
-	private static final String NEW_LINE_SEPARATOR = "\n";
-	// CSV file header
-	private static final Object[] FILE_HEADER = { "Date", "FirstName",
-			"LastName", "ContactNumber", "EmailId", "StreetAddress1",
-			"StreetAddress2", "City", "State", "Country", "Zipcode" };
-
-	
 	private Calendar cal = Calendar.getInstance();
 
 	private TransactionDTO retailTransaction;
@@ -85,10 +71,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		this.transId = transId;
 	}
 
-
-
-	private void addSignature(Document document, boolean isEstimateBill,
-			String staffName) throws DocumentException, IOException {
+	private void addSignature(Document document, boolean isEstimateBill, String staffName) throws DocumentException, IOException {
 		PdfPTable table;
 		table = new PdfPTable(3);
 		table.setWidthPercentage(100f);
@@ -99,8 +82,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_LEFT);
 		table.getDefaultCell().setBorder(0);
 		table.getDefaultCell().setBackgroundColor(new BaseColor(243, 175, 250));
-		BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER,
-				BaseFont.CP1252, BaseFont.EMBEDDED);
+		BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER, BaseFont.CP1252, BaseFont.EMBEDDED);
 		Font headerFont = new Font(baseFont, 11, Font.BOLD);
 		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
 
@@ -129,94 +111,10 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		document.add(table);
 	}
 
-	private String getFilePath(final boolean isEstimateBill,
-			final Date invoiceDate) {
-		String filePath = System.getenv(BILL_PATH) + File.separator
-				+ getDirectory(invoiceDate, isEstimateBill) + File.separator;
-		if (isEstimateBill) {
-
-			filePath += "Estimate_";
-
-		} else {
-			filePath += "Invoice_";
-		}
-		filePath += String.valueOf(cal.get(Calendar.YEAR)) + "-"
-				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
-				+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
-				+ String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + "-"
-				+ String.valueOf(cal.get(Calendar.MINUTE)) + "-"
-				+ String.valueOf(cal.get(Calendar.SECOND)) + "-"
-				+ String.valueOf(cal.get(Calendar.MILLISECOND)) + ".pdf";
-
-		return filePath;
-	}
-
-	private void saveCustomerInformation(CustomerDTO customer, Date invoiceDate) {
-		FileWriter fileWriter = null;
-		CSVPrinter csvFilePrinter = null;
-		CSVFormat csvFileFormat = CSVFormat.DEFAULT
-				.withRecordSeparator(NEW_LINE_SEPARATOR);
-		try {
-			// initialize FileWriter object
-			File f = new File(System.getenv(BILL_PATH) + File.separator
-					+ "customerInfo.csv");
-			boolean isFileExist = false;
-			if (isFileExist = f.exists()) {
-				f.createNewFile();
-
-			}
-
-			fileWriter = new FileWriter(f, true);
-			// initialize CSVPrinter object
-			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
-			// Create CSV file header
-			if (!isFileExist) {
-				csvFilePrinter.printRecord(FILE_HEADER);
-			}
-
-			List<String> customerInfoList = new ArrayList<>();
-			customerInfoList.add(String.valueOf(invoiceDate));
-			customerInfoList.add(customer.getFirstName());
-			customerInfoList.add(customer.getLastName());
-			customerInfoList.add(customer.getContactNumber());
-			customerInfoList.add(customer.getEmailId());
-			customerInfoList.add(customer.getStreetAddress1());
-			customerInfoList.add(customer.getStreetAddress2());
-			customerInfoList.add(customer.getCity());
-			customerInfoList.add(customer.getStateprovince());
-			customerInfoList.add(customer.getCountry());
-			customerInfoList.add(customer.getZipcode());
-			csvFilePrinter.printRecord(customerInfoList);
-
-		} catch (Exception e) {
-			logger.error("Error updating customer information", e);
-		} finally {
-			try {
-				fileWriter.flush();
-				fileWriter.close();
-				csvFilePrinter.close();
-			} catch (Exception e) {
-				logger.error(
-						"Error while flushing/closing fileWriter/csvPrinter !!!",
-						e);
-			}
-		}
-	}
-
-	// private com.itextpdf.text.Image generateBarCode(PdfWriter writer, Date
-	// date) throws DocumentException
-	// {
-	// Barcode128 barcd = new Barcode128();
-	// barcd.setCode("10031");
-	// PdfContentByte cb = writer.getDirectContent();
-	// com.itextpdf.text.Image barcode1 = barcd.createImageWithBarcode(cb,
-	// BaseColor.DARK_GRAY, BaseColor.BLUE);
-	// return barcode1;
-	// }
 	private void addInvoiceType(Document document, boolean isEstimateBill,
 			Date invoiceDate, String invoiceNumber) throws DocumentException,
 			IOException {
-		PdfPTable footerTable = getPDFTable(!isEstimateBill, 3);
+		PdfPTable footerTable = getPDFTable(true, 2);
 		footerTable.getDefaultCell().setBackgroundColor(
 				new BaseColor(252, 175, 175));
 		footerTable.getDefaultCell().setHorizontalAlignment(
@@ -225,33 +123,29 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 				BaseFont.CP1252, BaseFont.EMBEDDED);
 		Font headerFont = new Font(baseFont, 11, Font.BOLD);
 		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
-		Phrase transIdPhrase = new Phrase(new Chunk("Transaction No. : ", headerFont));
-		transIdPhrase.add(new Chunk(String.valueOf(transId), rowFont));
-		footerTable.addCell(transIdPhrase);
+		
+		if (!isEstimateBill) {
+			Phrase p = new Phrase(new Chunk("Invoice No: ", headerFont));
+			p.add(new Chunk(invoiceNumber, rowFont));
+			footerTable.addCell(p);
+		}else{
+			Phrase transIdPhrase = new Phrase(new Chunk("Transaction No. : ", headerFont));
+			transIdPhrase.add(new Chunk(String.valueOf(transId), rowFont));
+			footerTable.addCell(transIdPhrase);
+		}
+		
+		
 		Phrase notePhrase = new Phrase();
 		if (isEstimateBill) {
 
 			notePhrase.add(new Chunk("Estimate Letter", headerFont));
 		} else {
 			notePhrase.add(new Chunk("Retail Invoice", headerFont));
-
 		}
 
 		PdfPCell cell = new PdfPCell(notePhrase);
 		cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 		cell.setBackgroundColor(new BaseColor(247, 200, 153));
-		if (!isEstimateBill) {
-			// String InvoiceId = String.valueOf(cal.get(Calendar.YEAR)) + "-"
-			// + String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
-			// + String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
-			// + String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + "-"
-			// + String.valueOf(cal.get(Calendar.MINUTE)) + "-"
-			// + String.valueOf(cal.get(Calendar.SECOND)) + "-"
-			// + String.valueOf(cal.get(Calendar.MILLISECOND));
-			Phrase p = new Phrase(new Chunk("Invoice No: ", headerFont));
-			p.add(new Chunk(invoiceNumber, rowFont));
-			footerTable.addCell(p);
-		}
 		footerTable.addCell(cell);
 		document.add(footerTable);
 
@@ -581,7 +475,9 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 
 		Phrase datePhrase = new Phrase();
 		datePhrase.add(new Chunk("Date: ", headerFont));
-		datePhrase.add(new Chunk(invoiceDate.toString(), rowFont));
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+		String dateWithoutTime = sdf.format(invoiceDate);
+		datePhrase.add(new Chunk(dateWithoutTime, rowFont));
 		table.addCell(datePhrase);
 		if (!isEstimateBill) {
 			Phrase vinPhrase = new Phrase();
@@ -590,7 +486,6 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			table.addCell(vinPhrase);
 		}
 		document.add(table);
-
 	}
 
 	private void addPriceInformationTable(Document document,
@@ -609,8 +504,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		Font headerFont = new Font(baseFont, 10, Font.BOLD);
 		Font rowFont = new Font(baseFont, 9, Font.NORMAL);
 
-		table.addCell(new Phrase(new Chunk("Total Items Price(INR): ",
-				headerFont)));
+		table.addCell(new Phrase(new Chunk("Total Items Price(INR): ", headerFont)));
 		PriceDTO priceBean = retailTransaction.getPriceBean();
 		table.addCell(new Phrase(new Chunk(String.format("%.3f",priceBean.getTotalItemsPrice()), rowFont)));
 
@@ -618,41 +512,40 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		Double discountPrice = 	retailTransaction.getPriceBean().getDiscount();
 		if (discountPrice > 0) {
 			table.addCell(new Phrase(new Chunk("Discount(INR): ", headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f",priceBean.getDiscount(), rowFont))));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f",priceBean.getDiscount()), rowFont)));
 		}
 		if (!isEstimateBill) {
 			table.addCell(new Phrase(new Chunk("Vat("
 					+ String.valueOf(CustomShopSettingFileUtility.getInstance()
 							.getVatPercentage()) + "%) Charge(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getVatCharge(), rowFont))));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getVatCharge()), rowFont)));
 		}
 		Double oldPurchasePrice = priceBean.getOldPurchase();
 		if (oldPurchasePrice > 0) {
 			table.addCell(new Phrase(new Chunk("Old Purchase(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getOldPurchase(), rowFont))));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getOldPurchase()), rowFont)));
 		}
 		table.addCell(new Phrase(new Chunk("Net Amount(INR) : ", headerFont)));
 		Double advancedPayment = priceBean.getAdvancePaymentAmount();
 		if (advancedPayment > 0) {
-			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getNetpayableAmount(), rowFont))));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getNetpayableAmount()), rowFont)));
 
 		} else {
 			table.addCell(new Phrase(new Chunk(String
-					.format("%d(round off)", Math.round(priceBean.getNetpayableAmount())),
-					rowFont)));
+					.format("%d(round off)", Math.round(priceBean.getNetpayableAmount()),	rowFont))));
 		}
 
 		if (isEstimateBill && advancedPayment > 0) {
 			table.addCell(new Phrase(new Chunk("Advance Payment(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f", advancedPayment, rowFont))));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", advancedPayment), rowFont)));
 
 			table.addCell(new Phrase(new Chunk("Balance Amount(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%d(rounded)", Math.round(priceBean.getBalanceAmount())),
-					rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%d(rounded)", Math.round(priceBean.getBalanceAmount()),
+					rowFont))));
 		}
 
 		document.add(table);
@@ -744,49 +637,6 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 				+ retailTransaction.getDiamondTransactionItemBeanList().size();
 	}
 
-	String getDirectory(Date invoiceDate, boolean isEstimateBill) {
-		String directoryName = getDirectoryName(invoiceDate, isEstimateBill);
-		File theDir = new File(System.getenv(BILL_PATH) + File.separator
-				+ directoryName);
-
-		// if the directory does not exist, create it
-		if (!theDir.exists()) {
-			System.out
-					.println("Creating Directory: " + System.getenv(BILL_PATH)
-							+ File.separator + directoryName);
-			boolean result = false;
-
-			try {
-				theDir.mkdirs();
-				result = true;
-			} catch (SecurityException se) {
-
-				logger.error("Error creating directory ",  se);
-			}
-			if (result) {
-				System.out.println("Directory created") ;
-			}
-		}
-		return directoryName;
-	}
-
-	String getDirectoryName(Date invoiceDate, boolean isEstimateBill) {
-		cal.setTime(invoiceDate);
-		String dir = String.valueOf(cal.get(Calendar.YEAR));
-		if (isEstimateBill) {
-			dir += File.separator + "ESTIMATE" ;
-		} else {
-			dir += File.separator + "INVOICE";
-		}
-		dir += File.separator + String.valueOf(cal.get(Calendar.MONTH) + 1)
-				+ File.separator
-				+ String.valueOf(cal.get(Calendar.DAY_OF_MONTH)) + "-"
-				+ String.valueOf(cal.get(Calendar.MONTH) + 1) + "-"
-				+ String.valueOf(cal.get(Calendar.YEAR));
-		return dir;
-	}
-
-
 	@Override
     public InputStream getStream() {
 		Date invoiceDate = retailTransaction.getTransactionDate();
@@ -798,8 +648,8 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		String notes = retailTransaction.getNotes();
 		cal.setTime(invoiceDate);
 		Document document = new Document(PageSize.A4);
-		String filePath = getFilePath(isEstimateBill, invoiceDate);
-		File file = new File(filePath);
+		//String filePath = getFilePath(isEstimateBill, invoiceDate);
+		//File file = new File(filePath);
 		PdfWriter writer;
 		try{
 			writer = PdfWriter.getInstance(document, os);

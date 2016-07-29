@@ -109,19 +109,11 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 
 		shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
 
-		VerticalLayout goldBillingLayout = getBillingLayout(goldBillingTable,
-				goldItemContainer, ItemContainerType.GOLD);
-		VerticalLayout silverBillingLayout = getBillingLayout(
-				silverBillingTable, silverItemContainer,
-				ItemContainerType.SILVER);
-		VerticalLayout diamondBillingLayout = getBillingLayout(
-				diamondBillingTable, diamondItemContainer,
-				ItemContainerType.DIAMOND);
-		VerticalLayout generalBillingLayout = getBillingLayout(
-				generalBillingTable, generalItemContainer,
-				ItemContainerType.GENERAL);
-		customerLayout = new CustomerInfoLayout(cusBean)
-				.getUserDetailFormLayout();
+		VerticalLayout goldBillingLayout = getBillingLayout(goldBillingTable, goldItemContainer, ItemContainerType.GOLD);
+		VerticalLayout silverBillingLayout = getBillingLayout(silverBillingTable, silverItemContainer, ItemContainerType.SILVER);
+		VerticalLayout diamondBillingLayout = getBillingLayout(diamondBillingTable, diamondItemContainer, ItemContainerType.DIAMOND);
+		VerticalLayout generalBillingLayout = getBillingLayout(generalBillingTable, generalItemContainer, ItemContainerType.GENERAL);
+		customerLayout = new CustomerInfoLayout(cusBean).getUserDetailFormLayout();
 		retailViewVerticalLayout.addComponent(customerLayout);
 		retailViewVerticalLayout.addComponent(goldBillingLayout);
 		retailViewVerticalLayout.addComponent(silverBillingLayout);
@@ -515,7 +507,6 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 			TransactionDTO retailTransaction = null;
 
 			public void buttonClick(ClickEvent event) {
-				String fileName = "";
 				try {
 					boolean isEstimateBill = billType.getValue().equals(
 							ESTIMATE_BILL);

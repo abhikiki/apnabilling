@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.web.client.RestTemplate;
 
+import com.abhishek.fmanage.retail.dto.RetailTaxInvoiceDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.dto.TransactionSearchCriteriaDto;
@@ -24,6 +25,13 @@ public class RestTransactionService {
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("transId", transacationId);
 		return rest.getForObject("http://localhost:8090/bill/findbill/{transId}", TransactionDTO.class, paramMap);
+	}
+	
+	public RetailTaxInvoiceDTO getBillByInvoiceId(long invoiceId){
+		RestTemplate rest = new RestTemplate();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("invoiceId", invoiceId);
+		return rest.getForObject("http://localhost:8090/bill/findbill/invoice/{invoiceId}", RetailTaxInvoiceDTO.class, paramMap);
 	}
 	
 	public BillCreationResponse createBill(ShopDTO shopDto, TransactionDTO retailTransaction){

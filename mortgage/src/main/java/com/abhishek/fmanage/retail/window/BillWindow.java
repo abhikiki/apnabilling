@@ -5,11 +5,14 @@ import java.util.Date;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.pdf.InvoiceGeneratorInMemory;
 import com.abhishek.fmanage.retail.restclient.service.RestTransactionService;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
+import com.vaadin.shared.ui.label.ContentMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Embedded;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -20,6 +23,7 @@ public class BillWindow extends Window{
 	private  TransactionDTO retailTransaction;
 	private VerticalLayout windowDataVL = new VerticalLayout();
 	private Embedded e ;
+	
 	public BillWindow(long transId, TransactionDTO retailTransaction){
 		this.retailTransaction = retailTransaction;
 		windowDataVL.setSizeFull();
@@ -73,7 +77,8 @@ public class BillWindow extends Window{
 		windowHeaderHL.setHeight("5%");
 		windowHeaderHL.addStyleName("sidebar");
 		Button actionButton = new Button("Deactivate Bill");
-		actionButton.addStyleName("sidebar");
+		actionButton.addStyleName("default");
+		actionButton.setIcon(FontAwesome.AUTOMOBILE);
 		actionButton.setImmediate(true);
 		if(!retailTransaction.isTransactionActive()){
 			actionButton.setCaption("Activate Bill");
@@ -110,7 +115,9 @@ public class BillWindow extends Window{
 				}
 			}
 		});
+		Label transIdLabel = new Label("<b>Transaction No: " + transId + "</b>", ContentMode.HTML);
 		windowHeaderHL.addComponent(actionButton);
+		windowHeaderHL.addComponent(transIdLabel);
 		return windowHeaderHL;
 	}
 }

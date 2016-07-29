@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.retail.data.container.RetailTransactionViewContainer;
+import com.abhishek.fmanage.retail.dto.RetailTaxInvoiceDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.dto.TransactionSearchCriteriaDto;
@@ -112,6 +113,8 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
 
     private final TextField transIdTextField = new TextField();
     
+    private final TextField invoiceIdTextField = new TextField();
+    
     /** Data container for holding transactions */
     RetailTransactionViewContainer retailViewContainer = new RetailTransactionViewContainer();
 
@@ -165,6 +168,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             {
                 filter.setValue("");
                 transIdTextField.setValue("");
+                invoiceIdTextField.setValue("");
                 startPopUpDate.setValue(getStartDate(new Date(), 2));
                 endPopUpDate.setValue(new Date());
                 billType.setValue(ALL);
@@ -359,7 +363,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     		}
     	};
 
-    	StreamResource resource = new StreamResource(source, "Test" + ".csv");
+    	StreamResource resource = new StreamResource(source, "BillingData" + ".csv");
     	resource.setMIMEType("text/csv");
 
     	FileDownloader fileDownloader = new FileDownloader(resource);
@@ -401,35 +405,71 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             	
              }
          });
+    	 
+    	 invoiceIdTextField.setInputPrompt("Invoice No.");
+    	 Button invoiceSearchByIdButton = new Button("Invoice Number", new ClickListener()
+         {
+             private static final long serialVersionUID = 1L;
+
+             @Override
+             
+             public void buttonClick(ClickEvent event)
+             {
+            	if(NumberUtils.isDigits(String.valueOf(invoiceIdTextField.getValue()))){
+            		long invoiceId = NumberUtils.toLong(String.valueOf(invoiceIdTextField.getValue()));
+            		RetailTaxInvoiceDTO retailTaxInvoiceDto = new RestTransactionService().getBillByInvoiceId(invoiceId);
+            		if(retailTaxInvoiceDto == null){
+            			Notification.show("Invoice Not Found");
+            		}else{
+            			long transId = retailTaxInvoiceDto.getTransId();
+                		TransactionDTO transDto = new RestTransactionService().getBill(transId);
+                		BillWindow bw = new BillWindow(transId, transDto);
+                 		UI.getCurrent().addWindow(bw);
+                 		bw.focus();
+            		}
+            	}else{
+            		Notification.show("Invoice Number is not valid");
+            	}
+            	
+             }
+         });
+
     	 transSearchByIdButton.addStyleName("default");
+    	 invoiceSearchByIdButton.addStyleName("default");
     	 Button exportBtn = getExportButton();
     	 transSearchByIdButton.addStyleName("icon-search-1");
+    	 invoiceSearchByIdButton.addStyleName("icon-search-1");
     	 transIdSearchTooolbar.addComponent(transIdTextField);
     	 transIdSearchTooolbar.addComponent(transSearchByIdButton);
     	 transIdSearchTooolbar.addComponent(exportBtn);
+    	 transIdSearchTooolbar.addComponent(invoiceIdTextField);
+    	 transIdSearchTooolbar.addComponent(invoiceSearchByIdButton);
     	 transIdSearchTooolbar.setComponentAlignment(transIdTextField, Alignment.MIDDLE_LEFT);
     	 transIdSearchTooolbar.setComponentAlignment(transSearchByIdButton, Alignment.MIDDLE_LEFT);
     	 transIdSearchTooolbar.setComponentAlignment(exportBtn, Alignment.MIDDLE_LEFT);
+    	 transIdSearchTooolbar.setComponentAlignment(invoiceIdTextField, Alignment.MIDDLE_LEFT);
+    	 transIdSearchTooolbar.setComponentAlignment(invoiceSearchByIdButton, Alignment.MIDDLE_LEFT);
     	 transIdSearchTooolbar.setExpandRatio(transIdTextField, 1);
     	 transIdSearchTooolbar.setExpandRatio(transSearchByIdButton, 1);
     	 transIdSearchTooolbar.setExpandRatio(exportBtn, 1);
+    	 transIdSearchTooolbar.setExpandRatio(invoiceIdTextField, 1);
+    	 transIdSearchTooolbar.setExpandRatio(invoiceSearchByIdButton, 1);
     	 transIdSearchTooolbar.setWidth("100%");
     	 
     	 HorizontalLayout hLDummy = new HorizontalLayout();
     	 hLDummy.setWidth("100%");
-    	 //hLDummy.setSpacing(true);
-    	 //hLDummy.setMargin(true);
     	 hLDummy.addStyleName("mytoolbar");
     	 
     	 HorizontalLayout wholeHL = new HorizontalLayout();
     	 wholeHL.setWidth("100%");
-    	 wholeHL.setSpacing(false);
+    	 wholeHL.setSpacing(true);
     	 wholeHL.setMargin(false);
     	 wholeHL.addStyleName("mytoolbar");
     	 wholeHL.addComponent(transIdSearchTooolbar);
     	 wholeHL.addComponent(hLDummy);
-    	 //wholeHL.setExpandRatio(transIdSearchTooolbar, 1);
-    	 //wholeHL.setExpandRatio(hLDummy, 1);
+    	 wholeHL.setExpandRatio(transIdSearchTooolbar, 4);
+    	 wholeHL.setExpandRatio(hLDummy, 1);
+
     	 return wholeHL;
     }
     

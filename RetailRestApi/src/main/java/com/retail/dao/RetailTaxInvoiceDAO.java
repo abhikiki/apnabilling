@@ -30,6 +30,12 @@ public class RetailTaxInvoiceDAO {
 				this::retailTaxInvoiceMapRow);
 	}
 	
+	public List<RetailTaxInvoiceDTO> getRetailTaxInvoiceByInvoiceId(long invoiceId) {
+		final String sql = "SELECT SHOPID, TRANSID, INVOICENUMBER FROM RETAILTAXINVOICE WHERE INVOICENUMBER = ?";
+		return jdbcTemplate.query(sql, new Object[] { invoiceId }, this::retailTaxInvoiceMapRow);
+	}
+	
+	
 	public Long saveRetailTaxInvoice(long shopId, long transId){
 		final String sql = "INSERT INTO RETAILTAXINVOICE(SHOPID, TRANSID) values(?, ?)";
 		KeyHolder keyHolder = new GeneratedKeyHolder();

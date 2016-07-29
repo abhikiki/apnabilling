@@ -389,8 +389,8 @@ public class GoldItemContainer extends IndexedContainer implements
 			public void valueChange(ValueChangeEvent event) {
 				ComboBox itemNameField = (ComboBox) getItem(currentItemId)
 						.getItemProperty(ITEM_NAME).getValue();
-				ComboBox hallMarkTypeField = (ComboBox) getItem(currentItemId)
-						.getItemProperty(GOLD_TYPE).getValue();
+//				ComboBox hallMarkTypeField = (ComboBox) getItem(currentItemId)
+//						.getItemProperty(GOLD_TYPE).getValue();
 				ComboBox piecePairField = (ComboBox) getItem(currentItemId)
 						.getItemProperty(PIECE_PAIR).getValue();
 				ComboBox makingChargeType = (ComboBox) getItem(currentItemId)
@@ -422,8 +422,8 @@ public class GoldItemContainer extends IndexedContainer implements
 						&& (NumberUtils.isNumber(makingChargeTxtField
 								.getValue()) && makingCharge >= 0.0)
 						&& (NumberUtils.isNumber(weightTxtField.getValue()) && goldRate > 0.0)
-						&& !StringUtils.isBlank((String) hallMarkTypeField
-								.getValue())
+//						&& !StringUtils.isBlank((String) hallMarkTypeField
+//								.getValue())
 						&& !StringUtils.isBlank((String) piecePairField
 								.getValue())
 						&& !StringUtils.isBlank((String) makingChargeType
@@ -461,11 +461,12 @@ public class GoldItemContainer extends IndexedContainer implements
 		ComboBox hallMarkType = new ComboBox();
 		hallMarkType.setNullSelectionAllowed(false);
 		hallMarkType.addValueChangeListener(getCustomValueChangeListener(currentItemId));
+		hallMarkType.addItem(" ");
 		hallMarkType.addItem("916");
 		hallMarkType.addItem("875");
 		hallMarkType.addItem("833");
 		hallMarkType.addItem("750");
-		hallMarkType.setValue("916");
+		hallMarkType.setValue(" ");
 		hallMarkType.setWidth("90%");
 		return hallMarkType;
 	}

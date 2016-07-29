@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.retail.dao.RetailTaxInvoiceDAO;
 import com.retail.dao.RetailTransactionDAO;
 import com.retail.dao.TransactionDAO;
+import com.retail.dto.RetailTaxInvoiceDTO;
 import com.retail.dto.TransactionDTO;
 import com.retail.dto.TransactionSearchCriteriaDto;
 import com.retail.dto.TransactionSearchResultDto;
@@ -18,6 +20,9 @@ public class BillService {
 
 	@Autowired
 	private TransactionDAO transDao;
+	
+	@Autowired
+	private RetailTaxInvoiceDAO retailTaxInvoiceDao;
 	
 	@Autowired
 	private RetailTransactionDAO retailTransDao;
@@ -44,5 +49,14 @@ public class BillService {
 	
 	public boolean updateBillStatus(long transId, String transactionStatus){
 		return retailTransDao.updateTransactionStatus(transId, transactionStatus);
+	}
+
+	public RetailTaxInvoiceDTO findBillByInvoiceId(long invoiceId) {
+		RetailTaxInvoiceDTO retailTaxInvoiceDto = null;
+		List<RetailTaxInvoiceDTO> retailTaxInvoiceDtoList = retailTaxInvoiceDao.getRetailTaxInvoiceByInvoiceId(invoiceId);
+		if(!retailTaxInvoiceDtoList.isEmpty()){
+			retailTaxInvoiceDto = retailTaxInvoiceDtoList.get(0);
+		}
+		return retailTaxInvoiceDto;
 	}
 }
