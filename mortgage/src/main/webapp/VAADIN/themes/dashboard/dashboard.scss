@@ -28,6 +28,7 @@
 @import "views/reports.scss";
 @import "views/transactions.scss";
 @import "views/retailbilling.scss";
+@import "views/sms.scss";
 
 
 @mixin dashboard {
@@ -49,6 +50,7 @@
 	@include dashboard-schedule-view;
 	@include dashboard-sales-view;
 	@include dashboard-reports-view;
+	@include dashboard-sms-view;
 	@include dashboard-transactions-view;
 	@include dashboard-retailbilling-view;
 	@include dashboard-textfield;

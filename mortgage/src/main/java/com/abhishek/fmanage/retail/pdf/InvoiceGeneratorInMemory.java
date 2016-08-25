@@ -209,7 +209,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 						table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
 						table.addCell(new Phrase(String.valueOf(item.getQuantity()), rowFont));
 						table.addCell(new Phrase(String.valueOf(item.getPiecepair()), rowFont));
-						table.addCell(new Phrase(item.getWeight() > 0.0 ? item.getWeight().toString() : "N/A", rowFont));
+						table.addCell(new Phrase(item.getWeight() > 0.0 ? String.format("%.3f", item.getWeight()) : "N/A", rowFont));
 						table.addCell(new Phrase(item.getPricePerPiecepair().toString(), rowFont));
 					});
 			document.add(table);
@@ -267,8 +267,8 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 				table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getQuantity()), rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getPiecePair()), rowFont));
-				table.addCell(new Phrase(item.getGoldWeight().toString(), rowFont));
-				table.addCell(new Phrase(item.getDiamondWeightCarat().toString(), rowFont));
+				table.addCell(new Phrase(String.format("%.3f", item.getGoldWeight()), rowFont));
+				table.addCell(new Phrase(String.format("%.2f", item.getDiamondWeightCarat()), rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getDiamondPieceCount()), rowFont));
 				table.addCell(new Phrase(item.isCertified() ? "YES" : "NO", rowFont));
 			});
@@ -340,10 +340,10 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 				table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getQuantity()), rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getPiecepair()), rowFont));
-				table.addCell(new Phrase(item.getWeight().toString(), rowFont));
-				table.addCell(new Phrase(item.getMakingCharge().toString(), rowFont));
+				table.addCell(new Phrase(String.format("%.3f", item.getWeight()), rowFont));
+				table.addCell(new Phrase(String.format("%.3f", item.getMakingCharge()), rowFont));
 				table.addCell(new Phrase(item.getMakingChargeType(), rowFont));
-				table.addCell(new Phrase(item.getSilverRate().toString(), rowFont));
+				table.addCell(new Phrase(String.format("%.3f", item.getSilverRate()), rowFont));
 			});
 			
 		
@@ -409,10 +409,10 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 				table.addCell(new Phrase(golItem.getGoldType(), rowFont));
 				table.addCell(new Phrase(String.valueOf(golItem.getQuantity()), rowFont));
 				table.addCell(new Phrase(golItem.getPiecePair(), rowFont));
-				table.addCell(new Phrase(golItem.getWeight().toString(), rowFont));
-				table.addCell(new Phrase(golItem.getMakingCharge().toString(), rowFont));
+				table.addCell(new Phrase(String.format("%.3f", golItem.getWeight()), rowFont));
+				table.addCell(new Phrase(String.format("%.3f", golItem.getMakingCharge()), rowFont));
 				table.addCell(new Phrase(golItem.getMakingChargeType(), rowFont));
-				table.addCell(new Phrase(golItem.getGoldRate().toString(), rowFont));
+				table.addCell(new Phrase(String.format("%.3f",golItem.getGoldRate()), rowFont));
 			});
 			
 			

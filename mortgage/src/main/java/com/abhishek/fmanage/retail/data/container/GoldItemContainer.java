@@ -389,8 +389,6 @@ public class GoldItemContainer extends IndexedContainer implements
 			public void valueChange(ValueChangeEvent event) {
 				ComboBox itemNameField = (ComboBox) getItem(currentItemId)
 						.getItemProperty(ITEM_NAME).getValue();
-//				ComboBox hallMarkTypeField = (ComboBox) getItem(currentItemId)
-//						.getItemProperty(GOLD_TYPE).getValue();
 				ComboBox piecePairField = (ComboBox) getItem(currentItemId)
 						.getItemProperty(PIECE_PAIR).getValue();
 				ComboBox makingChargeType = (ComboBox) getItem(currentItemId)

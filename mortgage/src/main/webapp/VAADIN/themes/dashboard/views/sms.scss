@@ -1,0 +1,22 @@
+@mixin dashboard-sms-view {
+	.mysmsHeader{
+    	background-color: #D5CDCB;
+	}
+	
+	.smsContact{
+		background-color: #83DC4C;  
+	}
+	
+	.smsMessage{
+		background-color: #DDA9DE;  
+	}
+	
+	.smsBackLayout{
+		background-color: #DDA9DE;  
+	}
+	
+	.smsBackLowerLayout{
+		background-color: #F6F943;  
+	}
+	  
+}

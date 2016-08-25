@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestLoginService;
+import com.abhishek.fmanage.retail.views.SmsView;
 import com.abhishek.fmanage.retail.views.DashboardView;
 import com.abhishek.fmanage.retail.views.RetailInvoiceView;
 import com.abhishek.fmanage.retail.views.RetailTransactionSearchView;
@@ -65,7 +66,7 @@ public class DashboardUI extends UI {
     private CssLayout menu = new CssLayout();
     private CssLayout content = new CssLayout();
 
-    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions"};
+    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions", "sms"};
     private String[] staffViews = new String[] {"retailbilling"};
     private String currentRole = "ADMIN";
     
@@ -75,6 +76,7 @@ public class DashboardUI extends UI {
 			put("/dashboard", DashboardView.class);
             put("/retailbilling", RetailInvoiceView.class);
             put("/transactions", RetailTransactionSearchView.class);
+            put("/sms", SmsView.class);
         }
     };
 
@@ -210,12 +212,14 @@ public class DashboardUI extends UI {
         	
         	routes.put("/dashboard", DashboardView.class);
         	routes.put("/transactions", RetailTransactionSearchView.class);
+        	routes.put("/sms", SmsView.class);
             
         	
         }else{
         	currentView = staffViews;
         	routes.remove("/dashboard");
          	routes.remove("/transactions");
+         	routes.remove("/sms");
         }
        
         for (String route : routes.keySet()) {

@@ -215,6 +215,4 @@ public class TransactionDAO {
 		transSearchResultDto.setTotalItemsPrice(resultSet.getDouble("TOTALITEMSPRICE"));
 		return transSearchResultDto;
 	}
-
-
 }
