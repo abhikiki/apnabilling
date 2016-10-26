@@ -13,8 +13,8 @@ import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SmsSettingDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.pdf.InvoiceGeneratorInMemory;
-import com.abhishek.fmanage.retail.restclient.service.RestSmsService;
-import com.abhishek.fmanage.retail.restclient.service.RestTransactionService;
+import com.abhishek.fmanage.retail.restclient.service.RestRetailSmsService;
+import com.abhishek.fmanage.retail.restclient.service.RestRetailTransactionService;
 import com.abhishek.fmanage.retail.sms.SmsData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.data.Property;
@@ -220,7 +220,7 @@ public class BillWindow extends Window{
 			public void buttonClick(ClickEvent event) {
 				if(retailTransaction.isTransactionActive()){
 					//deactivate
-					Boolean updateSuccess = new RestTransactionService().updateBillStatus(transId,"I");
+					Boolean updateSuccess = new RestRetailTransactionService().updateBillStatus(transId,"I");
 					if(updateSuccess){
 						retailTransaction.setTransactionActive(false);
 						actionButton.setCaption("Activate Bill");
@@ -232,7 +232,7 @@ public class BillWindow extends Window{
 					actionButton.setImmediate(true);
 				}else{
 					//activate
-					Boolean updateSuccess = new RestTransactionService().updateBillStatus(transId,"A");
+					Boolean updateSuccess = new RestRetailTransactionService().updateBillStatus(transId,"A");
 					if(updateSuccess){
 						retailTransaction.setTransactionActive(true);
 						actionButton.setCaption("Deactivate Bill");
@@ -254,7 +254,7 @@ public class BillWindow extends Window{
 	}
 	
 	private SmsSettingDTO getSmsSetting() {
-		return new RestSmsService().getSmsSetting(getShopDto().getShopId());
+		return new RestRetailSmsService().getSmsSetting(getShopDto().getShopId());
 	}
 
 	private ShopDTO getShopDto() {

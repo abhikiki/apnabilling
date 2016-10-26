@@ -40,7 +40,7 @@ public class SilverItemTable extends Table{
 		setColumnWidth(SilverItemContainer.MAKING_CHARGE, 95);
 		setColumnWidth(SilverItemContainer.MAKING_CHARGE_TYPE,
 				105);
-		String totalFormattedSilverPrice = String.format("%.3f", silverItemContainer.getTotalPrice());
+		String totalFormattedSilverPrice = String.format("%.2f", silverItemContainer.getTotalPrice());
 		setColumnFooter(SilverItemContainer.PRICE, totalFormattedSilverPrice);
 		setColumnFooter(SilverItemContainer.WEIGHT, String.format("%.3f", silverItemContainer.getTotalWeight()));
 		setColumnFooter(SilverItemContainer.DELETE, ("Items=" + size()));

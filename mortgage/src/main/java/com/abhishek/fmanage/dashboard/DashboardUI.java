@@ -5,7 +5,9 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import com.abhishek.fmanage.retail.dto.ShopDTO;
-import com.abhishek.fmanage.retail.restclient.service.RestLoginService;
+import com.abhishek.fmanage.retail.restclient.service.RestRetailLoginService;
+import com.abhishek.fmanage.retail.views.MortgageTransactionSearchView;
+import com.abhishek.fmanage.retail.views.MortgageView;
 import com.abhishek.fmanage.retail.views.SmsView;
 import com.abhishek.fmanage.retail.views.DashboardView;
 import com.abhishek.fmanage.retail.views.RetailInvoiceView;
@@ -66,7 +68,7 @@ public class DashboardUI extends UI {
     private CssLayout menu = new CssLayout();
     private CssLayout content = new CssLayout();
 
-    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions", "sms"};
+    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions", "sms", "mortgage", "mortgagetransaction"};
     private String[] staffViews = new String[] {"retailbilling"};
     private String currentRole = "ADMIN";
     
@@ -77,6 +79,8 @@ public class DashboardUI extends UI {
             put("/retailbilling", RetailInvoiceView.class);
             put("/transactions", RetailTransactionSearchView.class);
             put("/sms", SmsView.class);
+            put("/mortgage", MortgageView.class);
+            put("/mortgagetransaction", MortgageTransactionSearchView.class);
         }
     };
 
@@ -175,7 +179,7 @@ public class DashboardUI extends UI {
             public void buttonClick(ClickEvent event) {
 				String userName = username.getValue();
 				String userPassword = password.getValue();
-				ShopDTO shopDto = new RestLoginService().retailLogin(userName, userPassword);
+				ShopDTO shopDto = new RestRetailLoginService().retailLogin(userName, userPassword);
                 if (shopDto.getShopId() != -1L) {
                 	getUI().getSession().setAttribute(ShopDTO.class, shopDto);
                 	currentRole = shopDto.getRole();
@@ -213,6 +217,8 @@ public class DashboardUI extends UI {
         	routes.put("/dashboard", DashboardView.class);
         	routes.put("/transactions", RetailTransactionSearchView.class);
         	routes.put("/sms", SmsView.class);
+        	routes.put("/mortgage", MortgageView.class);
+        	routes.put("/mortgagetransaction", MortgageTransactionSearchView.class);
             
         	
         }else{
@@ -220,6 +226,8 @@ public class DashboardUI extends UI {
         	routes.remove("/dashboard");
          	routes.remove("/transactions");
          	routes.remove("/sms");
+         	routes.remove("/mortgage");
+         	routes.remove("/mortgagetransaction");
         }
        
         for (String route : routes.keySet()) {

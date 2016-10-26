@@ -41,7 +41,7 @@ public class GoldItemTable extends Table{
 		setColumnWidth(GoldItemContainer.MAKING_CHARGE_TYPE, 100);
 		setColumnWidth(GoldItemContainer.PIECE_PAIR, 100);
 		setColumnWidth(GoldItemContainer.PRICE, 120);
-		String totalFormattedGoldPrice = String.format("%.3f", goldItemContainer.getTotalPrice());
+		String totalFormattedGoldPrice = String.format("%.2f", goldItemContainer.getTotalPrice());
 		setColumnFooter(GoldItemContainer.PRICE, totalFormattedGoldPrice);
 		setColumnFooter(GoldItemContainer.WEIGHT, String.format("%.3f", goldItemContainer.getTotalWeight()));
 		setColumnFooter(GoldItemContainer.DELETE, ("Items=" + size()));

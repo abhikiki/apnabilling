@@ -8,7 +8,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.cache.ItemCache;
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
-import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.ItemDTO;
@@ -23,7 +22,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.TextField;
 
-public class DiamondItemContainer extends IndexedContainer implements CustomItemContainerInterface{
+public class DiamondItemContainer extends IndexedContainer implements CustomRetailItemContainerInterface{
 
 	private static final long serialVersionUID = 1L;
 	public static final String DELETE = "Delete";
@@ -58,7 +57,7 @@ public class DiamondItemContainer extends IndexedContainer implements CustomItem
 	       	String itemPrice = goldPriceTxtField.getValue();
 	       	totalCost += NumberUtils.isNumber(itemPrice) ? NumberUtils.toDouble(itemPrice) : 0.0;
 	     }
-	     return totalCost;
+	     return  Math.round(totalCost * 100.0) / 100.0;
 	}
 	
 	public double getTotalGoldWeight() {

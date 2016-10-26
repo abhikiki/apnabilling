@@ -37,3 +37,4 @@ mysql --user=apna --password=apna < /vagrant/sql/generalitems.sql
 mysql --user=apna --password=apna < /vagrant/sql/diamonditems.sql
 
 
+

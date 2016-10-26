@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.abhishek.fmanage.retail.charts.ItemSummaryChart;
 import com.abhishek.fmanage.retail.dto.SummaryDTO;
-import com.abhishek.fmanage.retail.restclient.service.RestSummaryService;
+import com.abhishek.fmanage.retail.restclient.service.RestRetailSummaryService;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
@@ -37,7 +37,6 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	/** Name of the transaction css style */
     private static final String TRANSACTION_STYLE_NAME = "transactions";
 	private static final long serialVersionUID = 1L;
-	private VerticalLayout root = null;
 	private SummaryDTO summary;
 	private final PopupDateField startPopUpDate = new PopupDateField();
 	private final PopupDateField endPopUpDate = new PopupDateField();
@@ -45,6 +44,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
     private Label totalSaleLabel = null;
     private Label silverWeightLabel = null;
     private Label goldWeightLabel = null;
+    private Label vatLabel = null;
     
 	@Override
 	public void enter(ViewChangeEvent event) {
@@ -64,7 +64,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 		hsplit.setHeight("100%");
 		hsplit.setFirstComponent(getTreeMenu());
 		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
-				new RestSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getGoldItemSummaryDtoList(), "Gold Items Sale"));
+				new RestRetailSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getGoldItemSummaryDtoList(), "Gold Items Sale"));
 		return hsplit;
 		 
 	 }
@@ -140,7 +140,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	            
 	            public void buttonClick(ClickEvent event)
 	            {
-	            	summary = new RestSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
+	            	summary = new RestRetailSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
 	            	silverWeightLabel.setValue(String .format("%.3f",summary.getTotalSilverWeight()));
 	            	goldWeightLabel.setValue(String .format("%.3f",summary.getTotalGoldWeight()));
 	            	totalSaleLabel.setValue(String .format("%.3f",summary.getTotalSale()));
@@ -163,7 +163,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	 
 	 
 	 private Component buildSaleSummary() {
-		 	summary = new RestSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
+		 	summary = new RestRetailSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
 	        HorizontalLayout sparks = new HorizontalLayout();
 	        //sparks.addStyleName("sparks");
 	        sparks.setWidth("100%");
@@ -172,6 +172,8 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	        sparks.addStyleName("mydasboardsummary");
 
 	        sparks.addComponent(buildSummaryLabels("Total Sale(INR)", String.format("%.3f", summary.getTotalSale()), "SALE"));
+	        Double vatTotal = Math.round(summary.getTotalVat() * 100.0) / 100.0;
+	        sparks.addComponent(buildSummaryLabels("Total VAT(INR)", String .format("%.2f",vatTotal), "VAT"));
 	        sparks.addComponent(buildSummaryLabels("Total Gold Weight(gms)", String.format("%.3f", summary.getTotalGoldWeight()), "GOLDWEIGHT"));
 	        sparks.addComponent(buildSummaryLabels("Total Silver Weight(gms)", String .format("%.3f",summary.getTotalSilverWeight()), "SILVERWEIGHT"));
 	        return sparks;
@@ -203,13 +205,20 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
         	 goldWeightLabel.addStyleName(ValoTheme.LABEL_SMALL);
         	 goldWeightLabel.addStyleName(ValoTheme.LABEL_LIGHT);
         	 vl.addComponent(goldWeightLabel);
-        }else{
+        }else if(labelName.equals("SILVER")){
         	 silverWeightLabel = new Label(weight);
         	 silverWeightLabel.setImmediate(true);
         	 silverWeightLabel.setSizeUndefined();
         	 silverWeightLabel.addStyleName(ValoTheme.LABEL_SMALL);
         	 silverWeightLabel.addStyleName(ValoTheme.LABEL_LIGHT);
              vl.addComponent(silverWeightLabel);
+        }else{
+        	 vatLabel = new Label(weight);
+        	 vatLabel.setImmediate(true);
+        	 vatLabel.setSizeUndefined();
+        	 vatLabel.addStyleName(ValoTheme.LABEL_SMALL);
+        	 vatLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+             vl.addComponent(vatLabel);
         }
         
         p.setContent(vl);

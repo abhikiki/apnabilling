@@ -37,7 +37,7 @@ public class GeneralItemTable extends Table{
 		setColumnWidth(GeneralItemContainer.ITEM_NAME, 180);
 		setColumnWidth(GeneralItemContainer.QUANTITY, 60);
 		setColumnWidth(GeneralItemContainer.WEIGHT, 90);
-		String totalFormattedDiamondPrice = String.format("%.3f", generalItemContainer.getTotalPrice());
+		String totalFormattedDiamondPrice = String.format("%.2f", generalItemContainer.getTotalPrice());
 		setColumnFooter(GeneralItemContainer.PRICE, totalFormattedDiamondPrice);
 		setColumnFooter(GeneralItemContainer.DELETE, "Items=" + size());
 		for (Object obj : getItemIds()) {

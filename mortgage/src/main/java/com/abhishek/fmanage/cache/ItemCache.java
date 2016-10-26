@@ -9,7 +9,7 @@ import java.util.Map;
 import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.abhishek.fmanage.retail.dto.RetailItemStaffDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
-import com.abhishek.fmanage.retail.restclient.service.RestItemService;
+import com.abhishek.fmanage.retail.restclient.service.RestRetailItemService;
 import com.google.gwt.dev.util.collect.HashMap;
 import com.vaadin.ui.UI;
 
@@ -38,7 +38,7 @@ public class ItemCache {
 	}
 
 	private void initializeCache() {
-		RestItemService service = new RestItemService();
+		RestRetailItemService service = new RestRetailItemService();
 		ShopDTO shopDto =  (ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class);
 		RetailItemStaffDTO dto = service.getItems(shopDto.getShopId());
 		itemMap.put("GOLD", dto.getGoldItemsList());

@@ -27,7 +27,7 @@ import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.dto.TransactionSearchCriteriaDto;
 import com.abhishek.fmanage.retail.dto.TransactionSearchResultDto;
-import com.abhishek.fmanage.retail.restclient.service.RestTransactionService;
+import com.abhishek.fmanage.retail.restclient.service.RestRetailTransactionService;
 import com.abhishek.fmanage.retail.window.BillWindow;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
@@ -221,7 +221,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             	criteriaDto.setEndDate(endPopUpDate.getValue());
             	criteriaDto.setBillType(convertBillType(billType.getValue().toString()));
             	criteriaDto.setBillStatus(convertBillStatus(billStatus.getValue().toString()));
-            	List<TransactionSearchResultDto> searchResultDtoList = new RestTransactionService().findBills(criteriaDto);
+            	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService().findBills(criteriaDto);
                 retailViewContainer.addTransactionSearch(searchResultDtoList);
                 setContainerFilters();
                 transactionTable.setPageLength(searchResultDtoList.size());
@@ -269,7 +269,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
                     Item item = ((Table) sender).getItem(target);
                     long transId =  (long) item.getItemProperty(
                         RetailTransactionViewContainer.TRANSID_COL_NAME).getValue();
-                    BillWindow bw = new BillWindow(transId, new RestTransactionService().getBill(transId));
+                    BillWindow bw = new BillWindow(transId, new RestRetailTransactionService().getBill(transId));
             		UI.getCurrent().addWindow(bw);
             		bw.focus();
                 }
@@ -391,7 +391,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
              {
             	if(NumberUtils.isDigits(String.valueOf(transIdTextField.getValue()))){
             		long transId = NumberUtils.toLong(String.valueOf(transIdTextField.getValue()));
-            		TransactionDTO transDto = new RestTransactionService().getBill(transId);
+            		TransactionDTO transDto = new RestRetailTransactionService().getBill(transId);
             		if(transDto != null){
             			BillWindow bw = new BillWindow(transId, transDto);
                  		UI.getCurrent().addWindow(bw);
@@ -417,12 +417,12 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
              {
             	if(NumberUtils.isDigits(String.valueOf(invoiceIdTextField.getValue()))){
             		long invoiceId = NumberUtils.toLong(String.valueOf(invoiceIdTextField.getValue()));
-            		RetailTaxInvoiceDTO retailTaxInvoiceDto = new RestTransactionService().getBillByInvoiceId(invoiceId);
+            		RetailTaxInvoiceDTO retailTaxInvoiceDto = new RestRetailTransactionService().getBillByInvoiceId(invoiceId);
             		if(retailTaxInvoiceDto == null){
             			Notification.show("Invoice Not Found");
             		}else{
             			long transId = retailTaxInvoiceDto.getTransId();
-                		TransactionDTO transDto = new RestTransactionService().getBill(transId);
+                		TransactionDTO transDto = new RestRetailTransactionService().getBill(transId);
                 		BillWindow bw = new BillWindow(transId, transDto);
                  		UI.getCurrent().addWindow(bw);
                  		bw.focus();
@@ -613,7 +613,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
                             }
                             return super.formatPropertyValue(rowId, colId, property);
                         }
-               };;
+               };
         transactionTable.setSizeFull();
         transactionTable.addStyleName("borderless");
         transactionTable.setSelectable(true);
@@ -648,7 +648,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     	dto.setEndDate(endDate);
     	dto.setBillType(convertBillType(billType));
     	dto.setBillStatus(convertBillStatus(billStatus));
-    	List<TransactionSearchResultDto> searchResultDtoList = new RestTransactionService().findBills(dto);
+    	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService().findBills(dto);
         retailViewContainer.addTransactionSearch(searchResultDtoList);
         return retailViewContainer;
     }

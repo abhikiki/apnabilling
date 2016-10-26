@@ -38,7 +38,7 @@ public class DiamondItemTable extends Table{
 		setColumnWidth(DiamondItemContainer.GOLD_WEIGHT, 90);
 		setColumnWidth(DiamondItemContainer.DIAMOND_WEIGHT,
 				125);
-		String totalFormattedDiamondPrice = String.format("%.3f", diamondItemContainer.getTotalPrice());
+		String totalFormattedDiamondPrice = String.format("%.2f", diamondItemContainer.getTotalPrice());
 		setColumnFooter(DiamondItemContainer.PRICE, totalFormattedDiamondPrice);
 		setColumnFooter(DiamondItemContainer.GOLD_WEIGHT, String.format("%.3f", diamondItemContainer.getTotalGoldWeight()));
 		setColumnFooter(DiamondItemContainer.DIAMOND_WEIGHT, String.format("%.2f", diamondItemContainer.getTotalDiamondWeight()));

@@ -8,7 +8,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.cache.ItemCache;
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
-import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.vaadin.data.Item;
@@ -23,7 +22,7 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.TextField;
 
 public class SilverItemContainer extends IndexedContainer implements
-		CustomItemContainerInterface {
+		CustomRetailItemContainerInterface {
 
 	private static final long serialVersionUID = 1L;
 	public static final ThemeResource removeItemImageResource = new ThemeResource(
@@ -64,7 +63,7 @@ public class SilverItemContainer extends IndexedContainer implements
 			totalCost += NumberUtils.isNumber(itemPrice) ? NumberUtils
 					.toDouble(itemPrice) : 0.0;
 		}
-		return totalCost;
+		return  Math.round(totalCost * 100.0) / 100.0 ;
 	}
 
 	public Double getTotalWeight() {
@@ -435,8 +434,7 @@ public class SilverItemContainer extends IndexedContainer implements
 					case MAKING_COST_TYPE_NET:
 						silverPrice = (weight * silverRate) + makingCharge;
 					}
-					silverPriceTxtField.setValue(String.format("%.3f",
-							silverPrice));
+					silverPriceTxtField.setValue(String.format("%.2f", Math.round(silverPrice * 100.0) / 100.0));
 					silverPriceTxtField.addStyleName("v-textfield-success");
 					silverPriceTxtField.setImmediate(true);
 					// Notification.show("Item entry complete");

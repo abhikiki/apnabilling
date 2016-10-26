@@ -21,6 +21,7 @@ import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.PriceDTO;
 import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
+import com.abhishek.fmanage.utility.ConvertNumberToWords;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -203,7 +204,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			generalItemsTransactionList
 					.forEach(item -> {
 						if (includePrice) {
-							table.addCell(new Phrase(item.getItemPrice().toString(),
+							table.addCell(new Phrase(String.format("%.2f", item.getItemPrice()),
 									rowFont));
 						}
 						table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
@@ -220,8 +221,8 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			Phrase totalGeneralPricePhrase = new Phrase();
 			totalGeneralPricePhrase.add(new Chunk("Total Items Price(INR) = ",
 					headerFont));
-			totalGeneralPricePhrase.add(new Chunk(String.format("%.3f",
-					generalItemsTransactionList.stream().map(item -> item.getItemPrice()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
+			totalGeneralPricePhrase.add(new Chunk(String.format("%.2f",
+					 Math.round(generalItemsTransactionList.stream().map(item -> item.getItemPrice()).reduce((price1, price2) -> price1 + price2).get() * 100.0) / 100.0 , rowFont)));
 			footerTable.addCell(new Phrase(totalGeneralPricePhrase));
 			document.add(footerTable);
 		}
@@ -261,7 +262,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			diamondItemsTransactionList
 			.forEach(item -> {
 				if (includePrice) {
-					table.addCell(new Phrase(item.getItemPrice().toString(),
+					table.addCell(new Phrase(String.format("%.2f", item.getItemPrice()),
 							rowFont));
 				}
 				table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
@@ -281,7 +282,8 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			Phrase totalDiamondPricePhrase = new Phrase();
 			totalDiamondPricePhrase.add(new Chunk(
 					"Total Diamond Price(INR) = ", headerFont));
-			totalDiamondPricePhrase.add(new Chunk(String.format("%.3f", diamondItemsTransactionList.stream().map(item -> item.getItemPrice()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
+			totalDiamondPricePhrase.add(new Chunk(String.format("%.2f",
+					 Math.round(diamondItemsTransactionList.stream().map(item -> item.getItemPrice()).reduce((price1, price2) -> price1 + price2).get() * 100.0) / 100.0 , rowFont)));
 			footerTable.addCell(new Phrase(totalDiamondPricePhrase));
 
 			Phrase totalGoldWeightPhrase = new Phrase();
@@ -334,7 +336,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			silverItemsTransactionList
 			.forEach(item -> {
 				if (includePrice) {
-					table.addCell(new Phrase(item.getSilverItemPrice().toString(),
+					table.addCell(new Phrase(String.format("%.2f", item.getSilverItemPrice()),
 							rowFont));
 				}
 				table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
@@ -354,12 +356,15 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			Phrase totalSilverPricePhrase = new Phrase();
 			totalSilverPricePhrase.add(new Chunk("Total Silver Price(INR) = ",
 					headerFont));
-			totalSilverPricePhrase.add(new Chunk(String.format("%.3f", silverItemsTransactionList.stream().map(item -> item.getSilverItemPrice()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
+			totalSilverPricePhrase.add(new Chunk(String.format("%.2f", 
+					 Math.round(silverItemsTransactionList.stream().map(item -> item.getSilverItemPrice()).reduce((price1, price2) -> price1 + price2).get() * 100.0) / 100.0 , rowFont)));
 			footerTable.addCell(new Phrase(totalSilverPricePhrase));
 			Phrase totalSilverWeightPhrase = new Phrase();
 			totalSilverWeightPhrase.add(new Chunk("Total Silver Wt(gm) = ",
 					headerFont));
-			totalSilverWeightPhrase.add(new Chunk(String.format("%.3f", silverItemsTransactionList.stream().map(item -> item.getWeight()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
+			totalSilverWeightPhrase.add(new Chunk(String.format("%.3f", 
+					 Math.round(silverItemsTransactionList.stream().map(item -> item.getWeight()).reduce((price1, price2) -> price1 + price2).get()
+							 * 100.0) / 100.0 , rowFont)));
 			footerTable.addCell(totalSilverWeightPhrase);
 			document.add(footerTable);
 		}
@@ -403,7 +408,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		goldItemsTransactionList
 			.forEach(golItem -> {
 				if (includePrice) {
-					table.addCell(new Phrase(String.valueOf(golItem.getGoldItemPrice()), rowFont));
+					table.addCell(new Phrase(String.format("%.2f", golItem.getGoldItemPrice()), rowFont));
 				}
 				table.addCell(new Phrase(String.valueOf(golItem.getGoldItemName()), rowFont));
 				table.addCell(new Phrase(golItem.getGoldType(), rowFont));
@@ -424,7 +429,8 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			Phrase totalGoldPricePhrase = new Phrase();
 			totalGoldPricePhrase.add(new Chunk("Total Gold Price(INR) = ",
 					headerFont));
-			totalGoldPricePhrase.add(new Chunk(String.format("%.3f", goldItemsTransactionList.stream().map(item -> item.getGoldItemPrice()).reduce((price1, price2) -> price1 + price2).get(), rowFont)));
+			totalGoldPricePhrase.add(new Chunk(String.format("%.2f", 
+					 Math.round(goldItemsTransactionList.stream().map(item -> item.getGoldItemPrice()).reduce((price1, price2) -> price1 + price2).get() * 100.0) / 100.0 , rowFont)));
 			footerTable.addCell(new Phrase(totalGoldPricePhrase));
 			Phrase totalGoldWeightPhrase = new Phrase();
 			totalGoldWeightPhrase.add(new Chunk("Total Gold Wt(gm) = ",
@@ -506,50 +512,50 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 
 		table.addCell(new Phrase(new Chunk("Total Items Price(INR): ", headerFont)));
 		PriceDTO priceBean = retailTransaction.getPriceBean();
-		table.addCell(new Phrase(new Chunk(String.format("%.3f",priceBean.getTotalItemsPrice()), rowFont)));
+		table.addCell(new Phrase(new Chunk(String.format("%.2f",priceBean.getTotalItemsPrice()), rowFont)));
 
 		
 		Double discountPrice = 	retailTransaction.getPriceBean().getDiscount();
 		if (discountPrice > 0) {
 			table.addCell(new Phrase(new Chunk("Discount(INR): ", headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f",priceBean.getDiscount()), rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f",priceBean.getDiscount()), rowFont)));
 		}
 		if (!isEstimateBill) {
 			table.addCell(new Phrase(new Chunk("Vat("
 					+ String.valueOf(CustomShopSettingFileUtility.getInstance()
 							.getVatPercentage()) + "%) Charge(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getVatCharge()), rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f", priceBean.getVatCharge()), rowFont)));
 		}
 		Double oldPurchasePrice = priceBean.getOldPurchase();
 		if (oldPurchasePrice > 0) {
 			table.addCell(new Phrase(new Chunk("Old Purchase(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getOldPurchase()), rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f", priceBean.getOldPurchase()), rowFont)));
 		}
 		table.addCell(new Phrase(new Chunk("Net Amount(INR) : ", headerFont)));
 		Double advancedPayment = priceBean.getAdvancePaymentAmount();
 		if (advancedPayment > 0) {
-			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getNetpayableAmount()), rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f", priceBean.getNetpayableAmount()), rowFont)));
 
 		} else {
-			table.addCell(new Phrase(new Chunk(String
-					.format("%d(round off)", Math.round(priceBean.getNetpayableAmount()),	rowFont))));
+			Double neyPayAmt = (double) Math.round(priceBean.getNetpayableAmount());
+			table.addCell(new Phrase(new Chunk(String.format("%.2f (%s)", neyPayAmt, new ConvertNumberToWords(neyPayAmt).convertToWords(),	rowFont))));
 		}
 
 		if (isEstimateBill && advancedPayment > 0) {
 			table.addCell(new Phrase(new Chunk("Advance Payment(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%.3f", advancedPayment), rowFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f", advancedPayment), rowFont)));
 
 			table.addCell(new Phrase(new Chunk("Balance Amount(INR) : ",
 					headerFont)));
-			table.addCell(new Phrase(new Chunk(String.format("%d(rounded)", Math.round(priceBean.getBalanceAmount()),
+			Double balanceAmt = (double) Math.round(priceBean.getBalanceAmount());
+			table.addCell(new Phrase(new Chunk(String.format("%.2f (%s)", balanceAmt, new ConvertNumberToWords(balanceAmt).convertToWords(),
 					rowFont))));
 		}
 
 		document.add(table);
-
 	}
 
 	private void addCustomerInformation(Document document)

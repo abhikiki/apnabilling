@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SmsSettingDTO;
-import com.abhishek.fmanage.retail.restclient.service.RestSmsService;
+import com.abhishek.fmanage.retail.restclient.service.RestRetailSmsService;
 import com.abhishek.fmanage.retail.sms.SmsData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gwt.thirdparty.guava.common.collect.Iterables;
@@ -102,7 +102,7 @@ public class SmsView extends VerticalLayout implements View{
 		twinCol.setLeftColumnCaption("Available Contact Numbers");
 		twinCol.setRightColumnCaption("Selected Contact Numbers");
 		twinCol.setMultiSelect(true);
-		List<String> contactList = new RestSmsService().getCustomerContact(getShopDto().getShopId());
+		List<String> contactList = new RestRetailSmsService().getCustomerContact(getShopDto().getShopId());
 		twinCol.addItems(contactList);
 		twinCol.setImmediate(true);
 		twinCol.setRows(15);
@@ -179,7 +179,7 @@ public class SmsView extends VerticalLayout implements View{
 	            	smsSettingdto.setSmsPassword(StringUtils.isEmpty(password.getValue()) ? "" : password.getValue());
 	            	smsSettingdto.setSmsSenderId(StringUtils.isEmpty(senderId.getValue()) ? "" : senderId.getValue());
 	            	smsSettingdto.setSmsGatewayUrl(StringUtils.isEmpty(smsGatewayUrl.getValue()) ? "" : smsGatewayUrl.getValue());
-	            	new RestSmsService().updateSmsSetting(getShopDto().getShopId(), smsSettingdto);
+	            	new RestRetailSmsService().updateSmsSetting(getShopDto().getShopId(), smsSettingdto);
 	            }
 	        });
 		smsCredential.addComponent(smsGatewayUrl);
@@ -193,7 +193,7 @@ public class SmsView extends VerticalLayout implements View{
 	}
 
 	private SmsSettingDTO getSmsSetting() {
-		return new RestSmsService().getSmsSetting(getShopDto().getShopId());
+		return new RestRetailSmsService().getSmsSetting(getShopDto().getShopId());
 	}
 
 	private ShopDTO getShopDto() {

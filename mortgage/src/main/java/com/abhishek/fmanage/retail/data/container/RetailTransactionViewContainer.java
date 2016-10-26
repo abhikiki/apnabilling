@@ -7,12 +7,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.abhishek.fmanage.mortgage.data.bean.MortgageItem;
-import com.abhishek.fmanage.retail.dto.CustomerDTO;
 import com.abhishek.fmanage.retail.dto.TransactionSearchResultDto;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
-import com.vaadin.ui.Button;
 
 public class RetailTransactionViewContainer extends IndexedContainer{
 

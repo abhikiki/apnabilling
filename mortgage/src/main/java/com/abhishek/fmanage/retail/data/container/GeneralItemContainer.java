@@ -11,7 +11,6 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.cache.ItemCache;
 import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
-import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.vaadin.data.Item;
@@ -29,7 +28,7 @@ import com.vaadin.ui.TextField;
  * @author GUPTAA6
  *
  */
-public class GeneralItemContainer extends IndexedContainer implements CustomItemContainerInterface {
+public class GeneralItemContainer extends IndexedContainer implements CustomRetailItemContainerInterface {
 
 	/**
 	 * 
@@ -316,6 +315,6 @@ public class GeneralItemContainer extends IndexedContainer implements CustomItem
 			String itemPrice = generalPriceTxtField.getValue();
 			totalCost += NumberUtils.isNumber(itemPrice) ? NumberUtils.toDouble(itemPrice) : 0.0;
 		}
-		return totalCost;
+		return  Math.round(totalCost * 100.0) / 100.0;
 	}
 }

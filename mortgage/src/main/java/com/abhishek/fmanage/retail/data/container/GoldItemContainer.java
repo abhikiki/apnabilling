@@ -1,14 +1,13 @@
 package com.abhishek.fmanage.retail.data.container;
 
-import java.util.ArrayList;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.cache.ItemCache;
-import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
-import com.abhishek.fmanage.mortgage.data.container.CustomItemContainerInterface;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.vaadin.data.Item;
@@ -16,6 +15,8 @@ import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.util.converter.StringToDoubleConverter;
+import com.vaadin.data.util.converter.Converter.ConversionException;
 import com.vaadin.data.validator.DoubleRangeValidator;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.ComboBox;
@@ -23,7 +24,7 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.TextField;
 
 public class GoldItemContainer extends IndexedContainer implements
-		CustomItemContainerInterface {
+		CustomRetailItemContainerInterface {
 
 	public static final String DELETE = "Delete";
 	public static final String PRICE = "Price(INR)";
@@ -35,8 +36,7 @@ public class GoldItemContainer extends IndexedContainer implements
 	public static final String QUANTITY = "Quantity";
 	public static final String ITEM_NAME = "ItemName";
 	public static final String GOLD_TYPE = "GoldType";
-	public static final ThemeResource removeItemImageResource = new ThemeResource(
-			"img/removeButtonSmall.jpg");
+	public static final ThemeResource removeItemImageResource = new ThemeResource("img/removeButtonSmall.jpg");
 
 	private static final String MAKING_COST_TYPE_NET = "net";
 	private static final String MAKING_COST_TYPE_PER_GM = "per gm";
@@ -67,7 +67,7 @@ public class GoldItemContainer extends IndexedContainer implements
 			totalCost += NumberUtils.isNumber(itemPrice) ? NumberUtils
 					.toDouble(itemPrice) : 0.0;
 		}
-		return totalCost;
+		return  Math.round(totalCost * 100.0) / 100.0 ;
 	}
 
 	public Double getTotalWeight() {
@@ -431,8 +431,7 @@ public class GoldItemContainer extends IndexedContainer implements
 					double goldPrice = 0.0;
 					switch (String.valueOf(makingChargeType.getValue())) {
 					case MAKING_COST_TYPE_PERCENT:
-						goldPrice = (weight * goldRate)
-								* (1 + makingCharge / 100.0f);
+						goldPrice = (weight * goldRate)	* (1 + makingCharge / 100.0f);
 						break;
 					case MAKING_COST_TYPE_PER_GM:
 						goldPrice = weight * (goldRate + makingCharge);
@@ -440,8 +439,8 @@ public class GoldItemContainer extends IndexedContainer implements
 					case MAKING_COST_TYPE_NET:
 						goldPrice = (weight * goldRate) + makingCharge;
 					}
-					goldPriceTxtField
-							.setValue(String.format("%.3f", goldPrice));
+					String goldItemPrice = String.format("%.2f",  Math.round(goldPrice * 100.0) / 100.0 );
+					goldPriceTxtField.setValue(goldItemPrice);
 					goldPriceTxtField.addStyleName("v-textfield-success");
 					goldPriceTxtField.setImmediate(true);
 				} else {
@@ -454,7 +453,7 @@ public class GoldItemContainer extends IndexedContainer implements
 			}
 		};
 	}
-
+	
 	private ComboBox getHallMarkTypeList(final Object currentItemId) {
 		ComboBox hallMarkType = new ComboBox();
 		hallMarkType.setNullSelectionAllowed(false);

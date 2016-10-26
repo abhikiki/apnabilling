@@ -82,8 +82,8 @@ public class PriceForm extends FormLayout{
 			private static final long serialVersionUID = 5320925689852078782L;
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				vatOnNewItemPrice.setValue(String.format("%.3f", getVatPrice()));
-				netAmountToPay.setValue(String.format("%.3f", getTotalNetAmount()));
+				vatOnNewItemPrice.setValue(String.format("%.2f", getVatPrice()));
+				netAmountToPay.setValue(String.format("%.2f", getTotalNetAmount()));
 			}
 		});
     	
@@ -91,7 +91,7 @@ public class PriceForm extends FormLayout{
 			private static final long serialVersionUID = 5320925689852078782L;
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				balanceAmount.setValue(String.format("%.3f", getBalanceAmount()));
+				balanceAmount.setValue(String.format("%.2f", getBalanceAmount()));
 			}
 		});
     	
@@ -102,7 +102,7 @@ public class PriceForm extends FormLayout{
 			@Override
 			public void valueChange(ValueChangeEvent event) {
 				if(NumberUtils.isNumber(getNumericTextValue(advancePayment))){
-					balanceAmount.setValue(String.format("%.3f", getBalanceAmount()));
+					balanceAmount.setValue(String.format("%.2f", getBalanceAmount()));
 					balanceAmount.removeStyleName("v-textfield-fail");
 					advancePayment.removeStyleName("v-textfield-fail");
 					advancePayment.setComponentError(null);
@@ -122,7 +122,7 @@ public class PriceForm extends FormLayout{
 			@Override
 			public void valueChange(ValueChangeEvent event) {
 				if(NumberUtils.isNumber(getNumericTextValue(oldPurchasePrice))){
-					netAmountToPay.setValue(String.format("%.3f", getTotalNetAmount()));
+					netAmountToPay.setValue(String.format("%.2f", getTotalNetAmount()));
 					netAmountToPay.removeStyleName("v-textfield-fail");
 					oldPurchasePrice.removeStyleName("v-textfield-fail");
 					oldPurchasePrice.setComponentError(null);
@@ -143,8 +143,8 @@ public class PriceForm extends FormLayout{
 			@Override
 			public void valueChange(ValueChangeEvent event) {
 				if(NumberUtils.isNumber(getNumericTextValue(discountPrice))){
-					vatOnNewItemPrice.setValue(String.format("%.3f", getVatPrice()));
-					netAmountToPay.setValue(String.format("%.3f", getTotalNetAmount()));
+					vatOnNewItemPrice.setValue(String.format("%.2f", getVatPrice()));
+					netAmountToPay.setValue(String.format("%.2f", getTotalNetAmount()));
 					netAmountToPay.removeStyleName("v-textfield-fail");
 					discountPrice.removeStyleName("v-textfield-fail");
 					discountPrice.setComponentError(null);
@@ -166,6 +166,7 @@ public class PriceForm extends FormLayout{
 	}
     
 	private StringToDoubleConverter CustomStringToDoubleConverter() {
+		
 		return new StringToDoubleConverter() {
  			private static final long serialVersionUID = -2654779837579321367L;
  			 @Override
@@ -173,7 +174,7 @@ public class PriceForm extends FormLayout{
  		            Class<? extends Double> targetType, Locale locale)
  		            throws ConversionException {
  		        Number n = convertToNumber(value, targetType, locale);
- 		        return n == null ? 0.000 : n.doubleValue();
+ 		        return n == null ? 0.00f : n.doubleValue();
  		    }
  			
 			protected java.text.NumberFormat getFormat(Locale locale) {
@@ -202,26 +203,26 @@ public class PriceForm extends FormLayout{
 			+ Double.valueOf((getNumericTextValue(vatOnNewItemPrice)))
 			- Double.valueOf((getNumericTextValue(oldPurchasePrice)))
 			- Double.valueOf((getNumericTextValue(discountPrice)));
-		return totalNetAmount;
+		return  Math.round(totalNetAmount * 100.0) / 100.0;
 	}
 	
 	private String getNumericTextValue(TextField numericField) {
 		String value = StringUtils.remove(numericField.getValue(), ","); 
 		if(StringUtils.isEmpty(value)){
-			return "0.000";
+			return "0.00";
 		}else{
 			return value;
 		}
 	}
 	
 	public double getVatPrice(){
-		double vatPrice = 0.000;
+		double vatPrice = 0.00f;
 		if(isInvoiceEnabled)
 		{
 			double discountedPrice = Double.valueOf(getNumericTextValue(totalItemPrice)) - Double.valueOf(getNumericTextValue(discountPrice));
 			//vatPrice = (1 * discountedPrice)/ 100.0;
 			vatPrice = (CustomShopSettingFileUtility.getInstance().getVatPercentage() * discountedPrice)/ 100.0;
 		}
-		return vatPrice;
+		return  Math.round(vatPrice * 100.0) / 100.0;
 	}
 }
