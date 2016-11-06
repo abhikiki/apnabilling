@@ -41,10 +41,10 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	private final PopupDateField startPopUpDate = new PopupDateField();
 	private final PopupDateField endPopUpDate = new PopupDateField();
     HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
-    private Label totalSaleLabel = null;
-    private Label silverWeightLabel = null;
-    private Label goldWeightLabel = null;
-    private Label vatLabel = null;
+    private Label totalSaleLabel = new Label("");
+    private Label silverWeightLabel = new Label("");
+    private Label goldWeightLabel = new Label("");
+    private Label vatLabel = new Label("");
     
 	@Override
 	public void enter(ViewChangeEvent event) {
@@ -141,9 +141,11 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	            public void buttonClick(ClickEvent event)
 	            {
 	            	summary = new RestRetailSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
-	            	silverWeightLabel.setValue(String .format("%.3f",summary.getTotalSilverWeight()));
-	            	goldWeightLabel.setValue(String .format("%.3f",summary.getTotalGoldWeight()));
-	            	totalSaleLabel.setValue(String .format("%.3f",summary.getTotalSale()));
+	            	Double vatTotal = Math.round(summary.getTotalVat() * 100.0) / 100.0;
+	            	vatLabel.setValue(String.format("%.3f", vatTotal));
+	            	silverWeightLabel.setValue(String.format("%.3f",summary.getTotalSilverWeight()));
+	            	goldWeightLabel.setValue(String.format("%.3f",summary.getTotalGoldWeight()));
+	            	totalSaleLabel.setValue(String.format("%.3f",summary.getTotalSale()));
 	            	hsplit.setSecondComponent(new ItemSummaryChart().getChart(
 	        				summary.getGoldItemSummaryDtoList(), "Gold Items Sale"));
 	            }
@@ -205,7 +207,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
         	 goldWeightLabel.addStyleName(ValoTheme.LABEL_SMALL);
         	 goldWeightLabel.addStyleName(ValoTheme.LABEL_LIGHT);
         	 vl.addComponent(goldWeightLabel);
-        }else if(labelName.equals("SILVER")){
+        }else if(labelName.equals("SILVERWEIGHT")){
         	 silverWeightLabel = new Label(weight);
         	 silverWeightLabel.setImmediate(true);
         	 silverWeightLabel.setSizeUndefined();

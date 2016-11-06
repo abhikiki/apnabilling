@@ -3,6 +3,7 @@ package com.abhishek.mortgage.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ public class MortgageBillResource {
 	@Autowired
 	private MortgageBillService mortgageBillService;
 		
+	
 	@RequestMapping(value = "/bill/create/{shopId}", method = RequestMethod.POST)
 	public Long createBill(@PathVariable long shopId, @RequestBody MortgageTransactionDTO transDto) {
 		return  mortgageBillService.createBill(shopId, transDto);

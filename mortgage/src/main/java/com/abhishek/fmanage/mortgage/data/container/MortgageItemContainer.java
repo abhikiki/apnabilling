@@ -30,9 +30,11 @@ public class MortgageItemContainer extends IndexedContainer implements CustomMor
     private static final long serialVersionUID = 1L;
     public static final String DELETE = "Delete";
     public static final String ITEM_NAME = "ItemName";
+    public static final String QUANTITY = "Quantity";
     public static final String WEIGHT = "Wt(gms)";
     public static final String GOLD_WEIGHT = "Gold wt(gms)";
     public static final String DIAMOND_WEIGHT = "Diamond wt(ct)";
+    public static final String PIECE_PAIR = "Piece/pair";
     public static final ThemeResource removeItemImageResource = new ThemeResource("img/removeButtonSmall.jpg");
     public MortgageItemType itemType;
     /**
@@ -43,10 +45,13 @@ public class MortgageItemContainer extends IndexedContainer implements CustomMor
     	this.itemType = itemType;
         addContainerProperty(DELETE, Image.class, new Image());
         addContainerProperty(ITEM_NAME, ComboBox.class, new ComboBox());
+        addContainerProperty(QUANTITY, DecimalTextField.class, new DecimalTextField());
+        addContainerProperty(PIECE_PAIR, ComboBox.class, new ComboBox());
         if(MortgageItemType.DIAMOND == itemType){
         	addContainerProperty(GOLD_WEIGHT, DecimalTextField.class, new DecimalTextField());
         	addContainerProperty(DIAMOND_WEIGHT, DecimalTextField.class, new DecimalTextField());
         }else{
+        	
         	addContainerProperty(WEIGHT, DecimalTextField.class, new DecimalTextField());
         }
     }
@@ -93,17 +98,29 @@ public class MortgageItemContainer extends IndexedContainer implements CustomMor
 		if (item != null) {
 			item.getItemProperty(DELETE).setValue(getRemoveItemImage(itemRowId, itemType));
 			item.getItemProperty(ITEM_NAME).setValue(getItemNameList(itemRowId, itemType));
+			item.getItemProperty(PIECE_PAIR).setValue(getPiecePair(itemRowId, itemType));
+			item.getItemProperty(QUANTITY).setValue(getWeight(itemRowId, itemType));
 			if(MortgageItemType.DIAMOND == itemType){
 				item.getItemProperty(GOLD_WEIGHT).setValue(getWeight(itemRowId, itemType));
 				item.getItemProperty(DIAMOND_WEIGHT).setValue(getWeight(itemRowId, itemType));
 			}else{
+				
 				item.getItemProperty(WEIGHT).setValue(getWeight(itemRowId, itemType));
 			}
 		}
 		return itemRowId;
     }
     
-    private Object getWeight(final Object currentItemId, MortgageItemType itemType) {
+    private Object getPiecePair(Object itemRowId, MortgageItemType itemType) {
+    	ComboBox piecePairCombo = new ComboBox();
+    	piecePairCombo.setRequired(true);
+    	piecePairCombo.addItem("PIECE");
+    	piecePairCombo.addItem("PAIR");
+    	piecePairCombo.setValue("PIECE");
+		return piecePairCombo;
+	}
+
+	private Object getWeight(final Object currentItemId, MortgageItemType itemType) {
     	DecimalTextField weight = new DecimalTextField();
 		weight.setImmediate(true);
 		weight.setRequired(true);
@@ -120,8 +137,6 @@ public class MortgageItemContainer extends IndexedContainer implements CustomMor
 					weight.addStyleName("v-textfield-success");
 				}else{
 					weight.setValue("0.000");
-					//weight.removeStyleName("v-textfield-success");
-					//weight.addStyleName("v-textfield-fail");
 				}
 			}
 		});

@@ -103,9 +103,9 @@ public class MortgageWholeTransactionDAO {
 		for(String item : data){
 				String innerData[] = item.split("#");
 				String itemName = innerData[0];
-				String goldWeight = innerData[1];
-				String diamondWeight = innerData[2];
-				result = result + itemName + "(GoldWt:" + goldWeight + "gms DiamondWt:" + diamondWeight + "Ct),";
+				String goldWeight = innerData[3];
+				String diamondWeight = innerData[4];
+				result = result + itemName + "(" + innerData[1]+ innerData[2] + " GoldWt:" + goldWeight + "gms DiamondWt:" + diamondWeight + "Ct),";
 		}
 		char c = result.charAt(result.length()-1);
 		if(c == ','){
@@ -126,12 +126,13 @@ public class MortgageWholeTransactionDAO {
 		for(String item : data){
 			String innerData[] = item.split("#");
 			itemName = innerData[0];
+			result = result + itemName + "(" + innerData[1] + innerData[2];
 			if(transSearchResultDto.getTotalGoldWeight() == 0.000d){
-				String goldWeight = innerData[1];
-				result = result + itemName + "(" + goldWeight + "gms)" + ",";
+				String goldWeight = innerData[3];
+				result = result + "#" + goldWeight + "gms)" + ",";
 			}else{
 				isByTotalWeight = true;
-				result = result + itemName + ",";
+				result = result + "),";
 			}
 		}
 		char c = result.charAt(result.length()-1);
@@ -156,12 +157,13 @@ public class MortgageWholeTransactionDAO {
 		for(String item : data){
 			String innerData[] = item.split("#");
 			itemName = innerData[0];
+			result = result + itemName + "(" + innerData[1] + innerData[2];
 			if(transSearchResultDto.getTotalSilverWeight() == 0.000d){
-				String silverWeight = innerData[1];
-				result = result + itemName + "(" + silverWeight + "gms)" + ",";
+				String silverWeight = innerData[3];
+				result = result + "#" + silverWeight + "gms)" + ",";
 			}else{
 				isByTotalWeight = true;
-				result = result + itemName + ",";
+				result = result + "),";
 			}
 		}
 		char c = result.charAt(result.length()-1);

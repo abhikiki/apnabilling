@@ -19,7 +19,7 @@ public class MortgageItemTable extends Table{
 		setSelectable(false);
 		setColumnCollapsingAllowed(false);
 		setColumnReorderingAllowed(true);
-		setWidth("50%");
+		setWidth("80%");
 		setContainerDataSource(mortgageItemContainer);
 		switch(itemType){
 			case GOLD :

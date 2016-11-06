@@ -115,6 +115,7 @@ public class MortgageView extends VerticalLayout implements View {
 		mortgageViewVerticalLayout.setImmediate(true);
 
 		VerticalLayout itemAndNotesLayoutVL = new VerticalLayout();
+		itemAndNotesLayoutVL.setWidth("100%");
 		itemAndNotesLayoutVL.addComponent(mortgageViewVerticalLayout);
 		itemAndNotesLayoutVL.addComponent(getNotesAndSaveTransactionLayout());
 		itemAndNotesLayoutVL.setSpacing(true);
@@ -224,12 +225,12 @@ public class MortgageView extends VerticalLayout implements View {
 				if(StringUtils.isEmpty(validationMessage)){
 					long transId = new RestMortgageTransactionService().createBill(shopDto,	transDto);
 					if(transId > 0){
-						Notification.show("Transaction Saved successfully");
+						Notification.show("Transaction Saved successfully", Type.WARNING_MESSAGE);
 					}else{
-						Notification.show("Failed Saving transactiony", Type.ERROR_MESSAGE);
+						Notification.show("Failed Saving transactiony", Type.WARNING_MESSAGE);
 					}
 				}else{
-					Notification.show(validationMessage, Type.ERROR_MESSAGE);
+					Notification.show(validationMessage, Type.WARNING_MESSAGE);
 				}
 				
 			}
@@ -255,11 +256,22 @@ public class MortgageView extends VerticalLayout implements View {
 			Double diamondGoldWeight = 0.000d;
 			Double diamondDiamondWeight = 0.000d;
 			Double weight = 0.000d;
+			String piecePair = "";
+			Double quantity = 0.0d;
+			quantity = Double.valueOf(((DecimalTextField) (workingTable
+					.getContainerDataSource().getItem(obj)
+					.getItemProperty(MortgageItemContainer.QUANTITY).getValue()))
+					.getValue());
+			piecePair = (String) ((ComboBox) (workingTable
+					.getContainerDataSource().getItem(obj)
+					.getItemProperty(MortgageItemContainer.PIECE_PAIR)
+					.getValue())).getValue();
 			if(itemType != MortgageItemType.DIAMOND){
 				 weight = Double.valueOf(((DecimalTextField) (workingTable
 						.getContainerDataSource().getItem(obj)
 						.getItemProperty(MortgageItemContainer.WEIGHT).getValue()))
 						.getValue());
+				 
 			}else{
 				diamondGoldWeight = Double.valueOf(((DecimalTextField) (workingTable
 						.getContainerDataSource().getItem(obj)
@@ -275,7 +287,7 @@ public class MortgageView extends VerticalLayout implements View {
 				.getContainerDataSource().getItem(obj)
 				.getItemProperty(MortgageItemContainer.ITEM_NAME)
 				.getValue())).getValue();
-			itemList.add(new MortgageItemDTO(itemName, weight, diamondGoldWeight, diamondDiamondWeight));
+			itemList.add(new MortgageItemDTO(itemName, weight, diamondGoldWeight, diamondDiamondWeight, piecePair, quantity));
 		}
 		return itemList;
 	}
@@ -380,12 +392,14 @@ public class MortgageView extends VerticalLayout implements View {
 	private ComboBox getStaffListComboBox() {
 		keeperNameComboBox.setNullSelectionAllowed(false);
 		keeperNameComboBox.setNullSelectionAllowed(false);
-		keeperNameComboBox.addItem("VIVEKANAND");
+		keeperNameComboBox.addItem("MOM");
 		keeperNameComboBox.addItem("DOLLY");
-		keeperNameComboBox.addItem("HARI NARAYAN GUPTA");
-		keeperNameComboBox.addItem("RANJANA GUPTA");
-		keeperNameComboBox.addItem("APNA JEWELLERY");
-		keeperNameComboBox.setValue("APNA JEWELLERY");
+		keeperNameComboBox.addItem("A.J");
+		keeperNameComboBox.addItem("G.P");
+		keeperNameComboBox.addItem("B.B");
+		keeperNameComboBox.addItem("KHATRI");
+		keeperNameComboBox.addItem("ROHIT");
+		keeperNameComboBox.setValue("MOM");
 		return keeperNameComboBox;
 	}
 
@@ -485,6 +499,7 @@ public class MortgageView extends VerticalLayout implements View {
 		}
 		totalWeightLayout.addStyleName(buttonStyle);
 		VerticalLayout itemHolderLayout = new VerticalLayout();
+		itemHolderLayout.setWidth("100%");
 		itemHolderLayout.addComponent(totalWeightLayout);
 		itemHolderLayout.addComponent(table);
 		return itemHolderLayout;
@@ -663,10 +678,12 @@ public class MortgageView extends VerticalLayout implements View {
 	private String validateItemList(MortgageTransactionDTO transDto, MortgageItemType itemType, String transValidationMessage) {
 		List <MortgageItemDTO> itemList = new ArrayList<MortgageItemDTO>();
 		String tableName = "";
+		boolean totalWeightEnabled = false;
 		switch(itemType){
 			case GOLD : itemList = transDto.getGoldItemList();
 					tableName = "gold";
 					if(transDto.getGoldItemList().size() > 0 && goldTableWeightCheckBox.getValue()){
+						totalWeightEnabled = true;
 						if(Double.valueOf(goldTableTotalWeightTxt.getValue()) <= 0.000){
 							transValidationMessage = "Total Gold weight is not valid";
 							return transValidationMessage;
@@ -681,6 +698,7 @@ public class MortgageView extends VerticalLayout implements View {
 			case SILVER : itemList = transDto.getSilverItemList();
 					tableName = "silver";
 					if(transDto.getSilverItemList().size() > 0  && silverTableWeightCheckBox.getValue()){
+						totalWeightEnabled = true;
 						if(Double.valueOf(silverTableTotalWeightTxt.getValue()) <= 0.000){
 							transValidationMessage = "Total Silver weight is not valid";
 						}
@@ -694,18 +712,30 @@ public class MortgageView extends VerticalLayout implements View {
 					tableName = "diamond";
 					break;
 		}
-		if((itemType == MortgageItemType.GOLD && goldTableWeightCheckBox.getValue()) 
-				|| (itemType == MortgageItemType.SILVER && silverTableWeightCheckBox.getValue())){
-			//do nothing
-		}else{
-			for(MortgageItemDTO mdto : itemList){
+		for(MortgageItemDTO mdto : itemList){
+			transValidationMessage = validateItemQuantity(transValidationMessage, tableName, mdto, itemType);
+			if(!StringUtils.isEmpty(transValidationMessage)){
+				return transValidationMessage;
+			}
+			if(!totalWeightEnabled){
 				transValidationMessage = validateWeight(transValidationMessage, tableName, mdto, itemType);
 			}
 		}
-		
 		return transValidationMessage;
 	}
 
+	private String validateItemQuantity(String transValidationMessage, String tableName, MortgageItemDTO mdto, MortgageItemType itemType){
+		if(NumberUtils.isNumber(String.valueOf(mdto.getQuantity()))){
+			if(mdto.getQuantity() <= 0.000){
+				transValidationMessage = "Please check the quantity in " + tableName + " items";
+			}
+			
+		}else{
+			transValidationMessage = "Please check the quantity in " + tableName + " items";
+		}
+		return transValidationMessage;
+	}
+	
 	private String validateWeight(String transValidationMessage, String tableName, MortgageItemDTO mdto, MortgageItemType itemType) {
 		if(MortgageItemType.DIAMOND != itemType){
 			Double weight = mdto.getWeight();

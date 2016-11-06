@@ -26,27 +26,27 @@ public class RetailItemStaffDAO {
 	}
 	
 	public List<ItemDTO> getGoldItems(final long shopId) {
-		final String sql = "SELECT ITEMNAME, OWNER FROM RETAILGOLDITEM WHERE SHOPID = ?";
+		final String sql = "SELECT ITEMNAME FROM RETAILGOLDITEM WHERE SHOPID = ?";
 		return jdbcTemplate.query(sql, new Object[]{shopId}, this::itemMapRow);
 	}
 
 	public List<ItemDTO> getSilverItems(final long shopId) {
-		final String sql = "SELECT ITEMNAME, OWNER FROM RETAILSILVERITEM WHERE SHOPID = ?";
+		final String sql = "SELECT ITEMNAME FROM RETAILSILVERITEM WHERE SHOPID = ?";
 		return jdbcTemplate.query(sql, new Object[]{shopId}, this::itemMapRow);
 	}
 	
 	public List<ItemDTO> getDiamondItems(final long shopId) {
-		final String sql = "SELECT ITEMNAME, OWNER FROM RETAILDIAMONDITEM WHERE SHOPID = ?";
+		final String sql = "SELECT ITEMNAME FROM RETAILDIAMONDITEM WHERE SHOPID = ?";
 		return jdbcTemplate.query(sql, new Object[]{shopId}, this::itemMapRow);
 	}
 	
 	public List<ItemDTO> getGeneralItems(final long shopId) {
-		final String sql = "SELECT ITEMNAME, OWNER FROM RETAILGENERALITEM WHERE SHOPID = ?";
+		final String sql = "SELECT ITEMNAME FROM RETAILGENERALITEM WHERE SHOPID = ?";
 		return jdbcTemplate.query(sql, new Object[]{shopId}, this::itemMapRow);
 	}
 	
 	public List<ItemDTO> getStaffList(final long shopId) {
-		final String sql = "SELECT STAFFNAME, OWNER FROM RETAILSTAFF WHERE SHOPID = ?";
+		final String sql = "SELECT STAFFNAME FROM RETAILSTAFF WHERE SHOPID = ?";
 		return jdbcTemplate.query(sql, new Object[]{shopId}, this::staffMapRow);
 	}
 	
@@ -96,14 +96,14 @@ public class RetailItemStaffDAO {
 	private ItemDTO itemMapRow(ResultSet resultSet, int rowNumber) throws SQLException {
 		ItemDTO item = new ItemDTO();
 		item.setItemName(resultSet.getString("ITEMNAME"));
-		item.setOwner(resultSet.getString("OWNER"));
+		//item.setOwner(resultSet.getString("OWNER"));
 		return item;
 	}
 	
 	private ItemDTO staffMapRow(ResultSet resultSet, int rowNumber) throws SQLException {
 		ItemDTO item = new ItemDTO();
 		item.setItemName(resultSet.getString("STAFFNAME"));
-		item.setOwner(resultSet.getString("OWNER"));
+		//item.setOwner(resultSet.getString("OWNER"));
 		return item;
 	}
 }

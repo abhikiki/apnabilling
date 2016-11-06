@@ -64,13 +64,17 @@ INSERT INTO TRANSANCTION_SEARCH_RESULT(
 INSERT INTO TRANSANCTION_ID_HOLDER(TRANSID) SELECT TRANSID FROM TRANSANCTION_SEARCH_RESULT;
 CREATE TEMPORARY TABLE GOLD_SILVER_ITEM_TABLE(
 	ITEMNAME VARCHAR(255) DEFAULT '',
-	WEIGHT   DECIMAL(9, 3) UNSIGNED
+	WEIGHT   DECIMAL(9, 3) UNSIGNED,
+	QUANTITY INT UNSIGNED,
+	PIECEPAIR VARCHAR(255)
 );
 
 CREATE TEMPORARY TABLE DIAMOND_ITEM_TABLE(
 	ITEMNAME VARCHAR(255) DEFAULT '',
 	GOLDWEIGHT   DECIMAL(9, 3) UNSIGNED,
-	DIAMONDWEIGHT   DECIMAL(9, 3) UNSIGNED
+	DIAMONDWEIGHT   DECIMAL(9, 3) UNSIGNED,
+	QUANTITY INT UNSIGNED,
+	PIECEPAIR VARCHAR(255)
 );
 
 OPEN transId_cursor;
@@ -81,24 +85,26 @@ OPEN transId_cursor;
 	END IF;
 	BLOCK2: BEGIN
 		DECLARE v_finished_inner INTEGER DEFAULT 0;
+		DECLARE item_quantity_inner INT UNSIGNED;
 		DECLARE itemname_inner  VARCHAR(255);
+		DECLARE itempiecepair_inner  VARCHAR(255);
 		DECLARE weight_inner DECIMAL(9,3);
 		DECLARE weight_diamond_carat DECIMAL(9,2);
 		DECLARE total_weight DECIMAL(9, 3) UNSIGNED;
 		DECLARE itemnamelist VARCHAR(2048) DEFAULT NULL;
-		DECLARE item_cursor CURSOR FOR  SELECT ITEMNAME, WEIGHT  FROM GOLD_SILVER_ITEM_TABLE;
-		DECLARE diamond_item_cursor CURSOR FOR  SELECT ITEMNAME, GOLDWEIGHT, DIAMONDWEIGHT  FROM DIAMOND_ITEM_TABLE;
+		DECLARE item_cursor CURSOR FOR  SELECT ITEMNAME, WEIGHT, QUANTITY, PIECEPAIR  FROM GOLD_SILVER_ITEM_TABLE;
+		DECLARE diamond_item_cursor CURSOR FOR  SELECT ITEMNAME, GOLDWEIGHT, DIAMONDWEIGHT, QUANTITY, PIECEPAIR  FROM DIAMOND_ITEM_TABLE;
 		DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_finished_inner = 1;
 		SET itemnamelist = NULL;
 		SET total_weight = 0.0;
-		INSERT INTO GOLD_SILVER_ITEM_TABLE(ITEMNAME, WEIGHT) SELECT ITEMNAME, WEIGHT FROM MORTGAGEGOLDITEMTRANSACTION WHERE TRANSID = v_transId;
+		INSERT INTO GOLD_SILVER_ITEM_TABLE(ITEMNAME, WEIGHT, QUANTITY, PIECEPAIR) SELECT ITEMNAME, WEIGHT, QUANTITY, PIECEPAIR FROM MORTGAGEGOLDITEMTRANSACTION WHERE TRANSID = v_transId;
 		OPEN item_cursor;
 			 get_item: LOOP
-				FETCH item_cursor INTO itemname_inner, weight_inner;
+				FETCH item_cursor INTO itemname_inner, weight_inner, item_quantity_inner, itempiecepair_inner;
 				IF v_finished_inner = 1 THEN 
 					LEAVE get_item;
 				END IF;
-				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '#', weight_inner), itemnamelist);
+				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '#', item_quantity_inner, '#', itempiecepair_inner, '#', weight_inner), itemnamelist);
 				SET total_weight = total_weight + weight_inner;
 			 END LOOP get_item;
 		    UPDATE TRANSANCTION_SEARCH_RESULT SET GOLDITEMS = itemnamelist WHERE TRANSID = v_transId;
@@ -108,14 +114,14 @@ OPEN transId_cursor;
 		SET v_finished_inner = 0;
 		SET itemnamelist = NULL;
 		SET total_weight = 0.0;
-		INSERT INTO GOLD_SILVER_ITEM_TABLE(ITEMNAME, WEIGHT) SELECT ITEMNAME, WEIGHT FROM MORTGAGESILVERITEMTRANSACTION WHERE TRANSID = v_transId;
+		INSERT INTO GOLD_SILVER_ITEM_TABLE(ITEMNAME, WEIGHT, QUANTITY, PIECEPAIR) SELECT ITEMNAME, WEIGHT, QUANTITY, PIECEPAIR FROM MORTGAGESILVERITEMTRANSACTION WHERE TRANSID = v_transId;
 		OPEN item_cursor;
 			 get_item: LOOP
-				FETCH item_cursor INTO itemname_inner, weight_inner;
+				FETCH item_cursor INTO itemname_inner, weight_inner, item_quantity_inner, itempiecepair_inner;
 				IF v_finished_inner = 1 THEN 
 					LEAVE get_item;
 				END IF;
-				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '#', weight_inner), itemnamelist);
+				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '#', item_quantity_inner, '#', itempiecepair_inner, '#', weight_inner), itemnamelist);
 			 END LOOP get_item;
 			 UPDATE TRANSANCTION_SEARCH_RESULT SET SILVERITEMS = itemnamelist WHERE TRANSID = v_transId;
 		CLOSE item_cursor;
@@ -125,15 +131,15 @@ OPEN transId_cursor;
 		SET itemnamelist = NULL;
 		SET total_weight = 0.0;
 		
-		INSERT INTO DIAMOND_ITEM_TABLE(ITEMNAME, GOLDWEIGHT, DIAMONDWEIGHT) SELECT ITEMNAME, GOLDWEIGHT, DIAMONDWEIGHT FROM MORTGAGEDIAMONDITEMTRANSACTION WHERE TRANSID = v_transId;
+		INSERT INTO DIAMOND_ITEM_TABLE(ITEMNAME, GOLDWEIGHT, DIAMONDWEIGHT, QUANTITY, PIECEPAIR) SELECT ITEMNAME, GOLDWEIGHT, DIAMONDWEIGHT, QUANTITY, PIECEPAIR FROM MORTGAGEDIAMONDITEMTRANSACTION WHERE TRANSID = v_transId;
 		OPEN diamond_item_cursor;
 			 get_item: LOOP
-				FETCH diamond_item_cursor INTO itemname_inner, weight_inner, weight_diamond_carat;
+				FETCH diamond_item_cursor INTO itemname_inner, weight_inner, weight_diamond_carat, item_quantity_inner, itempiecepair_inner;
 				IF v_finished_inner = 1 THEN 
 					LEAVE get_item;
 				END IF;
 				SET weight_diamond_carat = weight_inner;
-				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '#', weight_inner, '#', weight_diamond_carat), itemnamelist);
+				SET itemnamelist = CONCAT_WS(',', CONCAT(itemname_inner, '#', item_quantity_inner, '#', itempiecepair_inner, '#', weight_inner, '#', weight_diamond_carat), itemnamelist);
 			 END LOOP get_item;
 			 UPDATE TRANSANCTION_SEARCH_RESULT SET DIAMONDITEMS = itemnamelist WHERE TRANSID = v_transId;
 		CLOSE diamond_item_cursor;

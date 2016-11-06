@@ -44,7 +44,7 @@ public class MortgageItemTransactionDAO {
 		{
 			case GOLD:
 			case SILVER:
-				sql = "INSERT INTO " + tableName + "(TRANSID, ITEMNAME, WEIGHT) VALUES (?,?,?)";
+				sql = "INSERT INTO " + tableName + "(TRANSID, ITEMNAME, WEIGHT, QUANTITY, PIECEPAIR) VALUES (?,?,?,?,?)";
 				jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
 
 					    @Override
@@ -53,6 +53,8 @@ public class MortgageItemTransactionDAO {
 					        ps.setLong(1, transId);
 					        ps.setString(2, itemDto.getItemName());
 					        ps.setDouble(3, itemDto.getWeight());
+					        ps.setInt(4, (int) Math.round(itemDto.getQuantity()));
+					        ps.setString(5, itemDto.getPiecePair());
 					    }
 
 					    @Override
@@ -62,7 +64,7 @@ public class MortgageItemTransactionDAO {
 					  });
 				break;
 			case DIAMOND: 
-				sql = "INSERT INTO " + tableName + "(TRANSID, ITEMNAME, GOLDWEIGHT, DIAMONDWEIGHT) VALUES (?,?,?,?)";
+				sql = "INSERT INTO " + tableName + "(TRANSID, ITEMNAME, GOLDWEIGHT, DIAMONDWEIGHT, QUANTITY, PIECEPAIR) VALUES (?,?,?,?,?,?)";
 				jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
 
 					    @Override
@@ -72,6 +74,8 @@ public class MortgageItemTransactionDAO {
 					        ps.setString(2, itemDto.getItemName());
 					        ps.setDouble(3, itemDto.getDiamondGoldWeight());
 					        ps.setDouble(4, itemDto.getDiamondDiamondWeight());
+					        ps.setInt(5, (int) Math.round(itemDto.getQuantity()));
+					        ps.setString(6, itemDto.getPiecePair());
 					    }
 
 					    @Override
