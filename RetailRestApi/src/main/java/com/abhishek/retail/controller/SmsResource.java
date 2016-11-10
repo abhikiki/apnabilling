@@ -2,6 +2,8 @@ package com.abhishek.retail.controller;
 
 import java.util.List;
 
+import javax.annotation.security.RolesAllowed;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,11 +21,13 @@ public class SmsResource {
 	@Autowired
 	private SmsService smsService;
 	
+	@RolesAllowed({"ADMIN"})
 	@RequestMapping(value = "/contacts/{shopId}", method = RequestMethod.GET)
 	public List<String> getCustomerContacts(@PathVariable int shopId) {
 		return smsService.getCustomerContact(shopId);
 	}
 	
+	@RolesAllowed({"STAFF", "ADMIN"})
 	@RequestMapping(value = "/setting/{shopId}", method = RequestMethod.GET)
 	public SmsSettingDTO getSmsSetting(@PathVariable int shopId) {
 		SmsSettingDTO smsSetting = new SmsSettingDTO();
@@ -34,6 +38,7 @@ public class SmsResource {
 		return smsSetting;	
 	}
 	
+	@RolesAllowed({"ADMIN"})
 	@RequestMapping(value = "/setting/{shopId}", method = RequestMethod.POST)
 	public int updateSmsSetting(@PathVariable int shopId, @RequestBody SmsSettingDTO smsSettingDto) {
 		List<SmsSettingDTO> smsSettingList = smsService.getSmsSetting(shopId);

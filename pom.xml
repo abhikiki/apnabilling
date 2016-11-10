@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>mortgage</module>     
+        <module>mortgage</module>
+		<module>RetailRestApi</module>
     </modules>
 </project>

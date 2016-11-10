@@ -149,7 +149,7 @@ public class MortgageItemContainer extends IndexedContainer implements CustomMor
 		switch(itemType){
 			case GOLD : itemDTOList = ItemCache.getInstance().getItemMap().get("GOLD");
 				break;
-			case SILVER : itemDTOList = ItemCache.getInstance().getItemMap().get("GOLD");
+			case SILVER : itemDTOList = ItemCache.getInstance().getItemMap().get("SILVER");
 				break;
 			case DIAMOND : itemDTOList = ItemCache.getInstance().getItemMap().get("DIAMOND");
 		}

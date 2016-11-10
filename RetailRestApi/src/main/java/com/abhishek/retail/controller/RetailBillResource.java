@@ -6,7 +6,10 @@ package com.abhishek.retail.controller;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.security.RolesAllowed;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +39,7 @@ public class RetailBillResource {
 	@Autowired
 	private RetailWholeTransactionDAO transdao;
 	
+	@RolesAllowed({"STAFF", "ADMIN"})
 	@RequestMapping(value = "/create/{shopId}", method = RequestMethod.POST)
 	public BillCreationResponse createBill(@PathVariable long shopId, @RequestBody TransactionDTO transDto) {
 		Map<String, Long> transIdInvoiceIdMap =  billService.createBill(shopId, transDto);
@@ -47,16 +51,19 @@ public class RetailBillResource {
 		return billResp;
 	}
 	
+	@RolesAllowed({"STAFF", "ADMIN"})
 	@RequestMapping(value = "/findbill/{transId}", method = RequestMethod.GET)
 	public TransactionDTO findBill(@PathVariable long transId) {
 		return billService.findBill(transId);
 	}
 	
+	@RolesAllowed({"STAFF", "ADMIN"})
 	@RequestMapping(value = "/findbill/invoice/{invoiceId}", method = RequestMethod.GET)
 	public RetailTaxInvoiceDTO findBillByInvoiceId(@PathVariable long invoiceId) {
 		return billService.findBillByInvoiceId(invoiceId);
 	}
 	
+	@RolesAllowed({"STAFF", "ADMIN"})
 	@RequestMapping(value = "/findbills", method = RequestMethod.POST)
 	public TransactionSearchResponse  findBills(@RequestBody TransactionSearchCriteriaDto transDto) {
 		List<TransactionSearchResultDto> searchResultList = billService.findBills(transDto);
@@ -65,12 +72,13 @@ public class RetailBillResource {
 		return searchResponse;
 	}
 	
-	
+	@RolesAllowed({"ADMIN"})
 	@RequestMapping(value = "/deletebill/{transId}", method = RequestMethod.DELETE)
 	public Boolean deleteBill(@PathVariable long transId) {
 		return billService.deleteBill(transId);
 	}
 	
+	@RolesAllowed({"STAFF", "ADMIN"})
 	@RequestMapping(value = "/updatebill/{shopId}/{transId}", method = RequestMethod.POST)
 	public BillCreationResponse updateBill(@PathVariable long shopId, @PathVariable long transId, @RequestBody TransactionDTO transDto) {
 		Map<String, Long> transIdInvoiceIdMap =  billService.updateBill(shopId, transId, transDto);
@@ -81,6 +89,7 @@ public class RetailBillResource {
 		return billResp;
 	}
 	
+	@RolesAllowed({"STAFF", "ADMIN"})
 	@RequestMapping(value = "/updatebillstatus/{transId}", method = RequestMethod.POST)
 	public boolean updateBillStatus(@PathVariable long transId, @RequestBody String transactionStatus) {
 		return billService.updateBillStatus(transId, transactionStatus);
