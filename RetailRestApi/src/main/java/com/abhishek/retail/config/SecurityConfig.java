@@ -56,8 +56,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	 @Override
 	    protected void configure(AuthenticationManagerBuilder authManagerBuilder) throws Exception {
 	        //authManagerBuilder.inMemoryAuthentication().withUser("abhishek").password("admin").roles("HOLO");
-		 authManagerBuilder.authenticationProvider(authenticationProvider);
-		 //authManagerBuilder.authenticationProvider(authenticationProvider).eraseCredentials(false);
+		 //authManagerBuilder.authenticationProvider(authenticationProvider);
+		 authManagerBuilder.authenticationProvider(authenticationProvider).eraseCredentials(false);
 		 }
 	 
 	 @Bean
