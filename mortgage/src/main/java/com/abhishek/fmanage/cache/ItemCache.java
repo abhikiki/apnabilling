@@ -23,7 +23,7 @@ public class ItemCache {
 
 	private ItemCache(){}
 
-	public static ItemCache getInstance()
+	public static ItemCache getInstance( )
 	{
 		if(instance == null)
 		{
