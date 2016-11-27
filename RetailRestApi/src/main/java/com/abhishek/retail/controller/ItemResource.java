@@ -3,7 +3,6 @@ package com.abhishek.retail.controller;
 import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,13 +18,13 @@ public class ItemResource {
 	@Autowired
 	private ItemService itemService;
 	
-	@RolesAllowed({"STAFF", "ADMIN"})
+	@RolesAllowed({"STAFF", "ADMIN", "ADMIN_EXCLUDING_MORTGAGE"})
 	@RequestMapping(value = "/{shopId}", method = RequestMethod.GET)
-	public RetailItemStaffDTO itemsDetail(@PathVariable long shopId) {
+	public RetailItemStaffDTO getItemsDetail(@PathVariable long shopId) {
 		return itemService.getItems(shopId);
 	}
 	
-	@RolesAllowed({"ADMIN"})
+	@RolesAllowed({"ADMIN","ADMIN_EXCLUDING_MORTGAGE"})
 	@RequestMapping(value = "/{shopId}/{itemname}/{container}", method = RequestMethod.POST)
 	public long addItem(@PathVariable long shopId, @PathVariable String itemName, @PathVariable String container) {
 		return itemService.addItem(shopId, itemName, container);

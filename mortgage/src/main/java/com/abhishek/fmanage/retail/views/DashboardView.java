@@ -8,6 +8,7 @@ import java.util.Locale;
 import org.apache.commons.lang3.StringUtils;
 
 import com.abhishek.fmanage.retail.charts.ItemSummaryChart;
+import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SummaryDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailSummaryService;
 import com.vaadin.event.ItemClickEvent;
@@ -26,6 +27,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.Tree;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -64,7 +66,8 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 		hsplit.setHeight("100%");
 		hsplit.setFirstComponent(getTreeMenu());
 		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
-				new RestRetailSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getGoldItemSummaryDtoList(), "Gold Items Sale"));
+				new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class))
+				.getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getGoldItemSummaryDtoList(), "Gold Items Sale"));
 		return hsplit;
 		 
 	 }
@@ -140,7 +143,8 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	            
 	            public void buttonClick(ClickEvent event)
 	            {
-	            	summary = new RestRetailSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
+	            	summary = new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class))
+	            	.getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
 	            	Double vatTotal = Math.round(summary.getTotalVat() * 100.0) / 100.0;
 	            	vatLabel.setValue(String.format("%.3f", vatTotal));
 	            	silverWeightLabel.setValue(String.format("%.3f",summary.getTotalSilverWeight()));
@@ -165,7 +169,8 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	 
 	 
 	 private Component buildSaleSummary() {
-		 	summary = new RestRetailSummaryService().getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
+		 	summary = new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class))
+		 	.getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
 	        HorizontalLayout sparks = new HorizontalLayout();
 	        //sparks.addStyleName("sparks");
 	        sparks.setWidth("100%");

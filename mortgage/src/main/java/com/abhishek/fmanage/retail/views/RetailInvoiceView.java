@@ -302,7 +302,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						&& NumberUtils.isDigits(transactionSearchTxt.getValue())) {
 					transId = Long.parseLong(transactionSearchTxt
 							.getValue());
-					TransactionDTO tDto = new RestRetailTransactionService()
+					TransactionDTO tDto = new RestRetailTransactionService(shopDto)
 							.getBill(transId);
 					if (tDto != null) {
 						cusBean = tDto.getCustomer();
@@ -528,7 +528,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 					ShopDTO shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
 
 					if (transId == -1L) {
-						BillCreationResponse response = new RestRetailTransactionService()
+						BillCreationResponse response = new RestRetailTransactionService(shopDto)
 								.createBill(shopDto, retailTransaction);
 						retailTransaction.setInvoiceNumber(response
 								.getInvoiceId());
@@ -538,7 +538,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						retailTransaction.setEstimateBill(isEstimateBill);
 						retailTransaction.setTransactionDate(mortgageStartDate
 								.getValue());
-						BillCreationResponse response = new RestRetailTransactionService()
+						BillCreationResponse response = new RestRetailTransactionService(shopDto)
 								.updateBill(transId, shopDto.getShopId(),
 										retailTransaction);
 						retailTransaction.setInvoiceNumber(response

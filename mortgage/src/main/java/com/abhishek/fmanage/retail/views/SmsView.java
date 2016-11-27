@@ -102,7 +102,8 @@ public class SmsView extends VerticalLayout implements View{
 		twinCol.setLeftColumnCaption("Available Contact Numbers");
 		twinCol.setRightColumnCaption("Selected Contact Numbers");
 		twinCol.setMultiSelect(true);
-		List<String> contactList = new RestRetailSmsService().getCustomerContact(getShopDto().getShopId());
+		ShopDTO shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+		List<String> contactList = new RestRetailSmsService(shopDto).getCustomerContact(getShopDto().getShopId());
 		twinCol.addItems(contactList);
 		twinCol.setImmediate(true);
 		twinCol.setRows(15);
@@ -179,7 +180,7 @@ public class SmsView extends VerticalLayout implements View{
 	            	smsSettingdto.setSmsPassword(StringUtils.isEmpty(password.getValue()) ? "" : password.getValue());
 	            	smsSettingdto.setSmsSenderId(StringUtils.isEmpty(senderId.getValue()) ? "" : senderId.getValue());
 	            	smsSettingdto.setSmsGatewayUrl(StringUtils.isEmpty(smsGatewayUrl.getValue()) ? "" : smsGatewayUrl.getValue());
-	            	new RestRetailSmsService().updateSmsSetting(getShopDto().getShopId(), smsSettingdto);
+	            	new RestRetailSmsService(getShopDto()).updateSmsSetting(getShopDto().getShopId(), smsSettingdto);
 	            }
 	        });
 		smsCredential.addComponent(smsGatewayUrl);
@@ -193,7 +194,7 @@ public class SmsView extends VerticalLayout implements View{
 	}
 
 	private SmsSettingDTO getSmsSetting() {
-		return new RestRetailSmsService().getSmsSetting(getShopDto().getShopId());
+		return new RestRetailSmsService(getShopDto()).getSmsSetting(getShopDto().getShopId());
 	}
 
 	private ShopDTO getShopDto() {

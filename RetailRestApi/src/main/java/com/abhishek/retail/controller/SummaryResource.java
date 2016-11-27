@@ -3,7 +3,7 @@ package com.abhishek.retail.controller;
 import javax.annotation.security.RolesAllowed;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,8 +20,9 @@ public class SummaryResource {
 	@Autowired
 	private SummaryService summaryService;
 
-	@RolesAllowed({"ADMIN"})
-	@RequestMapping(value = "/retailsummary", method = RequestMethod.POST)
+	
+	@RolesAllowed({"ADMIN", "ADMIN_EXCLUDING_MORTGAGE"})
+	@RequestMapping(value = "/retailsummary", produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE}, method = RequestMethod.POST)
 	public SummaryDTO  getRetailSummary(@RequestBody DateRangeCriteriaDTO dateRangeCriteriaDto) {
 		return summaryService.getRetailSummary(dateRangeCriteriaDto.getStartDate(), dateRangeCriteriaDto.getEndDate());
 	}

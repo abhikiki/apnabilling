@@ -69,6 +69,7 @@ public class DashboardUI extends UI {
     private CssLayout content = new CssLayout();
 
     private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions", "sms", "mortgage", "mortgagetransaction"};
+    private String[] adminExcludingMortgageViews = new String[] {"dashboard", "retailbilling", "transactions", "sms"};
     private String[] staffViews = new String[] {"retailbilling"};
     private String currentRole = "ADMIN";
     
@@ -179,7 +180,7 @@ public class DashboardUI extends UI {
             public void buttonClick(ClickEvent event) {
 				String userName = username.getValue();
 				String userPassword = password.getValue();
-				ShopDTO shopDto = new RestRetailLoginService().retailLogin(userName, userPassword);
+				ShopDTO shopDto = new RestRetailLoginService(userName, userPassword).retailLogin();
                 if (shopDto.getShopId() != -1L) {
                 	getUI().getSession().setAttribute(ShopDTO.class, shopDto);
                 	currentRole = shopDto.getRole();
@@ -209,27 +210,10 @@ public class DashboardUI extends UI {
     }
 
     private void buildMainView() {
-        nav = new Navigator(this, content);
-        String[] currentView = null;
-        if(currentRole.equalsIgnoreCase("Admin")){
-        	currentView = adminViews;
-        	
-        	routes.put("/dashboard", DashboardView.class);
-        	routes.put("/transactions", RetailTransactionSearchView.class);
-        	routes.put("/sms", SmsView.class);
-        	routes.put("/mortgage", MortgageView.class);
-        	routes.put("/mortgagetransaction", MortgageTransactionSearchView.class);
-            
-        	
-        }else{
-        	currentView = staffViews;
-        	routes.remove("/dashboard");
-         	routes.remove("/transactions");
-         	routes.remove("/sms");
-         	routes.remove("/mortgage");
-         	routes.remove("/mortgagetransaction");
-        }
+        
+        String[] currentView = getViewBasedOnRole();
        
+        nav = new Navigator(this, content);
         for (String route : routes.keySet()) {
             nav.addView(route, routes.get(route));
         }
@@ -371,6 +355,35 @@ public class DashboardUI extends UI {
         });
 
     }
+
+	private String[] getViewBasedOnRole() {
+		String[] currentView = new String[]{};
+		switch(currentRole.toUpperCase()){
+			case "ADMIN" :
+					currentView = adminViews;
+					routes.put("/dashboard", DashboardView.class);
+		        	routes.put("/transactions", RetailTransactionSearchView.class);
+		        	routes.put("/sms", SmsView.class);
+		        	routes.put("/mortgage", MortgageView.class);
+		        	routes.put("/mortgagetransaction", MortgageTransactionSearchView.class);
+					break;
+			case "STAFF" :
+					currentView = staffViews;
+					routes.remove("/dashboard");
+		         	routes.remove("/transactions");
+		         	routes.remove("/sms");
+		         	routes.remove("/mortgage");
+		         	routes.remove("/mortgagetransaction");
+				break;
+			case "ADMIN_EXCLUDING_MORTGAGE":
+					currentView = adminExcludingMortgageViews;
+					routes.put("/dashboard", DashboardView.class);
+		        	routes.put("/transactions", RetailTransactionSearchView.class);
+		        	routes.put("/sms", SmsView.class);
+				break;
+		}
+		return currentView;
+	}
 
     private void clearMenuSelection() {
         for (Iterator<Component> it = menu.iterator(); it.hasNext();) {

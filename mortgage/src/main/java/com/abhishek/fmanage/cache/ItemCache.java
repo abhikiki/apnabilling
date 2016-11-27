@@ -38,8 +38,8 @@ public class ItemCache {
 	}
 
 	private void initializeCache() {
-		RestRetailItemService service = new RestRetailItemService();
 		ShopDTO shopDto =  (ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class);
+		RestRetailItemService service = new RestRetailItemService(shopDto);
 		RetailItemStaffDTO dto = service.getItems(shopDto.getShopId());
 		itemMap.put("GOLD", dto.getGoldItemsList());
 		itemMap.put("SILVER", dto.getSilverItemsList());

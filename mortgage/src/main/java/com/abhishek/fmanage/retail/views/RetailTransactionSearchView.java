@@ -87,9 +87,6 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     /** Name of the transaction css style */
     private static final String TRANSACTION_STYLE_NAME = "transactions";
 
-    /** Name of the toolbar css style */
-    private static final String TOOLBAR_STYLE_NAME = "sidebar"; //"toolbar";
-
     /** pop up start date field prompt text when no date is selected*/
     public static final String POPUP_START_DATE_PROMPT_TEXT = "Start Date";
 
@@ -221,7 +218,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             	criteriaDto.setEndDate(endPopUpDate.getValue());
             	criteriaDto.setBillType(convertBillType(billType.getValue().toString()));
             	criteriaDto.setBillStatus(convertBillStatus(billStatus.getValue().toString()));
-            	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService().findBills(criteriaDto);
+            	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService(shopDto).findBills(criteriaDto);
                 retailViewContainer.addTransactionSearch(searchResultDtoList);
                 setContainerFilters();
                 transactionTable.setPageLength(searchResultDtoList.size());
@@ -269,7 +266,8 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
                     Item item = ((Table) sender).getItem(target);
                     long transId =  (long) item.getItemProperty(
                         RetailTransactionViewContainer.TRANSID_COL_NAME).getValue();
-                    BillWindow bw = new BillWindow(transId, new RestRetailTransactionService().getBill(transId));
+                    ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+                    BillWindow bw = new BillWindow(transId, new RestRetailTransactionService(shopDto).getBill(transId));
             		UI.getCurrent().addWindow(bw);
             		bw.focus();
                 }
@@ -391,7 +389,8 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
              {
             	if(NumberUtils.isDigits(String.valueOf(transIdTextField.getValue()))){
             		long transId = NumberUtils.toLong(String.valueOf(transIdTextField.getValue()));
-            		TransactionDTO transDto = new RestRetailTransactionService().getBill(transId);
+            		ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+            		TransactionDTO transDto = new RestRetailTransactionService(shopDto).getBill(transId);
             		if(transDto != null){
             			BillWindow bw = new BillWindow(transId, transDto);
                  		UI.getCurrent().addWindow(bw);
@@ -417,12 +416,13 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
              {
             	if(NumberUtils.isDigits(String.valueOf(invoiceIdTextField.getValue()))){
             		long invoiceId = NumberUtils.toLong(String.valueOf(invoiceIdTextField.getValue()));
-            		RetailTaxInvoiceDTO retailTaxInvoiceDto = new RestRetailTransactionService().getBillByInvoiceId(invoiceId);
+            		ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+            		RetailTaxInvoiceDTO retailTaxInvoiceDto = new RestRetailTransactionService(shopDto).getBillByInvoiceId(invoiceId);
             		if(retailTaxInvoiceDto == null){
             			Notification.show("Invoice Not Found");
             		}else{
             			long transId = retailTaxInvoiceDto.getTransId();
-                		TransactionDTO transDto = new RestRetailTransactionService().getBill(transId);
+                		TransactionDTO transDto = new RestRetailTransactionService(shopDto).getBill(transId);
                 		BillWindow bw = new BillWindow(transId, transDto);
                  		UI.getCurrent().addWindow(bw);
                  		bw.focus();
@@ -648,7 +648,8 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     	dto.setEndDate(endDate);
     	dto.setBillType(convertBillType(billType));
     	dto.setBillStatus(convertBillStatus(billStatus));
-    	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService().findBills(dto);
+    	ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+    	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService(shopDto).findBills(dto);
         retailViewContainer.addTransactionSearch(searchResultDtoList);
         return retailViewContainer;
     }

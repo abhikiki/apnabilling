@@ -194,7 +194,7 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
             	criteriaDto.setStartDate(startPopUpDate.getValue());
             	criteriaDto.setEndDate(endPopUpDate.getValue());
             	criteriaDto.setBillStatus(convertBillStatus(billStatus.getValue().toString()));
-            	List<MortgageTransactionSearchResultDTO> searchResultDtoList = new RestMortgageTransactionService().findBills(criteriaDto);
+            	List<MortgageTransactionSearchResultDTO> searchResultDtoList = new RestMortgageTransactionService(shopDto).findBills(criteriaDto);
             	mortgageViewContainer.addTransactionSearch(searchResultDtoList);
                 setContainerFilters();
                 transactionTable.setPageLength(searchResultDtoList.size());
@@ -267,7 +267,8 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
                 {
             		Item item = ((Table) sender).getItem(target);
                     long transId =  (long) item.getItemProperty(MortgageTransactionViewContainer.TRANSID_COL_NAME).getValue();
-                    new RestMortgageTransactionService().updateBillStatus(transId, "A");
+                    ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+                    new RestMortgageTransactionService(shopDto).updateBillStatus(transId, "A");
                     Item i = transactionTable.getContainerDataSource().getItem(item.getItemProperty(MortgageTransactionViewContainer.BILL_STATUS_COL_NAME).getValue());
                     item.getItemProperty(MortgageTransactionViewContainer.BILL_STATUS_COL_NAME).setValue("Active");
                     if(!billStatus.getValue().equals("All")){
@@ -296,7 +297,8 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
                 {
                 	Item item = ((Table) sender).getItem(target);
                     long transId =  (long) item.getItemProperty(MortgageTransactionViewContainer.TRANSID_COL_NAME).getValue();
-                    new RestMortgageTransactionService().updateBillStatus(transId, "I");
+                    ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+                    new RestMortgageTransactionService(shopDto).updateBillStatus(transId, "I");
                     item.getItemProperty(MortgageTransactionViewContainer.BILL_STATUS_COL_NAME).setValue("InActive");
                     if(!billStatus.getValue().equals("All")){
                     	transactionTable.getContainerDataSource().removeItem((Integer) item.getItemProperty(MortgageTransactionViewContainer.ITEM_ID_HIDDEN_COL_NAME).getValue());
@@ -342,7 +344,8 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
         Button yesBtn = new Button("Yes");
         yesBtn.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
-            	new RestMortgageTransactionService().deleteBill(transId);
+            	ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+            	new RestMortgageTransactionService(shopDto).deleteBill(transId);
                 transactionTable.getContainerDataSource().removeItem((Integer) item.getItemProperty(MortgageTransactionViewContainer.ITEM_ID_HIDDEN_COL_NAME).getValue());
                 mywindow.close(); // Close the sub-window
                 Notification.show("Transaction No: " + transId + " deleted successfully");
@@ -682,7 +685,8 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
     	dto.setStartDate(startDate);
     	dto.setEndDate(endDate);
     	dto.setBillStatus(convertBillStatus(billStatus));
-    	List<MortgageTransactionSearchResultDTO> searchResultDtoList = new RestMortgageTransactionService().findBills(dto);
+    	ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+    	List<MortgageTransactionSearchResultDTO> searchResultDtoList = new RestMortgageTransactionService(shopDto).findBills(dto);
     	mortgageViewContainer.addTransactionSearch(searchResultDtoList);
         return mortgageViewContainer;
     }

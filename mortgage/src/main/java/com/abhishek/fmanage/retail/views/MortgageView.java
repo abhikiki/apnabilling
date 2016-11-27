@@ -223,7 +223,7 @@ public class MortgageView extends VerticalLayout implements View {
 						ShopDTO.class);
 				String validationMessage = checkToSaveTransaction(transDto);
 				if(StringUtils.isEmpty(validationMessage)){
-					long transId = new RestMortgageTransactionService().createBill(shopDto,	transDto);
+					long transId = new RestMortgageTransactionService(shopDto).createBill(shopDto,	transDto);
 					if(transId > 0){
 						Notification.show("Transaction Saved successfully", Type.WARNING_MESSAGE);
 					}else{

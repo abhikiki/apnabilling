@@ -21,13 +21,13 @@ public class SmsResource {
 	@Autowired
 	private SmsService smsService;
 	
-	@RolesAllowed({"ADMIN"})
+	@RolesAllowed({"ADMIN", "ADMIN_EXCLUDING_MORTGAGE"})
 	@RequestMapping(value = "/contacts/{shopId}", method = RequestMethod.GET)
 	public List<String> getCustomerContacts(@PathVariable int shopId) {
 		return smsService.getCustomerContact(shopId);
 	}
 	
-	@RolesAllowed({"STAFF", "ADMIN"})
+	@RolesAllowed({"STAFF", "ADMIN", "ADMIN_EXCLUDING_MORTGAGE"})
 	@RequestMapping(value = "/setting/{shopId}", method = RequestMethod.GET)
 	public SmsSettingDTO getSmsSetting(@PathVariable int shopId) {
 		SmsSettingDTO smsSetting = new SmsSettingDTO();
@@ -38,7 +38,7 @@ public class SmsResource {
 		return smsSetting;	
 	}
 	
-	@RolesAllowed({"ADMIN"})
+	@RolesAllowed({"ADMIN", "ADMIN_EXCLUDING_MORTGAGE"})
 	@RequestMapping(value = "/setting/{shopId}", method = RequestMethod.POST)
 	public int updateSmsSetting(@PathVariable int shopId, @RequestBody SmsSettingDTO smsSettingDto) {
 		List<SmsSettingDTO> smsSettingList = smsService.getSmsSetting(shopId);

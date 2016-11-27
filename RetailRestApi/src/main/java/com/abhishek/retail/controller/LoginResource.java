@@ -20,12 +20,10 @@ public class LoginResource {
 	@Autowired
 	private LoginService loginService;
 	
-	@RolesAllowed({"STAFF", "ADMIN"})
+	@RolesAllowed({"STAFF", "ADMIN", "ADMIN_EXCLUDING_MORTGAGE"})
 	@RequestMapping( method = RequestMethod.GET)
 	public ShopDTO createBill(UsernamePasswordAuthenticationToken userToken, Authentication auth) {
 		UserDetailsModel userModel = (UserDetailsModel) userToken.getPrincipal();
-		//auth.getCredentials()
 		return loginService.login(userModel.getUserName(), userModel.getPassword());
-		
 	}
 }

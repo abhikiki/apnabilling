@@ -1,41 +1,36 @@
 package com.abhishek.fmanage.retail.restclient.service;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.web.client.RestTemplate;
 
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 
 public class RestRetailLoginService {
 
-	public RestRetailLoginService(){}
+	private String userName;
+	private String password;
+	
+	public RestRetailLoginService(String userName, String password){
+		this.userName = userName;
+		this.password = password;
+	}
 
-	public ShopDTO retailLogin(final String userName, final String passWord){
+	public ShopDTO retailLogin(){
         Map<String, Object> paramMap = new  HashMap<String, Object>();
         paramMap.put("username", userName);
-        paramMap.put("password", passWord);
-        HttpEntity<String> request = new HttpEntity<String>(getHeaders());
+        paramMap.put("password", password);
+        ShopDTO shopDto = new ShopDTO();
+        shopDto.setUserId(userName);
+        shopDto.setPassword(password);
+        RestServiceUtil restUtil = new RestServiceUtil();
+        HttpEntity<String> request = new HttpEntity<String>(restUtil.getHeaders(shopDto));
         RestTemplate restTemplate = new RestTemplate(); 
-        ResponseEntity<ShopDTO> response = restTemplate.exchange("http://localhost:8090/login", HttpMethod.GET, request, ShopDTO.class);
+        ResponseEntity<ShopDTO> response = restTemplate.exchange(restUtil.getRestHostPortUrl() + "/login", HttpMethod.GET, request, ShopDTO.class);
         return response.getBody();
-        //return new RestTemplate().getForObject("http://localhost:8090/login/{username}/{password}", ShopDTO.class, paramMap);
 	}
-	
-	private static HttpHeaders getHeaders(){
-        String plainCredentials="staff:staff";
-        String base64Credentials = new String(Base64.encode(plainCredentials.getBytes()));
-         
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Basic " + base64Credentials);
-        //headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        return headers;
-    }
 }

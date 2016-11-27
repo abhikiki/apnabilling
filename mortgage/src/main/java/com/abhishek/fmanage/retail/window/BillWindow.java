@@ -220,7 +220,8 @@ public class BillWindow extends Window{
 			public void buttonClick(ClickEvent event) {
 				if(retailTransaction.isTransactionActive()){
 					//deactivate
-					Boolean updateSuccess = new RestRetailTransactionService().updateBillStatus(transId,"I");
+					ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+					Boolean updateSuccess = new RestRetailTransactionService(shopDto).updateBillStatus(transId,"I");
 					if(updateSuccess){
 						retailTransaction.setTransactionActive(false);
 						actionButton.setCaption("Activate Bill");
@@ -232,7 +233,8 @@ public class BillWindow extends Window{
 					actionButton.setImmediate(true);
 				}else{
 					//activate
-					Boolean updateSuccess = new RestRetailTransactionService().updateBillStatus(transId,"A");
+					ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+					Boolean updateSuccess = new RestRetailTransactionService(shopDto).updateBillStatus(transId,"A");
 					if(updateSuccess){
 						retailTransaction.setTransactionActive(true);
 						actionButton.setCaption("Deactivate Bill");
@@ -254,7 +256,7 @@ public class BillWindow extends Window{
 	}
 	
 	private SmsSettingDTO getSmsSetting() {
-		return new RestRetailSmsService().getSmsSetting(getShopDto().getShopId());
+		return new RestRetailSmsService(getShopDto()).getSmsSetting(getShopDto().getShopId());
 	}
 
 	private ShopDTO getShopDto() {

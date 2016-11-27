@@ -1,34 +1,31 @@
 package com.abhishek.fmanage.retail.restclient.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Date;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import com.abhishek.fmanage.retail.dto.DateRangeCriteriaDTO;
+import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SummaryDTO;
 
-public class RestRetailSummaryService {
+public class RestRetailSummaryService<D> {
 
-	public RestRetailSummaryService(){}
+	private ShopDTO shopDto = null;
+	public RestRetailSummaryService(ShopDTO shopDto){
+		this.shopDto = shopDto;
+	}
 	
 	public SummaryDTO getRetailSummary(Date startDate, Date endDate){
-		SummaryDTO summary = new SummaryDTO();
-		final String uri = "http://localhost:8090/summary/retailsummary";
-    	DateRangeCriteriaDTO dd = new DateRangeCriteriaDTO();
-    	dd.setStartDate(startDate);
-    	dd.setEndDate(endDate);
-    	
-        URI url = null;
-		try {
-			url = new URI(uri);
-			summary =  new RestTemplate().postForObject(url, dd, SummaryDTO.class);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return summary;
-        
+		final String url = new RestServiceUtil().getRestHostPortUrl() + "/summary/retailsummary";
+    	DateRangeCriteriaDTO dateRangeCriteriaDto = new DateRangeCriteriaDTO();
+    	dateRangeCriteriaDto.setStartDate(startDate);
+    	dateRangeCriteriaDto.setEndDate(endDate);
+	    RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<DateRangeCriteriaDTO> entityrequest = new HttpEntity<DateRangeCriteriaDTO>(dateRangeCriteriaDto, new RestServiceUtil().getHeaders(shopDto));
+        ResponseEntity<SummaryDTO> response = restTemplate.exchange(url, HttpMethod.POST, entityrequest, SummaryDTO.class);
+		return response.getBody();
 	}
 }
