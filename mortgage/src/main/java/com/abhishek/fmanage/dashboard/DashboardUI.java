@@ -8,6 +8,7 @@ import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailLoginService;
 import com.abhishek.fmanage.retail.views.MortgageTransactionSearchView;
 import com.abhishek.fmanage.retail.views.MortgageView;
+import com.abhishek.fmanage.retail.views.PurchaseRecordView;
 import com.abhishek.fmanage.retail.views.SmsView;
 import com.abhishek.fmanage.retail.views.DashboardView;
 import com.abhishek.fmanage.retail.views.RetailInvoiceView;
@@ -68,8 +69,8 @@ public class DashboardUI extends UI {
     private CssLayout menu = new CssLayout();
     private CssLayout content = new CssLayout();
 
-    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions", "sms", "mortgage", "mortgagetransaction"};
-    private String[] adminExcludingMortgageViews = new String[] {"dashboard", "retailbilling", "transactions", "sms"};
+    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions", "sms", "purchaserecord","mortgage", "mortgagetransaction"};
+    private String[] adminExcludingMortgageViews = new String[] {"dashboard", "retailbilling", "transactions", "purchaserecord", "sms"};
     private String[] staffViews = new String[] {"retailbilling"};
     private String currentRole = "ADMIN";
     
@@ -80,6 +81,7 @@ public class DashboardUI extends UI {
             put("/retailbilling", RetailInvoiceView.class);
             put("/transactions", RetailTransactionSearchView.class);
             put("/sms", SmsView.class);
+            put("/purchaserecord", PurchaseRecordView.class);
             put("/mortgage", MortgageView.class);
             put("/mortgagetransaction", MortgageTransactionSearchView.class);
         }
@@ -363,6 +365,7 @@ public class DashboardUI extends UI {
 					currentView = adminViews;
 					routes.put("/dashboard", DashboardView.class);
 		        	routes.put("/transactions", RetailTransactionSearchView.class);
+		        	routes.put("/purchaserecord", PurchaseRecordView.class);
 		        	routes.put("/sms", SmsView.class);
 		        	routes.put("/mortgage", MortgageView.class);
 		        	routes.put("/mortgagetransaction", MortgageTransactionSearchView.class);
@@ -371,6 +374,7 @@ public class DashboardUI extends UI {
 					currentView = staffViews;
 					routes.remove("/dashboard");
 		         	routes.remove("/transactions");
+		         	routes.remove("/purchaserecord", PurchaseRecordView.class);
 		         	routes.remove("/sms");
 		         	routes.remove("/mortgage");
 		         	routes.remove("/mortgagetransaction");
@@ -379,6 +383,7 @@ public class DashboardUI extends UI {
 					currentView = adminExcludingMortgageViews;
 					routes.put("/dashboard", DashboardView.class);
 		        	routes.put("/transactions", RetailTransactionSearchView.class);
+		        	routes.put("/purchaserecord", PurchaseRecordView.class);
 		        	routes.put("/sms", SmsView.class);
 				break;
 		}

@@ -458,7 +458,6 @@ public class MortgageView extends VerticalLayout implements View {
 							.format("%.2f", ((MortgageItemContainer) table
 									.getContainerDataSource()).getDiamondItemTotalDiamondWeight()));
 				}
-				
 				mortgageItemTableCountValueChange(itemType);
 			}
 		});
