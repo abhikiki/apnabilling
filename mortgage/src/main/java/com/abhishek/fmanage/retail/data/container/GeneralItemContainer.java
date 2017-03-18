@@ -85,6 +85,7 @@ public class GeneralItemContainer extends IndexedContainer implements CustomReta
 				
 				TextField quantity = getQuantity(generalItemRowId);
 				quantity.setValue(String.valueOf(generalItemBean.getQuantity()));
+				quantity.setReadOnly(false);
 				item.getItemProperty(QUANTITY).setValue(quantity);
 				
 				ComboBox piecePairCombo = getPiecePair(generalItemRowId);
@@ -95,10 +96,12 @@ public class GeneralItemContainer extends IndexedContainer implements CustomReta
 				TextField itemWeightTxt = (TextField) getWeight(generalItemRowId);
 				itemWeightTxt.setValue(String.valueOf(generalItemBean.getWeight()));
 				item.getItemProperty(WEIGHT).setValue(itemWeightTxt);
+				itemWeightTxt.setReadOnly(false);
 				
-				TextField itemPricePerPiecePairTxt = (TextField) getPrice();
+				TextField itemPricePerPiecePairTxt = (TextField) getPricePerPiece(generalItemRowId);
 				itemPricePerPiecePairTxt.setValue(String.valueOf(generalItemBean.getPricePerPiecepair()));
 				item.getItemProperty(PRICE_PER_PIECE_PAIR).setValue(itemPricePerPiecePairTxt);
+				itemPricePerPiecePairTxt.setReadOnly(false);
 				
 				TextField itemPriceTxt = (TextField) getPrice();
 				itemPriceTxt.setValue(String.valueOf(generalItemBean.getItemPrice()));

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.abhishek.retail.dto.RetailTaxInvoiceDTO;
 import com.abhishek.retail.dto.RetailTransactionDTO;
+import com.abhishek.retail.dto.RetailTransactionPaymentDTO;
 import com.abhishek.retail.dto.TransactionDTO;
 import com.abhishek.retail.dto.TransactionSearchResultDto;
 
@@ -51,6 +52,9 @@ public class RetailWholeTransactionDAO {
 	private RetailTransactionPriceDAO priceDAO;
 	
 	@Autowired
+	private RetailTransactionPaymentDAO paymentDAO;
+	
+	@Autowired
     protected NamedParameterJdbcTemplate namedJdbcTemplate;
 	
 	private final JdbcTemplate jdbcTemplate;
@@ -81,6 +85,13 @@ public class RetailWholeTransactionDAO {
 			transDto.setTransactionDate(retailTransDto.getTransdate());
 			transDto.setNotes(retailTransDto.getNotes());
 			transDto.setVinNumber(shopDao.getShopInformation(retailTransDto.getShopId()).get(0).getTinNumber());
+			List<RetailTransactionPaymentDTO> paymentList = paymentDAO.getRetailTransactionPayment(transId);
+			if(!paymentList.isEmpty()){
+				transDto.setRetailTransPaymentDto(paymentList.get(0));
+			}else{
+				transDto.setRetailTransPaymentDto(new RetailTransactionPaymentDTO());
+			}
+			
 			if(!transDto.isEstimateBill()){
 				List<RetailTaxInvoiceDTO> retailTaxInvoiceDtoList = retailTaxInvoiceDAO.getRetailTaxInvoice(transId);
 				if(!retailTaxInvoiceDtoList.isEmpty()){
@@ -154,6 +165,7 @@ public class RetailWholeTransactionDAO {
 		diamondDAO.saveDiamondItemTransaction(transId, tDto.getDiamondTransactionItemBeanList());
 		generalDAO.saveGeneralItemTransaction(transId, tDto.getGeneralTransactionItemBeanList());
 		priceDAO.saveRetailTransactionPrice(transId, tDto.getPriceBean());
+		paymentDAO.saveRetailTransactionPayment(transId, tDto.getRetailTransPaymentDto());
 		
 		Map<String, Long> transIdInvoiceIdMap = new HashMap<>();
 		transIdInvoiceIdMap.put("TRANSID", transId);
@@ -213,6 +225,13 @@ public class RetailWholeTransactionDAO {
 		transSearchResultDto.setCustomerAddress(resultSet.getString("ADDRESS"));
 		transSearchResultDto.setEmailId(resultSet.getString("EMAILID"));
 		transSearchResultDto.setTotalItemsPrice(resultSet.getDouble("TOTALITEMSPRICE"));
+		transSearchResultDto.setVatAmount(resultSet.getDouble("VATAMOUNT"));
+		transSearchResultDto.setDiscount(resultSet.getDouble("DISCOUNT"));
+		transSearchResultDto.setCardPayment(resultSet.getDouble("CARDPAYMENT"));
+		transSearchResultDto.setCashPayment(resultSet.getDouble("CASHPAYMENT"));
+		transSearchResultDto.setChequePayment(resultSet.getDouble("CHEQUEPAYMENT"));
+		transSearchResultDto.setNeftPayment(resultSet.getDouble("NEFTPAYMENT"));
+		transSearchResultDto.setRtgsPayment(resultSet.getDouble("RGTSPAYMENT"));
 		return transSearchResultDto;
 	}
 }

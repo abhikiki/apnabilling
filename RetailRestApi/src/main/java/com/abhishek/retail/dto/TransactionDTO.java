@@ -26,6 +26,7 @@ public class TransactionDTO {
 	private Boolean includePrice;
 	private String notes;
 	private boolean isTransactionActive;
+	private RetailTransactionPaymentDTO retailTransPaymentDto;
 	
 	public TransactionDTO() {
 	}
@@ -44,7 +45,8 @@ public class TransactionDTO {
 		String dealingStaffName,
 		final Boolean includePrice,
 		final String notes,
-		boolean isTransactionActive)
+		boolean isTransactionActive,
+		RetailTransactionPaymentDTO retailTransPaymentDto)
 	{
 		this.goldTransactionItemBeanList = goldTransactionItemBeanList;
 		this.silverTransactionItemBeanList = silverTransactionItemBeanList;
@@ -60,9 +62,17 @@ public class TransactionDTO {
 		this.includePrice = includePrice;
 		this.notes = notes;
 		this.isTransactionActive = isTransactionActive;
+		this.retailTransPaymentDto = retailTransPaymentDto;
+	}
+	
+	public RetailTransactionPaymentDTO getRetailTransPaymentDto() {
+		return retailTransPaymentDto;
 	}
 
-	
+	public void setRetailTransPaymentDto(RetailTransactionPaymentDTO retailTransPaymentDto) {
+		this.retailTransPaymentDto = retailTransPaymentDto;
+	}
+
 	public String getNotes() {
 		return notes;
 	}

@@ -3,7 +3,6 @@
  */
 package com.abhishek.fmanage.retail.dto;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -11,12 +10,8 @@ import java.util.List;
  * @author GUPTAA6
  *
  */
-public class TransactionDTO implements Serializable{
+public class TransactionDTO {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private List<GoldTransactionItemDTO> goldTransactionItemBeanList;
 	private List<SilverTransactionItemDTO> silverTransactionItemBeanList;
 	private List<DiamondTransactionItemDTO> diamondTransactionItemBeanList;
@@ -31,6 +26,7 @@ public class TransactionDTO implements Serializable{
 	private Boolean includePrice;
 	private String notes;
 	private boolean isTransactionActive;
+	private RetailTransactionPaymentDTO retailTransPaymentDto;
 	
 	public TransactionDTO() {
 	}
@@ -49,7 +45,8 @@ public class TransactionDTO implements Serializable{
 		String dealingStaffName,
 		final Boolean includePrice,
 		final String notes,
-		boolean isTransactionActive)
+		boolean isTransactionActive,
+		RetailTransactionPaymentDTO retailTransPaymentDto)
 	{
 		this.goldTransactionItemBeanList = goldTransactionItemBeanList;
 		this.silverTransactionItemBeanList = silverTransactionItemBeanList;
@@ -65,9 +62,17 @@ public class TransactionDTO implements Serializable{
 		this.includePrice = includePrice;
 		this.notes = notes;
 		this.isTransactionActive = isTransactionActive;
+		this.retailTransPaymentDto = retailTransPaymentDto;
+	}
+	
+	public RetailTransactionPaymentDTO getRetailTransPaymentDto() {
+		return retailTransPaymentDto;
 	}
 
-	
+	public void setRetailTransPaymentDto(RetailTransactionPaymentDTO retailTransPaymentDto) {
+		this.retailTransPaymentDto = retailTransPaymentDto;
+	}
+
 	public String getNotes() {
 		return notes;
 	}

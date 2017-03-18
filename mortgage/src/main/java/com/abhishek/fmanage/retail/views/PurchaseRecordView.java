@@ -1,20 +1,19 @@
 package com.abhishek.fmanage.retail.views;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
-import com.abhishek.fmanage.mortgage.data.container.MortgageItemContainer;
-import com.abhishek.fmanage.mortgage.data.container.MortgageItemType;
-import com.abhishek.fmanage.mortgage.dto.MortgageTransactionDTO;
-import com.abhishek.fmanage.mortgage.tables.MortgageItemTable;
+import com.abhishek.fmanage.purchaserecord.data.bean.PurchasePayment;
 import com.abhishek.fmanage.purchaserecord.data.bean.PurchasePayment.PaymentType;
+import com.abhishek.fmanage.purchaserecord.data.bean.PurchaseRecordBean;
 import com.abhishek.fmanage.purchaserecord.data.container.PurchaseRecordPaymentContainer;
 import com.abhishek.fmanage.purchaserecord.tables.PurchaseRecordPaymentTable;
-import com.abhishek.fmanage.retail.dto.ShopDTO;
-import com.abhishek.fmanage.retail.restclient.service.RestMortgageTransactionService;
 import com.avathartech.fastformfields.widgets.DecimalTextField;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
@@ -22,16 +21,15 @@ import com.vaadin.event.MouseEvents;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.PopupDateField;
 import com.vaadin.ui.Table;
@@ -106,7 +104,7 @@ public class PurchaseRecordView extends VerticalLayout implements View {
 		rtgsPaymentTable = new PurchaseRecordPaymentTable(rtgsContainer,
 				PaymentType.RTGS);
 		VerticalLayout rtgsPaymentLayout = getPaymentLayout(rtgsPaymentTable,
-				neftContainer, PaymentType.RTGS);
+				rtgsContainer, PaymentType.RTGS);
 		rtgsPaymentLayout.setSpacing(true);
 		paymentViewVerticalLayout.addComponent(rtgsPaymentLayout);
 		//debitcard
@@ -127,7 +125,7 @@ public class PurchaseRecordView extends VerticalLayout implements View {
 		otherModePaymentTable = new PurchaseRecordPaymentTable(otherModeContainer,
 				PaymentType.OTHER);
 		VerticalLayout otherModePaymentLayout = getPaymentLayout(otherModePaymentTable,
-				creditCardContainer, PaymentType.OTHER);
+				otherModeContainer, PaymentType.OTHER);
 		otherModePaymentLayout.setSpacing(true);
 		paymentViewVerticalLayout.addComponent(otherModePaymentLayout);
 		VerticalLayout itemAndNotesLayoutVL = new VerticalLayout();
@@ -173,13 +171,156 @@ public class PurchaseRecordView extends VerticalLayout implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				
-				
+				PurchaseRecordBean purchaseRecordBean = new PurchaseRecordBean();
+				purchaseRecordBean.setItemName(itemNameTxt.getValue());
+				purchaseRecordBean.setPartyName(partyNameTxt.getValue());
+				purchaseRecordBean.setPurchaseDate(billPopUpDate.getValue());
+				purchaseRecordBean.setCashPayment(NumberUtils.isNumber(cashPaymentTxt.getValue())? Double.valueOf(cashPaymentTxt.getValue()) : 0.00f);
+				purchaseRecordBean.setWeight(NumberUtils.isNumber(weightTxt.getValue())? Double.valueOf(weightTxt.getValue()) : 0.00f);
+				purchaseRecordBean.setNotes(notes.getValue());
+				purchaseRecordBean.setChequePayment(getPaymentListByMode(PaymentType.CHEQUE));
+				purchaseRecordBean.setNeftPayment(getPaymentListByMode(PaymentType.NEFT));
+				purchaseRecordBean.setRtgsPayment(getPaymentListByMode(PaymentType.RTGS));
+				purchaseRecordBean.setCreditCardPayment(getPaymentListByMode(PaymentType.CREDITCARD));
+				purchaseRecordBean.setDebitCardPayment(getPaymentListByMode(PaymentType.DEBITCARD));
+				purchaseRecordBean.setOtherModePayment(getPaymentListByMode(PaymentType.OTHER));
+				String validationMessage = checkToSaveTransaction(purchaseRecordBean);
+				if(StringUtils.isEmpty(validationMessage)){
+				//	long transId = new RestMortgageTransactionService(shopDto).createBill(shopDto,	transDto);
+					//if(transId > 0){
+						Notification.show("Transaction Saved successfully", Type.WARNING_MESSAGE);
+					//}else{
+					//	Notification.show("Failed Saving transactiony", Type.WARNING_MESSAGE);
+					//}
+				}else{
+					Notification.show(validationMessage, Type.WARNING_MESSAGE);
+				}
 			}
 		});
 		return saveBtn;
 	}
 
+	private String checkToSaveTransaction(PurchaseRecordBean purchaseRecordBean) {
+		String transValidationMessage = "";
+		if(purchaseRecordBean.getChequePayment().isEmpty() 
+				&& purchaseRecordBean.getNeftPayment().isEmpty()
+				&& purchaseRecordBean.getRtgsPayment().isEmpty()
+				&& purchaseRecordBean.getCreditCardPayment().isEmpty()
+				&& purchaseRecordBean.getDebitCardPayment().isEmpty()
+				&& purchaseRecordBean.getOtherModePayment().isEmpty()
+				&& purchaseRecordBean.getCashPayment() <= 0.000f){
+			transValidationMessage = "There are no purchase payment mode added";
+			return transValidationMessage;
+		}
+		if(StringUtils.isEmpty(purchaseRecordBean.getItemName())){
+			transValidationMessage = "Item name cannot be empty";
+			return transValidationMessage;
+		}
+		if(StringUtils.isEmpty(purchaseRecordBean.getPartyName())){
+			transValidationMessage = "Party name cannot be empty";
+			return transValidationMessage;
+		}
+		if(NumberUtils.isNumber(String.valueOf(purchaseRecordBean.getWeight())) && purchaseRecordBean.getWeight() <= 0.00){
+			transValidationMessage = "Weight should be a number and > 0";
+			return transValidationMessage;
+		}
+		if(NumberUtils.isNumber(String.valueOf(purchaseRecordBean.getCashPayment()))
+				&& (purchaseRecordBean.getCashPayment() < 0.000 || purchaseRecordBean.getCashPayment() > 200000.00f)){
+				transValidationMessage = "Cash payment should be > 0 and <= 200000(two lakhs)";
+				return transValidationMessage;
+		}
+		transValidationMessage = validateItemList(purchaseRecordBean.getChequePayment(), PaymentType.CHEQUE, transValidationMessage);
+		transValidationMessage = validateItemList(purchaseRecordBean.getNeftPayment(), PaymentType.NEFT, transValidationMessage);
+		transValidationMessage = validateItemList(purchaseRecordBean.getRtgsPayment(), PaymentType.RTGS, transValidationMessage);
+		transValidationMessage = validateItemList(purchaseRecordBean.getCreditCardPayment(), PaymentType.CREDITCARD, transValidationMessage);
+		transValidationMessage = validateItemList(purchaseRecordBean.getDebitCardPayment(), PaymentType.DEBITCARD, transValidationMessage);
+		transValidationMessage = validateItemList(purchaseRecordBean.getOtherModePayment(), PaymentType.OTHER, transValidationMessage);
+		return transValidationMessage;
+	}
+	
+	private String validateItemList(List<PurchasePayment> purchasePaymentList, PaymentType paymentType, String transValidationMessage) {
+		for(PurchasePayment mdto : purchasePaymentList){
+			transValidationMessage = validateAmount(transValidationMessage, paymentType, mdto);
+			if(!StringUtils.isEmpty(transValidationMessage)){
+				return transValidationMessage;
+			}
+			transValidationMessage = validateReferenceNumber(transValidationMessage, paymentType, mdto);
+			if(!StringUtils.isEmpty(transValidationMessage)){
+				return transValidationMessage;
+			}
+			if(StringUtils.isEmpty(mdto.getBankName())){
+				transValidationMessage = "Bank Name should not be empty";
+				return transValidationMessage;
+			}
+		}
+		return transValidationMessage;
+	}
+
+	private String validateReferenceNumber(String transValidationMessage, PaymentType paymentType, PurchasePayment mdto) {
+		if(StringUtils.isEmpty(mdto.getReferenceNumber())){
+			transValidationMessage = "Reference number should not be empty";
+		}
+		return transValidationMessage;
+	}
+
+	private String validateAmount(String transValidationMessage, PaymentType paymentType, PurchasePayment mdto) {
+		if(mdto.getAmount() <= 0.000f){
+			transValidationMessage = "Amount should be > 0.00";
+		}
+		return transValidationMessage;
+	}
+
+	private List<PurchasePayment> getPaymentListByMode(PaymentType paymentType) {
+		switch (paymentType) {
+		case CHEQUE:
+			workingTable = checkPaymentTable;
+			break;
+		case NEFT:
+			workingTable = neftPaymentTable;
+			break;
+		case RTGS:
+			workingTable = rtgsPaymentTable;
+			break;
+		case DEBITCARD:
+			workingTable = debitCardPaymentTable;
+			break;
+		case CREDITCARD:
+			workingTable = creditCardPaymentTable;
+			break;
+		case OTHER: 
+			workingTable = otherModePaymentTable;
+			break;
+		}
+		List<PurchasePayment> itemList = new ArrayList<PurchasePayment>();
+		for (Object obj : workingTable.getItemIds()) {
+			Double amount = 0.000d;
+			String referenceNumber = "";
+			String bankName = "";
+			amount = Double.valueOf(((DecimalTextField) (workingTable
+					.getContainerDataSource().getItem(obj)
+					.getItemProperty(PurchaseRecordPaymentContainer.AMOUNT).getValue()))
+					.getValue());
+			if(PaymentType.CHEQUE == paymentType){
+				referenceNumber = (String) ((TextField) (workingTable
+						.getContainerDataSource().getItem(obj)
+						.getItemProperty(PurchaseRecordPaymentContainer.CHEQUENUMBER)
+						.getValue())).getValue();
+			}else{
+				referenceNumber = (String) ((TextField) (workingTable
+						.getContainerDataSource().getItem(obj)
+						.getItemProperty(PurchaseRecordPaymentContainer.TRANSACTION_REFERENCE_NUMBER)
+						.getValue())).getValue();
+			}
+			bankName = (String) ((TextField) (workingTable
+					.getContainerDataSource().getItem(obj)
+					.getItemProperty(PurchaseRecordPaymentContainer.BANK_NAME)
+					.getValue())).getValue();
+			itemList.add(new PurchasePayment(paymentType, referenceNumber, amount, bankName));
+		}
+		return itemList;
+	}
+	
+	
 	private VerticalLayout getPaymentLayout(Table paymentTable,
 			PurchaseRecordPaymentContainer purchaseRecordContainer,
 			PaymentType paymentType) {
@@ -219,6 +360,7 @@ public class PurchaseRecordView extends VerticalLayout implements View {
 			private static final long serialVersionUID = 1L;
 
 			public void buttonClick(ClickEvent event) {
+				
 				purchaseRecordContainer.addCustomItem(paymentType);
 				paymentTable.setPageLength(paymentTable.size());
 				paymentTable.setImmediate(true);
@@ -359,56 +501,54 @@ public class PurchaseRecordView extends VerticalLayout implements View {
 		return toolbarMainLayout;
 	}
 
-	private Table getPaymentTable(
-			PurchaseRecordPaymentContainer paymentContainer,
-			PaymentType paymentType) {
-		PurchaseRecordPaymentTable paymentTable = new PurchaseRecordPaymentTable(
-				paymentContainer, paymentType);
-		purchasePaymentTableCountValueChange(paymentType);
-		paymentTable.setPageLength(paymentTable.size());
-		paymentTable.setColumnFooter(PurchaseRecordPaymentContainer.DELETE, ""
-				+ paymentTable.size());
-		paymentTable.setColumnFooter(PurchaseRecordPaymentContainer.AMOUNT,
-				String.format("%.3f",
-						((PurchaseRecordPaymentContainer) paymentTable
-								.getContainerDataSource()).getTotalAmount()));
-		paymentTable.setImmediate(true);
-		return paymentTable;
-	}
+//	private Table getPaymentTable(PurchaseRecordPaymentContainer paymentContainer, PaymentType paymentType) {
+//		PurchaseRecordPaymentTable paymentTable = new PurchaseRecordPaymentTable(
+//				paymentContainer, paymentType);
+//		purchasePaymentTableCountValueChange(paymentType);
+//		paymentTable.setPageLength(paymentTable.size());
+//		paymentTable.setColumnFooter(PurchaseRecordPaymentContainer.DELETE, ""
+//				+ paymentTable.size());
+//		paymentTable.setColumnFooter(PurchaseRecordPaymentContainer.AMOUNT,
+//				String.format("%.3f",
+//						((PurchaseRecordPaymentContainer) paymentTable
+//								.getContainerDataSource()).getTotalAmount()));
+//		paymentTable.setImmediate(true);
+//		return paymentTable;
+//	}
 
-	private void purchasePaymentTableCountValueChange(PaymentType paymentType) {
-		Collection<?> itemIdsList = null;
-		workingTable = getWorkingTable(paymentType);
-		itemIdsList = workingTable.getItemIds();
-
-		for (Object itemId : itemIdsList) {
-			Image deleteImage = (Image) ((workingTable.getItem(itemId)
-					.getItemProperty(PurchaseRecordPaymentContainer.DELETE)
-					.getValue()));
-			deleteImage.addClickListener(new MouseEvents.ClickListener() {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void click(com.vaadin.event.MouseEvents.ClickEvent event) {
-					PaymentType paymentType = (PaymentType) (((Image) event
-							.getComponent()).getData());
-					workingTable = getWorkingTable(paymentType);
-					workingTable.setPageLength(workingTable.size());
-					workingTable.setColumnFooter(
-							PurchaseRecordPaymentContainer.DELETE, ""
-									+ workingTable.size());
-					workingTable.setColumnFooter(
-							PurchaseRecordPaymentContainer.AMOUNT,
-							String.format(
-									"%.3f",
-									((PurchaseRecordPaymentContainer) workingTable
-											.getContainerDataSource())
-											.getTotalAmount()));
-					workingTable.setImmediate(true);
-				}
-			});
-		}
-	}
+//	private void purchasePaymentTableCountValueChange(PaymentType paymentType) {
+//		Collection<?> itemIdsList = null;
+//		workingTable = getWorkingTable(paymentType);
+//		itemIdsList = workingTable.getItemIds();
+//
+//		for (Object itemId : itemIdsList) {
+//			Image deleteImage = (Image) ((workingTable.getItem(itemId)
+//					.getItemProperty(PurchaseRecordPaymentContainer.DELETE)
+//					.getValue()));
+//			deleteImage.addClickListener(new MouseEvents.ClickListener() {
+//				private static final long serialVersionUID = 1L;
+//
+//				@Override
+//				public void click(com.vaadin.event.MouseEvents.ClickEvent event) {
+//					PaymentType paymentType = (PaymentType) (((Image) event
+//							.getComponent()).getData());
+//					workingTable = getWorkingTable(paymentType);
+//					workingTable.setPageLength(workingTable.size());
+//					workingTable.setColumnFooter(
+//							PurchaseRecordPaymentContainer.DELETE, ""
+//									+ workingTable.size());
+//					workingTable.setColumnFooter(
+//							PurchaseRecordPaymentContainer.AMOUNT,
+//							String.format(
+//									"%.3f",
+//									((PurchaseRecordPaymentContainer) workingTable
+//											.getContainerDataSource())
+//											.getTotalAmount()));
+//					workingTable.setImmediate(true);
+//				}
+//			});
+//		}
+//	}
 
 	private Table getWorkingTable(PaymentType paymentType) {
 		switch (paymentType) {

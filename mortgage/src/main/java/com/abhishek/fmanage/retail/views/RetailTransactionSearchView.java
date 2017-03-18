@@ -317,7 +317,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     				csvFilePrinter = new CSVPrinter(bufferedWriter, csvFileFormat);
     				Object[] FILE_HEADER = { "TransDate","TransId", 
     					"BillType", "TransactionStatus", "CustomerName", "ContactNumber", "EmailId", "CustomerAddress", "GoldItems", "SilverItems",
-    					"DiamondItems", "GeneralItems", "Sale Amount" };
+    					"DiamondItems", "GeneralItems", "Sale Amount","Vat Amount", "Discount", "Cash Payment", "Card Payment", "Cheque Payment", "Neft Payment", "RTGS Payment"  };
     				csvFilePrinter.printRecord(FILE_HEADER);
     				List<TransactionSearchResultDto> list = retailViewContainer.getTransactionFilteredSearchResultDtoList();
     				for(TransactionSearchResultDto dto : list){
@@ -335,6 +335,13 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     					record.add(dto.getDiamondItems());
     					record.add(dto.getGeneralItems());
     					record.add(String.valueOf(dto.getTotalItemsPrice()));
+    					record.add(String.valueOf(dto.getVatAmount()));
+    					record.add(String.valueOf(dto.getDiscount()));
+    					record.add(String.valueOf(dto.getCashPayment()));
+    					record.add(String.valueOf(dto.getCardPayment()));
+    					record.add(String.valueOf(dto.getChequePayment()));
+    					record.add(String.valueOf(dto.getNeftPayment()));
+    					record.add(String.valueOf(dto.getRtgsPayment()));
     					csvFilePrinter.printRecord(record);
     				}
     			}
@@ -480,8 +487,18 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
         		String.format("%.3f", retailViewContainer.getItemIds().stream().map(
                 		item -> Double.valueOf(retailViewContainer.getItem(item).getItemProperty(
     	        				RetailTransactionViewContainer.SALE_AMOUNT_COL_NAME).getValue().toString())).reduce((price1, price2) -> price1 + price2).get())));
+    		transactionTable.setColumnFooter(RetailTransactionViewContainer.VATAMOUNT, ("Total Vat=" +
+            		String.format("%.3f", retailViewContainer.getItemIds().stream().map(
+                    		item -> Double.valueOf(retailViewContainer.getItem(item).getItemProperty(
+        	        				RetailTransactionViewContainer.VATAMOUNT).getValue().toString())).reduce((price1, price2) -> price1 + price2).get())));
+    		transactionTable.setColumnFooter(RetailTransactionViewContainer.DISCOUNT, ("Total Discount=" +
+            		String.format("%.3f", retailViewContainer.getItemIds().stream().map(
+                    		item -> Double.valueOf(retailViewContainer.getItem(item).getItemProperty(
+        	        				RetailTransactionViewContainer.DISCOUNT).getValue().toString())).reduce((price1, price2) -> price1 + price2).get())));
     	}else{
     		transactionTable.setColumnFooter(RetailTransactionViewContainer.CUSTOMER_ADDRESS_COL_NAME, ("Total Sale=0.000"));
+    		transactionTable.setColumnFooter(RetailTransactionViewContainer.VATAMOUNT, ("Total Vat=0.000"));
+    		transactionTable.setColumnFooter(RetailTransactionViewContainer.DISCOUNT, ("Total Discount=0.000"));
     	}
 	}
     

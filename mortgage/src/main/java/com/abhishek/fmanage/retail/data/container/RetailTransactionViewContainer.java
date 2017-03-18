@@ -33,7 +33,14 @@ public class RetailTransactionViewContainer extends IndexedContainer{
     public static final String BILL_STATUS_COL_NAME = "Status";
     public static final String EMAIL_ID_COL_NAME = "Email Id";
     public static final String TRANSACTION_DETAIL_BTN_COL_NAME = "Detail Button";
-
+    public static final String VATAMOUNT = "Vat Amount";
+    public static final String DISCOUNT = "Discount";
+    public static final String CASHPAYMENT = "Cash Payment";
+    public static final String CARDPAYMENT = "Card Payment";
+    public static final String CHEQUEPAYMENT = "Cheque Payment";
+    public static final String NEFTPAYMENT = "Neft Payment";
+    public static final String RTGSPAYMENT = "Rtgs Payment";
+    
     /**
      * {@link Constructor} for Transaction view container
      */
@@ -53,6 +60,13 @@ public class RetailTransactionViewContainer extends IndexedContainer{
         addContainerProperty(DIAMONDITEMS_COL_NAME, String.class, "");
         addContainerProperty(GENERALITEMS_COL_NAME, String.class, "");
         addContainerProperty(SALE_AMOUNT_COL_NAME, Double.class, 0.000d);
+        addContainerProperty(VATAMOUNT, Double.class, 0.000d);
+        addContainerProperty(DISCOUNT, Double.class, 0.000d);
+        addContainerProperty(CASHPAYMENT, Double.class, 0.000d);
+        addContainerProperty(CARDPAYMENT, Double.class, 0.000d);
+        addContainerProperty(CHEQUEPAYMENT, Double.class, 0.000d);
+        addContainerProperty(NEFTPAYMENT, Double.class, 0.000d);
+        addContainerProperty(RTGSPAYMENT, Double.class, 0.000d);
     }
     
     @SuppressWarnings("unchecked")
@@ -75,6 +89,13 @@ public class RetailTransactionViewContainer extends IndexedContainer{
     	            item.getItemProperty(DIAMONDITEMS_COL_NAME).setValue(StringUtils.isEmpty(dto.getDiamondItems()) ? "" : dto.getDiamondItems());
     	            item.getItemProperty(GENERALITEMS_COL_NAME).setValue(StringUtils.isEmpty(dto.getGeneralItems()) ? "" : dto.getGeneralItems());
     	            item.getItemProperty(SALE_AMOUNT_COL_NAME).setValue(dto.getTotalItemsPrice());
+    	            item.getItemProperty(VATAMOUNT).setValue(dto.getVatAmount());
+    	            item.getItemProperty(DISCOUNT).setValue(dto.getDiscount());
+    	            item.getItemProperty(CASHPAYMENT).setValue(dto.getCashPayment());
+    	            item.getItemProperty(CARDPAYMENT).setValue(dto.getCardPayment());
+    	            item.getItemProperty(CHEQUEPAYMENT).setValue(dto.getChequePayment());
+    	            item.getItemProperty(NEFTPAYMENT).setValue(dto.getNeftPayment());
+    	            item.getItemProperty(RTGSPAYMENT).setValue(dto.getRtgsPayment());
     	        }
     	}
     }
@@ -97,6 +118,13 @@ public class RetailTransactionViewContainer extends IndexedContainer{
         			dto.setDiamondItems(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.DIAMONDITEMS_COL_NAME).getValue()));
         			dto.setGeneralItems(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.GENERALITEMS_COL_NAME).getValue()));
         			dto.setTotalItemsPrice(Double.valueOf(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.SALE_AMOUNT_COL_NAME).getValue())));
+        			dto.setVatAmount(Double.valueOf(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.VATAMOUNT).getValue())));
+        			dto.setDiscount(Double.valueOf(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.DISCOUNT).getValue())));
+        			dto.setCashPayment(Double.valueOf(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.CASHPAYMENT).getValue())));
+        			dto.setCardPayment(Double.valueOf(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.CARDPAYMENT).getValue())));
+        			dto.setChequePayment(Double.valueOf(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.CHEQUEPAYMENT).getValue())));
+        			dto.setRtgsPayment(Double.valueOf(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.RTGSPAYMENT).getValue())));
+        			dto.setNeftPayment(Double.valueOf(String.valueOf(this.getItem(item).getItemProperty(RetailTransactionViewContainer.NEFTPAYMENT).getValue())));
         			searchList.add(dto);
         		});
     	return searchList;

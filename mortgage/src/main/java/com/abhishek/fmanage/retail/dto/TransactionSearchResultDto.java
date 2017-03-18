@@ -16,6 +16,13 @@ public class TransactionSearchResultDto {
 	private String emailId;
 	private String customerAddress;
 	private Double totalItemsPrice;
+	private Double vatAmount;
+	private Double discount;
+	private Double cashPayment;
+	private Double cardPayment;
+	private Double chequePayment;
+	private Double neftPayment;
+	private Double rtgsPayment;
 	
 	public TransactionSearchResultDto(){}
 	
@@ -25,6 +32,40 @@ public class TransactionSearchResultDto {
 	public void setTransId(long transId) {
 		this.transId = transId;
 	}
+	
+	
+	public Double getCardPayment() {
+		return cardPayment;
+	}
+
+	public void setCardPayment(Double cardPayment) {
+		this.cardPayment = cardPayment;
+	}
+
+	public Double getChequePayment() {
+		return chequePayment;
+	}
+
+	public void setChequePayment(Double chequePayment) {
+		this.chequePayment = chequePayment;
+	}
+
+	public Double getNeftPayment() {
+		return neftPayment;
+	}
+
+	public void setNeftPayment(Double neftPayment) {
+		this.neftPayment = neftPayment;
+	}
+
+	public Double getRtgsPayment() {
+		return rtgsPayment;
+	}
+
+	public void setRtgsPayment(Double rtgsPayment) {
+		this.rtgsPayment = rtgsPayment;
+	}
+
 	public Date getTransDate() {
 		return transDate;
 	}
@@ -106,4 +147,30 @@ public class TransactionSearchResultDto {
 	public void setTotalItemsPrice(Double totalItemsPrice) {
 		this.totalItemsPrice = totalItemsPrice;
 	}
+
+	public Double getVatAmount() {
+		return vatAmount;
+	}
+
+	public void setVatAmount(Double vatAmount) {
+		this.vatAmount = vatAmount;
+	}
+
+	public Double getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(Double discount) {
+		this.discount = discount;
+	}
+
+	public Double getCashPayment() {
+		return cashPayment;
+	}
+
+	public void setCashPayment(Double cashPayment) {
+		this.cashPayment = cashPayment;
+	}
+	
+	
 }

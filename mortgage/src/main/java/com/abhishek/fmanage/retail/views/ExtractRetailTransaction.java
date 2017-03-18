@@ -18,8 +18,10 @@ import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.PriceDTO;
+import com.abhishek.fmanage.retail.dto.RetailTransactionPaymentDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
+import com.abhishek.fmanage.retail.form.PaymentForm;
 import com.abhishek.fmanage.retail.form.PriceForm;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Table;
@@ -45,6 +47,7 @@ public class ExtractRetailTransaction {
 	private Boolean includePrice;
 	private String notes;
 	private boolean isTransactionActive;
+	private PaymentForm paymentForm;
 	
 	
 	public ExtractRetailTransaction(
@@ -61,7 +64,8 @@ public class ExtractRetailTransaction {
 			final String dealingStaffName,
 			final Boolean includePrice,
 			final String notes,
-			final boolean isTransactionActive) {
+			final boolean isTransactionActive,
+			final PaymentForm paymentForm) {
 		this.goldBillingTable = goldBillingTable;
 		this.silverBillingTable = silverBillingTable;
 		this.diamondBillingTable = diamondBillingTable;
@@ -76,6 +80,7 @@ public class ExtractRetailTransaction {
 		this.includePrice = includePrice;
 		this.notes = notes;
 		this.isTransactionActive = isTransactionActive;
+		this.paymentForm = paymentForm;
 	}
 
 	public TransactionDTO extract() {
@@ -87,6 +92,12 @@ public class ExtractRetailTransaction {
 		priceBean.setNetpayableAmount(Double.valueOf(pfForm.netAmountToPay.getValue()));
 		priceBean.setAdvancePaymentAmount(Double.valueOf(pfForm.advancePayment.getValue()));
 		priceBean.setBalanceAmount(Double.valueOf(pfForm.balanceAmount.getValue()));
+		RetailTransactionPaymentDTO paymentDto = new RetailTransactionPaymentDTO();
+		paymentDto.setTotalCardPayment(Double.valueOf(paymentForm.totalCardPayment.getValue()));
+		paymentDto.setCashPayment(Double.valueOf(paymentForm.cashPayment.getValue()));
+		paymentDto.setChequePayment(Double.valueOf(paymentForm.chequePayment.getValue()));
+		paymentDto.setNeftPayment(Double.valueOf(paymentForm.neftPayment.getValue()));
+		paymentDto.setRtgsPayment(Double.valueOf(paymentForm.rtgsPayment.getValue()));
 		return new TransactionDTO(
 				extractGoldTransItem(),
 				extractSilverTransItem(),
@@ -101,7 +112,8 @@ public class ExtractRetailTransaction {
 				dealingStaffName,
 				includePrice,
 				notes,
-				isTransactionActive);
+				isTransactionActive,
+				paymentDto);
 	}
 
 	private List<GeneralTransactionItemDTO> extractGeneralTransItem() {

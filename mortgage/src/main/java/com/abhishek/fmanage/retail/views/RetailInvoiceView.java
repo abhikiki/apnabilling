@@ -26,6 +26,7 @@ import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
+import com.abhishek.fmanage.retail.form.PaymentForm;
 import com.abhishek.fmanage.retail.form.PriceForm;
 import com.abhishek.fmanage.retail.restclient.response.BillCreationResponse;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailTransactionService;
@@ -87,6 +88,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	private VerticalLayout retailViewVerticalLayout = new VerticalLayout();
 	private Component customerLayout;
 	private PriceForm pfForm = new PriceForm(getPricePropertyItem());
+	private PaymentForm paymentForm = new PaymentForm(getPaymentPropertyItem());
 	private HorizontalLayout priceLayout = new HorizontalLayout();
 	private ComboBox staffNameComboBox = new ComboBox("Staff Name");
 	private CustomerDTO cusBean = new CustomerDTO();
@@ -153,7 +155,20 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		priceLayout.setSizeFull();
 		priceLayout.setSpacing(true);
 		priceLayout.addStyleName("customer-layout");
-		priceLayout.addComponent(pfForm);
+		Panel priceFormPanel = new Panel("PRICE PANEL");
+		priceFormPanel.setSizeFull();
+		pfForm.addStyleName("diamond-table");
+		priceFormPanel.addStyleName("diamond-table");
+		priceFormPanel.setContent(pfForm);
+		priceLayout.addComponent(priceFormPanel);
+		
+		Panel paymentFormPanel = new Panel("PAYMENT PANEL");
+		paymentFormPanel.setSizeFull();
+		paymentForm.addStyleName("diamond-table");
+		paymentFormPanel.addStyleName("diamond-table");
+		paymentFormPanel.setContent(paymentForm);
+		priceLayout.addComponent(paymentFormPanel);
+		
 		notes.setSizeFull();
 		notes.setIcon(FontAwesome.COMMENTS);
 		Button generateBillBtn = getGenerateBillBtn();
@@ -166,7 +181,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		priceLayout.setExpandRatio(notes, 1);
 		priceLayout.setExpandRatio(includePrice, 0.8f);
 
-		priceLayout.setExpandRatio(pfForm, 1.2f);
+		priceLayout.setExpandRatio(priceFormPanel, 1.2f);
+		priceLayout.setExpandRatio(paymentFormPanel, 1.2f);
 		priceLayout.setExpandRatio(generateBillBtn, 0.8f);
 		return priceLayout;
 	}
@@ -198,6 +214,18 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 				new ObjectProperty<Double>(0.0));
 		item.addItemProperty("discountPrice", new ObjectProperty<Double>(0.0));
 		item.addItemProperty("netAmountToPay", new ObjectProperty<Double>(0.0));
+		return item;
+	}
+	
+	private PropertysetItem getPaymentPropertyItem() {
+		PropertysetItem item = new PropertysetItem();
+		item.addItemProperty("Card", new ObjectProperty<Double>(0.0));
+		item.addItemProperty("Cash", new ObjectProperty<Double>(
+				0.0));
+		item.addItemProperty("Cheque",
+				new ObjectProperty<Double>(0.0));
+		item.addItemProperty("Rtgs", new ObjectProperty<Double>(0.0));
+		item.addItemProperty("Neft", new ObjectProperty<Double>(0.0));
 		return item;
 	}
 
@@ -268,8 +296,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 				pfForm.netAmountToPay.setValue(String.format("%.2f",
 						pfForm.getTotalNetAmount()));
 				pfForm.advancePayment.setValue(String.format("%.2f", 0.00f));
-				pfForm.advancePayment.setEnabled(false);
-				pfForm.advancePayment.setIcon(null);
+				//pfForm.advancePayment.setEnabled(false);
+				//pfForm.advancePayment.setIcon(null);
 				//pfForm.balanceAmount.setEnabled(false);
 			} else {
 				tinLabel.setValue("<font color=\"#D5CDCB\"><b>TIN VAT NO:</b>" + shopDto.getTinNumber() + "</font>");
@@ -278,8 +306,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 				pfForm.netAmountToPay.setValue(String.format("%.2f",
 						pfForm.getTotalNetAmount()));
 				//pfForm.vatOnNewItemPrice.setEnabled(false);
-				pfForm.advancePayment.setEnabled(true);
-				pfForm.advancePayment.setIcon(FontAwesome.EDIT);
+				//pfForm.advancePayment.setEnabled(true);
+				//pfForm.advancePayment.setIcon(FontAwesome.EDIT);
 				//pfForm.balanceAmount.setEnabled(true);
 
 			}
@@ -318,6 +346,11 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						pfForm.oldPurchasePrice.setValue(String.valueOf(tDto.getPriceBean().getOldPurchase()));
 						pfForm.discountPrice.setValue(String.valueOf(tDto.getPriceBean().getDiscount()));
 						pfForm.balanceAmount.setValue(String.valueOf(tDto.getPriceBean().getBalanceAmount()));
+						paymentForm.totalCardPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getTotalCardPayment()));
+						paymentForm.cashPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getCashPayment()));
+						paymentForm.chequePayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getChequePayment()));
+						paymentForm.rtgsPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getRtgsPayment()));
+						paymentForm.neftPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getNeftPayment()));
 						notes.setValue(tDto.getNotes());
 						includePrice.setValue(tDto.getIncludePrice());
 						transId =-1L;
@@ -513,6 +546,12 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 
 			public void buttonClick(ClickEvent event) {
 				try {
+					Double totalPayment = getPaymentTotal();
+					Double balanceAmount = Double.valueOf(pfForm.balanceAmount.getValue());
+					if(totalPayment.doubleValue() != balanceAmount.doubleValue()){
+						Notification.show("Total payment not equal to balance amount");
+						return;
+					}
 					boolean isEstimateBill = billType.getValue().equals(
 							ESTIMATE_BILL);
 					String invoiceNumber = "-1";
@@ -524,7 +563,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 							shopDto.getTinNumber(), Long.parseLong(invoiceNumber),
 							staffNameComboBox.getValue().toString(),
 							includePrice.getValue(), notes.getValue(),
-							isTransactionActive).extract();
+							isTransactionActive, paymentForm).extract();
 					ShopDTO shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
 
 					if (transId == -1L) {
@@ -560,11 +599,22 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 					getBillWindow(transId, retailTransaction);
 				}
 				generateBillBtn.setCaption("Update Bill");
+				if(Double.valueOf(paymentForm.cashPayment.getValue()) > 200000.000f){
+					Notification.show("ID Card Required");
+				}
 			}
 		});
 		return generateBillBtn;
 	}
 
+	private double getPaymentTotal(){
+		return Double.valueOf(paymentForm.totalCardPayment.getValue())
+				+ Double.valueOf(paymentForm.cashPayment.getValue())
+				+ Double.valueOf(paymentForm.chequePayment.getValue())
+				+ Double.valueOf(paymentForm.neftPayment.getValue())
+				+ Double.valueOf(paymentForm.rtgsPayment.getValue());
+	}
+	
 	private void getBillWindow(long transId, TransactionDTO retailTransaction) {
 
 		BillWindow bw = new BillWindow(transId, retailTransaction);

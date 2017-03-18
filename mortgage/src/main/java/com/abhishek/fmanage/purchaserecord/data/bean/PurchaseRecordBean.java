@@ -11,13 +11,14 @@ public class PurchaseRecordBean {
 	private String partyName;
 	private String itemName;
 	private Double weight;
-	private PurchasePayment cashPayment;
+	private Double cashPayment;
 	private List<PurchasePayment> chequePayment = new ArrayList<PurchasePayment>();
 	private List<PurchasePayment> rtgsPayment = new ArrayList<PurchasePayment>();
 	private List<PurchasePayment> neftPayment = new ArrayList<PurchasePayment>();
 	private List<PurchasePayment> debitCardPayment = new ArrayList<PurchasePayment>();
 	private List<PurchasePayment> creditCardPayment = new ArrayList<PurchasePayment>();
 	private List<PurchasePayment> otherModePayment = new ArrayList<PurchasePayment>();
+	private String notes;
 	
 	public long getPurchaseId() {
 		return purchaseId;
@@ -49,10 +50,10 @@ public class PurchaseRecordBean {
 	public void setWeight(Double weight) {
 		this.weight = weight;
 	}
-	public PurchasePayment getCashPayment() {
+	public Double getCashPayment() {
 		return cashPayment;
 	}
-	public void setCashPayment(PurchasePayment cashPayment) {
+	public void setCashPayment(Double cashPayment) {
 		this.cashPayment = cashPayment;
 	}
 	public List<PurchasePayment> getChequePayment() {
@@ -90,5 +91,11 @@ public class PurchaseRecordBean {
 	}
 	public void setOtherModePayment(List<PurchasePayment> otherModePayment) {
 		this.otherModePayment = otherModePayment;
+	}
+	public String getNotes() {
+		return notes;
+	}
+	public void setNotes(String notes) {
+		this.notes = notes;
 	}
 }
