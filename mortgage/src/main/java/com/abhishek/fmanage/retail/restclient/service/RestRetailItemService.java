@@ -28,16 +28,19 @@ public class RestRetailItemService {
         return response.getBody();
 	}
 	
-	public long addItem(final long shopId, final String itemName, String container){
+	public void addItem(final long shopId, final String itemName, String container){
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("shopId", shopId);
 		paramMap.put("itemname", itemName);
 		paramMap.put("container", container);
-		return new RestTemplate()
-				.postForObject(
-					new RestServiceUtil().getRestHostPortUrl() + "/item/{shopId}/{itemname}/{container}",
-					null,
-					Long.class,
-					paramMap);
+		
+		RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto));
+        ResponseEntity<Long> response = restTemplate.exchange(
+        		new RestServiceUtil().getRestHostPortUrl() + "/item/{shopId}/{itemname}/{container}",
+        		HttpMethod.POST,
+        		entityrequest,
+        		Long.class,
+        		paramMap);
 	}
 }

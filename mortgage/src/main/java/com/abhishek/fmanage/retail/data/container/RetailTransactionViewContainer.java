@@ -78,7 +78,7 @@ public class RetailTransactionViewContainer extends IndexedContainer{
     	        {
     	            item.getItemProperty(DATE_COL_NAME).setValue(dto.getTransDate());
     	            item.getItemProperty(TRANSID_COL_NAME).setValue(dto.getTransId());
-    	            item.getItemProperty(BILL_TYPE_COL_NAME).setValue(dto.getBillType().equals("E") ? "Estimate" : "Invoice");
+    	            item.getItemProperty(BILL_TYPE_COL_NAME).setValue(dto.getBillType().equals("E") ? "Advance" : "Invoice");
     	            item.getItemProperty(BILL_STATUS_COL_NAME).setValue(dto.getTransactionStatus().equals("A") ? "Active" : "Inactive");
     	            item.getItemProperty(CUSTOMER_NAME_COL_NAME).setValue(StringUtils.isEmpty(dto.getCustomerName()) ? "" : dto.getCustomerName());
     	            item.getItemProperty(CUSTOMER_PHONE_COL_NAME).setValue(StringUtils.isEmpty(dto.getContactNumber()) ? "" : dto.getContactNumber());

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.abhishek.retail.dao.RetailWholeTransactionDAO;
+import com.abhishek.retail.dto.RetailAdvanceBillDTO;
 import com.abhishek.retail.dto.RetailTaxInvoiceDTO;
 import com.abhishek.retail.dto.TransactionDTO;
 import com.abhishek.retail.dto.TransactionSearchCriteriaDto;
@@ -44,6 +45,7 @@ public class RetailBillResource {
 		Map<String, Long> transIdInvoiceIdMap =  billService.createBill(shopId, transDto);
 		BillCreationResponse billResp = new BillCreationResponse();
 		billResp.setInvoiceId(transIdInvoiceIdMap.get("INVOICENUMBER"));
+		billResp.setAdvanceReceiptId(transIdInvoiceIdMap.get("ADVANCERECEIPTID"));
 		long transId = transIdInvoiceIdMap.get("TRANSID");
 		billResp.setTransId(transIdInvoiceIdMap.get("TRANSID"));
 		billResp.setSuccess(transId == -1L ? false : true);
@@ -60,6 +62,12 @@ public class RetailBillResource {
 	@RequestMapping(value = "/findbill/invoice/{invoiceId}", method = RequestMethod.GET)
 	public RetailTaxInvoiceDTO findBillByInvoiceId(@PathVariable long invoiceId) {
 		return billService.findBillByInvoiceId(invoiceId);
+	}
+	
+	@RolesAllowed({"STAFF", "ADMIN", "ADMIN_EXCLUDING_MORTGAGE"})
+	@RequestMapping(value = "/findbill/advancereceipt/{advanceReceiptId}", method = RequestMethod.GET)
+	public RetailAdvanceBillDTO findBillByAdvanceReceiptId(@PathVariable long advanceReceiptId) {
+		return billService.findBillByAdvanceReceiptId(advanceReceiptId);
 	}
 	
 	@RolesAllowed({"STAFF", "ADMIN", "ADMIN_EXCLUDING_MORTGAGE"})
@@ -84,6 +92,7 @@ public class RetailBillResource {
 		BillCreationResponse billResp = new BillCreationResponse();
 		billResp.setInvoiceId(transIdInvoiceIdMap.get("INVOICENUMBER"));
 		billResp.setTransId(transIdInvoiceIdMap.get("TRANSID"));
+		billResp.setAdvanceReceiptId(transIdInvoiceIdMap.get("ADVANCERECEIPTID"));
 		billResp.setSuccess(true);
 		return billResp;
 	}

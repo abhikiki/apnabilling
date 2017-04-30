@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.abhishek.retail.dto.RetailAdvanceBillDTO;
 import com.abhishek.retail.dto.RetailTaxInvoiceDTO;
 import com.abhishek.retail.dto.RetailTransactionDTO;
 import com.abhishek.retail.dto.RetailTransactionPaymentDTO;
@@ -35,6 +36,9 @@ public class RetailWholeTransactionDAO {
 	
 	@Autowired
 	private RetailTaxInvoiceDAO retailTaxInvoiceDAO;
+	
+	@Autowired
+	private RetailAdvanceBillDAO retailAdvanceBillDAO;
 	
 	@Autowired
 	private RetailGoldItemTransactionDAO goldDAO;
@@ -98,6 +102,12 @@ public class RetailWholeTransactionDAO {
 					RetailTaxInvoiceDTO invoice = retailTaxInvoiceDtoList.get(0);
 					transDto.setInvoiceNumber(invoice.getInvoiceNumber());
 				}
+			}else{
+				List<RetailAdvanceBillDTO> retailAdvanceDtoList = retailAdvanceBillDAO.getRetailAdvanceBill(transId);
+				if(!retailAdvanceDtoList.isEmpty()){
+					RetailAdvanceBillDTO advanceReceipt = retailAdvanceDtoList.get(0);
+					transDto.setAdvanceReceiptId(advanceReceipt.getAdvanceBillId());
+				}
 			}
 		}
 		
@@ -111,6 +121,15 @@ public class RetailWholeTransactionDAO {
 			retailTaxInvoiceDto = retailTaxInvoiceDtoList.get(0);
 		}
 		return retailTaxInvoiceDto;
+	}
+	
+	public RetailAdvanceBillDTO getTransactionByAdvanceBillId(long advanceReceiptId) {
+		RetailAdvanceBillDTO retailAdvanceBillDto = null;
+		List<RetailAdvanceBillDTO> retailTaxInvoiceDtoList = retailAdvanceBillDAO.getRetailAdvanceBillById(advanceReceiptId);
+		if(!retailTaxInvoiceDtoList.isEmpty()){
+			retailAdvanceBillDto = retailTaxInvoiceDtoList.get(0);
+		}
+		return retailAdvanceBillDto;
 	}
 	
 	public List<TransactionSearchResultDto> getTransactionSearch(long shopId, String billType, String billStatus, Date startDate, Date endDate) {
@@ -157,8 +176,11 @@ public class RetailWholeTransactionDAO {
 		customerDAO.saveRetailCustomer(transId, tDto.getCustomer());
 		
 		long invoiceNumber = -1L;
+		long advanceReceiptId = -1L;
 		if(!tDto.isEstimateBill()){
 			invoiceNumber = retailTaxInvoiceDAO.saveRetailTaxInvoice(shopId, transId);
+		}else{
+			advanceReceiptId = retailAdvanceBillDAO.saveRetailAdvanceReceipt(shopId, transId);
 		}
 		goldDAO.saveGoldItemTransaction(transId, tDto.getGoldTransactionItemBeanList());
 		silverDAO.saveSilverItemTransaction(transId, tDto.getSilverTransactionItemBeanList());
@@ -170,6 +192,7 @@ public class RetailWholeTransactionDAO {
 		Map<String, Long> transIdInvoiceIdMap = new HashMap<>();
 		transIdInvoiceIdMap.put("TRANSID", transId);
 		transIdInvoiceIdMap.put("INVOICENUMBER", invoiceNumber);
+		transIdInvoiceIdMap.put("ADVANCERECEIPTID", advanceReceiptId);
 		return transIdInvoiceIdMap;
 	}
 	
@@ -189,23 +212,36 @@ public class RetailWholeTransactionDAO {
 		List<RetailTaxInvoiceDTO> retailTaxInvoiceList = retailTaxInvoiceDAO.getRetailTaxInvoice(transId);
 		if(retailTaxInvoiceList.isEmpty() && !tDto.isEstimateBill()){
 			invoiceNumber = retailTaxInvoiceDAO.saveRetailTaxInvoice(shopId, transId);
-		}else if(!retailTaxInvoiceList.isEmpty()){
-		
+		}else if(!retailTaxInvoiceList.isEmpty() && tDto.isEstimateBill()){
+			retailTaxInvoiceDAO.deleteTransaction(transId);
+			
+		}else if(!retailTaxInvoiceList.isEmpty() && !tDto.isEstimateBill()){
 			invoiceNumber = retailTaxInvoiceList.get(0).getInvoiceNumber();
+		}
+		
+		Long advanceReceiptId = -1L;
+		List<RetailAdvanceBillDTO> retailAdvanceBillDtoList = retailAdvanceBillDAO.getRetailAdvanceBill(transId);
+		if(retailAdvanceBillDtoList.isEmpty() && tDto.isEstimateBill()){
+			advanceReceiptId = retailAdvanceBillDAO.saveRetailAdvanceReceipt(shopId, transId);
+		}else if(!retailAdvanceBillDtoList.isEmpty() && !tDto.isEstimateBill()){
+			retailAdvanceBillDAO.deleteTransaction(transId);
+			
+		}else if(!retailAdvanceBillDtoList.isEmpty() && tDto.isEstimateBill()){
+			advanceReceiptId = retailAdvanceBillDtoList.get(0).getAdvanceBillId();
 		}
 		goldDAO.updateTransaction(transId, tDto.getGoldTransactionItemBeanList());
 		silverDAO.updateTransaction(transId, tDto.getSilverTransactionItemBeanList());
 		diamondDAO.updateTransaction(transId, tDto.getDiamondTransactionItemBeanList());
 		generalDAO.updateTransaction(transId, tDto.getGeneralTransactionItemBeanList());
 		priceDAO.updateTransaction(transId, tDto.getPriceBean());
+		paymentDAO.updateTransaction(transId, tDto.getRetailTransPaymentDto());
 		Map<String, Long> transIdInvoiceIdMap = new HashMap<>();
 		transIdInvoiceIdMap.put("TRANSID", transId);
 		transIdInvoiceIdMap.put("INVOICENUMBER", invoiceNumber);
+		transIdInvoiceIdMap.put("ADVANCERECEIPTID", advanceReceiptId);
 		return transIdInvoiceIdMap;
 	}
-	
-	
-	
+		
 	public boolean deleteTransaction(final long transId){
 		return retailTransDAO.deleteTransaction(transId);
 	}

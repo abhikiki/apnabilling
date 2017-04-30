@@ -13,7 +13,9 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.abhishek.retail.dto.PriceDTO;
 import com.abhishek.retail.dto.RetailTransactionDTO;
 import com.abhishek.retail.dto.RetailTransactionPaymentDTO;
 
@@ -50,6 +52,18 @@ public class RetailTransactionPaymentDAO {
 	public List<RetailTransactionPaymentDTO> getRetailTransactionPayment(long transId) {
 		final String sql = "SELECT TRANSID, TOTALCARDPAYMENT, CASHPAYMENT, CHEQUEPAYMENT, NEFTPAYMENT, RGTSPAYMENT FROM RETAILTRANSACTIONPAYMENT WHERE TRANSID = ?";
 		return jdbcTemplate.query(sql, new Object[] { transId }, this::retailTransactionPaymentMapRow);
+	}
+	
+	public boolean deleteTransaction(long transId){
+		final String sql = "DELETE FROM RETAILTRANSACTIONPAYMENT WHERE TRANSID = ?";
+		int rowsAffected = jdbcTemplate.update(sql, transId);
+		return rowsAffected > 0 ? true : false;
+	}
+	
+	@Transactional
+	public void updateTransaction(long transId, RetailTransactionPaymentDTO retailTransPaymentDto){
+		deleteTransaction(transId);
+		saveRetailTransactionPayment(transId, retailTransPaymentDto);
 	}
 	
 	private RetailTransactionPaymentDTO retailTransactionPaymentMapRow(ResultSet resultSet, int rowNumber) throws SQLException {

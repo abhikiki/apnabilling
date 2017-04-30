@@ -32,9 +32,9 @@ public class PriceForm extends FormLayout{
     public TextField oldPurchasePrice = new TextField("Old Purchase Price(-)", "0.0");
     public TextField discountPrice =  new TextField("Discount(-)", "0.0");
     public TextField netAmountToPay = new TextField("Net Payable Price", "0.0");
-    public TextField advancePayment = new TextField("Advance Payment", "0.0");
+    //public TextField advancePayment = new TextField("Advance Payment", "0.0");
     public TextField balanceAmount = new TextField("Balance", "0.0");
-    public boolean isInvoiceEnabled = false;
+    public boolean isInvoiceEnabled = true;
 
     public PriceForm(Item item){
     	addStyleName("customer-layout");
@@ -46,17 +46,17 @@ public class PriceForm extends FormLayout{
     	discountPrice.setConverter(plainDoubleConverter);
     	discountPrice.setIcon(FontAwesome.EDIT);
     	netAmountToPay.setConverter(plainDoubleConverter);
-    	advancePayment.setConverter(plainDoubleConverter);
-    	advancePayment.setIcon(FontAwesome.EDIT);
-    	advancePayment.setEnabled(true);
-		advancePayment.setIcon(FontAwesome.EDIT);
+    	//advancePayment.setConverter(plainDoubleConverter);
+    	//advancePayment.setIcon(FontAwesome.EDIT);
+    	//advancePayment.setEnabled(true);
+		//advancePayment.setIcon(FontAwesome.EDIT);
     	balanceAmount.setConverter(plainDoubleConverter);
     	addComponent(totalItemPrice);
     	addComponent(discountPrice);
     	addComponent(vatOnNewItemPrice);
     	addComponent(oldPurchasePrice);
     	addComponent(netAmountToPay);
-    	addComponent(advancePayment);
+    	//addComponent(advancePayment);
     	addComponent(balanceAmount);
     	// Now bind the member fields to the item
         FieldGroup binder = new FieldGroup(item);
@@ -66,7 +66,7 @@ public class PriceForm extends FormLayout{
         customNumericValidator(vatOnNewItemPrice);
         customNumericValidator(oldPurchasePrice);
         customNumericValidator(netAmountToPay);
-        customNumericValidator(advancePayment);
+        //customNumericValidator(advancePayment);
         customNumericValidator(balanceAmount);
         
         netAmountToPay.setEnabled(false);
@@ -96,24 +96,24 @@ public class PriceForm extends FormLayout{
 			}
 		});
     	
-    	advancePayment.setValidationVisible(true);
-    	advancePayment.addValidator(new DoubleRangeValidator("Must be number", 0.000, null));
-    	advancePayment.addValueChangeListener(new ValueChangeListener() {
-			private static final long serialVersionUID = 8724248055526259500L;
-			@Override
-			public void valueChange(ValueChangeEvent event) {
-				if(NumberUtils.isNumber(getNumericTextValue(advancePayment))){
-					balanceAmount.setValue(String.format("%.2f", getBalanceAmount()));
-					balanceAmount.removeStyleName("v-textfield-fail");
-					advancePayment.removeStyleName("v-textfield-fail");
-					advancePayment.setComponentError(null);
-				}else{
-					balanceAmount.clear();
-					balanceAmount.addStyleName("v-textfield-fail");
-					advancePayment.addStyleName("v-textfield-fail");
-				}
-			}
-		});
+//    	advancePayment.setValidationVisible(true);
+//    	advancePayment.addValidator(new DoubleRangeValidator("Must be number", 0.000, null));
+//    	advancePayment.addValueChangeListener(new ValueChangeListener() {
+//			private static final long serialVersionUID = 8724248055526259500L;
+//			@Override
+//			public void valueChange(ValueChangeEvent event) {
+//				if(NumberUtils.isNumber(getNumericTextValue(advancePayment))){
+//					balanceAmount.setValue(String.format("%.2f", getBalanceAmount()));
+//					balanceAmount.removeStyleName("v-textfield-fail");
+//					advancePayment.removeStyleName("v-textfield-fail");
+//					advancePayment.setComponentError(null);
+//				}else{
+//					balanceAmount.clear();
+//					balanceAmount.addStyleName("v-textfield-fail");
+//					advancePayment.addStyleName("v-textfield-fail");
+//				}
+//			}
+//		});
 
     	
     	oldPurchasePrice.setValidationVisible(true);
@@ -160,9 +160,10 @@ public class PriceForm extends FormLayout{
     	
     }
 
-    private Double getBalanceAmount() {
+    public Double getBalanceAmount() {
 		Double netAmount = getTotalNetAmount();
-		Double balance = netAmount - Double.valueOf((getNumericTextValue(advancePayment)));
+		//Double balance = netAmount - Double.valueOf((getNumericTextValue(advancePayment)));
+		Double balance = netAmount;
 		return balance;
 	}
     

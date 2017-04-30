@@ -6,13 +6,14 @@ import java.util.Locale;
 
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailLoginService;
+import com.abhishek.fmanage.retail.views.DashboardView;
 import com.abhishek.fmanage.retail.views.MortgageTransactionSearchView;
 import com.abhishek.fmanage.retail.views.MortgageView;
 import com.abhishek.fmanage.retail.views.PurchaseRecordView;
-import com.abhishek.fmanage.retail.views.SmsView;
-import com.abhishek.fmanage.retail.views.DashboardView;
 import com.abhishek.fmanage.retail.views.RetailInvoiceView;
 import com.abhishek.fmanage.retail.views.RetailTransactionSearchView;
+import com.abhishek.fmanage.retail.views.SmsView;
+import com.abhishek.fmanage.retail.window.ItemEntryWindow;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
 import com.vaadin.event.ShortcutAction.KeyCode;
@@ -45,6 +46,8 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
+
 
 /**
  * This class represent the main UI of the application
@@ -269,18 +272,44 @@ public class DashboardUI extends UI {
 									@Override
                                     public void menuSelected(
                                             MenuItem selectedItem) {
+										
                                         Notification.show("Not implemented in this demo");
                                     }
                                 };
+                               
+                              
+
                                 MenuBar settings = new MenuBar();
                                 MenuItem settingsMenu = settings.addItem("", null);
                                 settingsMenu.setStyleName("icon-cog");
+                                MenuItem addBillingItemMenu = settingsMenu.addItem("Add Billing Item", cmd);
+                               // addBillingItemMenu.setStyleName("icon-cog");
+                                addBillingItemMenu.addItem("GOLD", (selectedItem) -> {
+                                	Window bw = new ItemEntryWindow(selectedItem.getText());
+                                	UI.getCurrent().addWindow(bw);
+                            		bw.focus();
+                                	});
+                                addBillingItemMenu.addItem("SILVER", (selectedItem) -> {
+                                	Window bw = new ItemEntryWindow(selectedItem.getText());
+                                	UI.getCurrent().addWindow(bw);
+                            		bw.focus();
+                                	});
+                                addBillingItemMenu.addItem("DIAMOND", (selectedItem) -> {
+                                	Window bw = new ItemEntryWindow(selectedItem.getText());
+                                	UI.getCurrent().addWindow(bw);
+                            		bw.focus();
+                                	});
+                                addBillingItemMenu.addItem("GENERAL", (selectedItem) -> {
+                                	Window bw = new ItemEntryWindow(selectedItem.getText());
+                                	UI.getCurrent().addWindow(bw);
+                            		bw.focus();
+                                	});
                                 settingsMenu.addItem(SETTINGS, cmd);
                                 settingsMenu.addItem(PREFERENCES, cmd);
                                 settingsMenu.addSeparator();
                                 settingsMenu.addItem(MY_ACCOUNT, cmd);
                                 addComponent(settings);
-
+                                
                                 Button exit = new NativeButton(EXIT);
                                 exit.addStyleName("icon-cancel");
                                 exit.setDescription(SIGN_OUT);

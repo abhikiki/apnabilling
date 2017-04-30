@@ -37,6 +37,8 @@ public class RetailTransactionDAO {
 		int rowsAffected = jdbcTemplate.update(sql, transId);
 		final String deleteRetailTaxInvoiceSql = "DELETE FROM RETAILTAXINVOICE WHERE TRANSID = ?";
 		jdbcTemplate.update(deleteRetailTaxInvoiceSql, transId);
+		final String deleteRetailAdvanceReceipt = "DELETE FROM RETAILADVANCEBILL WHERE TRANSID = ?";
+		jdbcTemplate.update(deleteRetailAdvanceReceipt, transId);
 		return rowsAffected > 0? true : false;
 	}
 	

@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.abhishek.fmanage.retail.data.container.RetailTransactionViewContainer;
+import com.abhishek.fmanage.retail.dto.RetailAdvanceBillDTO;
 import com.abhishek.fmanage.retail.dto.RetailTaxInvoiceDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
@@ -72,7 +73,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     public static final String SELECT_DATE = "Select Date";
 
     public static final String INVOICE_BILL = "Invoice Bill";
-	public static final String ESTIMATE_BILL = "Estimate Bill";
+	public static final String ESTIMATE_BILL = "Advance Bill";
 	
 	public static final String ACTIVE_BILL_STATUS = "Active";
 	public static final String INACTIVE_BILL_STATUS = "Inactive";
@@ -111,6 +112,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     private final TextField transIdTextField = new TextField();
     
     private final TextField invoiceIdTextField = new TextField();
+    private final TextField advanceReceiptIdTextField = new TextField();
     
     /** Data container for holding transactions */
     RetailTransactionViewContainer retailViewContainer = new RetailTransactionViewContainer();
@@ -166,6 +168,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
                 filter.setValue("");
                 transIdTextField.setValue("");
                 invoiceIdTextField.setValue("");
+                advanceReceiptIdTextField.setValue("");
                 startPopUpDate.setValue(getStartDate(new Date(), 2));
                 endPopUpDate.setValue(new Date());
                 billType.setValue(ALL);
@@ -385,8 +388,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     	 transIdSearchTooolbar.setMargin(true);
     	 transIdSearchTooolbar.addStyleName("mytoolbar");
     	 transIdTextField.setInputPrompt("Transaction No.");
-    	 
-    	 Button transSearchByIdButton = new Button("Transaction Number", new ClickListener()
+    	 Button transSearchByIdButton = new Button("Transaction", new ClickListener()
          {
              private static final long serialVersionUID = 1L;
 
@@ -411,9 +413,13 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             	
              }
          });
+    	 HorizontalLayout transHL = new HorizontalLayout();
+    	 transHL.setSpacing(true);
+    	 transHL.addComponent(transIdTextField);
+    	 transHL.addComponent(transSearchByIdButton);
     	 
     	 invoiceIdTextField.setInputPrompt("Invoice No.");
-    	 Button invoiceSearchByIdButton = new Button("Invoice Number", new ClickListener()
+    	 Button invoiceSearchByIdButton = new Button("Invoice", new ClickListener()
          {
              private static final long serialVersionUID = 1L;
 
@@ -440,28 +446,74 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             	
              }
          });
+    	 HorizontalLayout invoiceHL = new HorizontalLayout();
+    	 invoiceHL.setSpacing(true);
+    	 invoiceHL.addComponent(invoiceIdTextField);
+    	 invoiceHL.addComponent(invoiceSearchByIdButton);
+    	 
+    	 advanceReceiptIdTextField.setInputPrompt("Advance Receipt No.");
+    	 Button advanceReceiptIdButton = new Button("Advance Receipt", new ClickListener()
+         {
+             private static final long serialVersionUID = 1L;
+
+             @Override
+             
+             public void buttonClick(ClickEvent event)
+             {
+            	if(NumberUtils.isDigits(String.valueOf(advanceReceiptIdTextField.getValue()))){
+            		long advanceReceiptId = NumberUtils.toLong(String.valueOf(advanceReceiptIdTextField.getValue()));
+            		ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+            		RetailAdvanceBillDTO retailAdvanceBillDto = new RestRetailTransactionService(shopDto).getBillByAdvancveReceiptId(advanceReceiptId);
+            		if(retailAdvanceBillDto == null){
+            			Notification.show("Advance Receipt not found");
+            		}else{
+            			long transId = retailAdvanceBillDto.getTransId();
+                		TransactionDTO transDto = new RestRetailTransactionService(shopDto).getBill(transId);
+                		BillWindow bw = new BillWindow(transId, transDto);
+                 		UI.getCurrent().addWindow(bw);
+                 		bw.focus();
+            		}
+            	}else{
+            		Notification.show("Advance Receipt Number is not valid");
+            	}
+            	
+             }
+         });
+    	 HorizontalLayout advanceHL = new HorizontalLayout();
+    	 advanceHL.setSpacing(true);
+    	 advanceHL.addComponent(advanceReceiptIdTextField);
+    	 advanceHL.addComponent(advanceReceiptIdButton);
 
     	 transSearchByIdButton.addStyleName("default");
     	 invoiceSearchByIdButton.addStyleName("default");
+    	 advanceReceiptIdButton.addStyleName("default");
     	 Button exportBtn = getExportButton();
     	 transSearchByIdButton.addStyleName("icon-search-1");
     	 invoiceSearchByIdButton.addStyleName("icon-search-1");
-    	 transIdSearchTooolbar.addComponent(transIdTextField);
-    	 transIdSearchTooolbar.addComponent(transSearchByIdButton);
+    	// transIdSearchTooolbar.addComponent(transIdTextField);
+    	 transIdSearchTooolbar.setSpacing(true);
+    	 transIdSearchTooolbar.addComponent(transHL);
+    	 
+    	 //transIdSearchTooolbar.addComponent(invoiceIdTextField);
+    	 transIdSearchTooolbar.addComponent(invoiceHL);
+    	 //transIdSearchTooolbar.addComponent(advanceReceiptIdTextField);
+    	 transIdSearchTooolbar.addComponent(advanceHL);
     	 transIdSearchTooolbar.addComponent(exportBtn);
-    	 transIdSearchTooolbar.addComponent(invoiceIdTextField);
-    	 transIdSearchTooolbar.addComponent(invoiceSearchByIdButton);
-    	 transIdSearchTooolbar.setComponentAlignment(transIdTextField, Alignment.MIDDLE_LEFT);
-    	 transIdSearchTooolbar.setComponentAlignment(transSearchByIdButton, Alignment.MIDDLE_LEFT);
-    	 transIdSearchTooolbar.setComponentAlignment(exportBtn, Alignment.MIDDLE_LEFT);
-    	 transIdSearchTooolbar.setComponentAlignment(invoiceIdTextField, Alignment.MIDDLE_LEFT);
-    	 transIdSearchTooolbar.setComponentAlignment(invoiceSearchByIdButton, Alignment.MIDDLE_LEFT);
-    	 transIdSearchTooolbar.setExpandRatio(transIdTextField, 1);
-    	 transIdSearchTooolbar.setExpandRatio(transSearchByIdButton, 1);
-    	 transIdSearchTooolbar.setExpandRatio(exportBtn, 1);
-    	 transIdSearchTooolbar.setExpandRatio(invoiceIdTextField, 1);
-    	 transIdSearchTooolbar.setExpandRatio(invoiceSearchByIdButton, 1);
-    	 transIdSearchTooolbar.setWidth("100%");
+//    	 transIdSearchTooolbar.setComponentAlignment(transIdTextField, Alignment.MIDDLE_LEFT);
+//    	 transIdSearchTooolbar.setComponentAlignment(transSearchByIdButton, Alignment.MIDDLE_LEFT);
+//    	 transIdSearchTooolbar.setComponentAlignment(exportBtn, Alignment.MIDDLE_LEFT);
+//    	 transIdSearchTooolbar.setComponentAlignment(invoiceIdTextField, Alignment.MIDDLE_LEFT);
+//    	 transIdSearchTooolbar.setComponentAlignment(invoiceSearchByIdButton, Alignment.MIDDLE_LEFT);
+//    	 transIdSearchTooolbar.setComponentAlignment(advanceReceiptIdTextField, Alignment.MIDDLE_LEFT);
+//    	 transIdSearchTooolbar.setComponentAlignment(advanceReceiptIdButton, Alignment.MIDDLE_LEFT);
+//    	 transIdSearchTooolbar.setExpandRatio(transIdTextField, 1);
+//    	 transIdSearchTooolbar.setExpandRatio(transSearchByIdButton, 1);
+//    	 transIdSearchTooolbar.setExpandRatio(exportBtn, 1);
+//    	 transIdSearchTooolbar.setExpandRatio(invoiceIdTextField, 1);
+//    	 transIdSearchTooolbar.setExpandRatio(invoiceSearchByIdButton, 1);
+//    	 transIdSearchTooolbar.setExpandRatio(advanceReceiptIdTextField, 1);
+//    	 transIdSearchTooolbar.setExpandRatio(advanceReceiptIdButton, 1);
+//    	 transIdSearchTooolbar.setWidth("100%");
     	 
     	 HorizontalLayout hLDummy = new HorizontalLayout();
     	 hLDummy.setWidth("100%");
@@ -484,15 +536,23 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     	transactionTable.setColumnFooter(RetailTransactionViewContainer.DATE_COL_NAME, ("Total Items=" + retailViewContainer.size()));
     	if(retailViewContainer.size() > 0){
     		transactionTable.setColumnFooter(RetailTransactionViewContainer.CUSTOMER_ADDRESS_COL_NAME, ("Total Sale=" +
-        		String.format("%.3f", retailViewContainer.getItemIds().stream().map(
-                		item -> Double.valueOf(retailViewContainer.getItem(item).getItemProperty(
+        		String.format("%.3f", retailViewContainer.getItemIds().stream()
+        				//.filter(item -> retailViewContainer.getItem(item).getItemProperty(
+    	        			//	RetailTransactionViewContainer.BILL_TYPE_COL_NAME).getValue().toString().equals("Invoice"))
+        				.map(item -> Double.valueOf(retailViewContainer.getItem(item).getItemProperty(
     	        				RetailTransactionViewContainer.SALE_AMOUNT_COL_NAME).getValue().toString())).reduce((price1, price2) -> price1 + price2).get())));
     		transactionTable.setColumnFooter(RetailTransactionViewContainer.VATAMOUNT, ("Total Vat=" +
-            		String.format("%.3f", retailViewContainer.getItemIds().stream().map(
+            		String.format("%.3f", retailViewContainer.getItemIds().stream()
+            			//	.filter(item -> retailViewContainer.getItem(item).getItemProperty(
+        	        //				RetailTransactionViewContainer.BILL_TYPE_COL_NAME).getValue().toString().equals("Invoice"))
+            				.map(
                     		item -> Double.valueOf(retailViewContainer.getItem(item).getItemProperty(
         	        				RetailTransactionViewContainer.VATAMOUNT).getValue().toString())).reduce((price1, price2) -> price1 + price2).get())));
     		transactionTable.setColumnFooter(RetailTransactionViewContainer.DISCOUNT, ("Total Discount=" +
-            		String.format("%.3f", retailViewContainer.getItemIds().stream().map(
+            		String.format("%.3f", retailViewContainer.getItemIds().stream()
+            			//	.filter(item -> retailViewContainer.getItem(item).getItemProperty(
+        	        		//		RetailTransactionViewContainer.BILL_TYPE_COL_NAME).getValue().toString().equals("Invoice"))
+            				.map(
                     		item -> Double.valueOf(retailViewContainer.getItem(item).getItemProperty(
         	        				RetailTransactionViewContainer.DISCOUNT).getValue().toString())).reduce((price1, price2) -> price1 + price2).get())));
     	}else{

@@ -22,7 +22,7 @@ public class ItemService {
 		return retailItemStaffDto;
 	}
 	
-	public long addItem(long shopId, String itemName, String container){
-		return retailItemStaffDao.addItem(shopId, itemName, container);
+	public void addItem(long shopId, String itemName, String container){
+		 retailItemStaffDao.addItem(shopId, itemName, container);
 	}
 }

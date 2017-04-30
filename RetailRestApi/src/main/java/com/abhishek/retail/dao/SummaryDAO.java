@@ -53,7 +53,7 @@ public class SummaryDAO {
 
 	public Double getTotalSale(final Date startDate, final Date endDate){
 		String sql = "SELECT SUM(TOTALITEMSPRICE) TOTALITEMSPRICE FROM RETAILTRANSACTIONPRICE RTP, RETAILTRANSACTION RT"
-		 + " WHERE RT.TRANSACTIONSTATUS = 'A'"
+		 + " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
 		 + " AND RTP.TRANSID = RT.TRANSID"
 		 + " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		Double totalSale = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
@@ -62,13 +62,13 @@ public class SummaryDAO {
 	
 	public Double getTotalGoldWeight(final Date startDate, final Date endDate){
 		String sql = "SELECT SUM(WEIGHT) GOLDWEIGHT FROM RETAILGOLDITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
-					 " WHERE RT.TRANSACTIONSTATUS = 'A'" +
+					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'" +
 					 " AND RGT.TRANSID = RT.TRANSID" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		Double goldWeight=  jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		
 		sql = "SELECT SUM(GOLDWEIGHT) GOLDWEIGHT FROM RETAILDIAMONDITEMTRANSACTION RDT, RETAILTRANSACTION RT" + 
-				 " WHERE RT.TRANSACTIONSTATUS = 'A'" +
+				 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'" +
 				 " AND RDT.TRANSID = RT.TRANSID" +
 				  " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		Double goldWeightInDiamond =  jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
@@ -77,7 +77,7 @@ public class SummaryDAO {
 	
 	public Double getTotalSilverWeight(final Date startDate, final Date endDate){
 		String sql = "SELECT SUM(WEIGHT) SILVERWEIGHT FROM RETAILSILVERITEMTRANSACTION RST, RETAILTRANSACTION RT" + 
-					 " WHERE RT.TRANSACTIONSTATUS = 'A'" +
+					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'" +
 					 " AND RST.TRANSID = RT.TRANSID" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		Double silverWeight = jdbcTemplate.queryForObject(
@@ -87,7 +87,7 @@ public class SummaryDAO {
 	
 	public List<ItemSummaryDTO> getGoldItemQuantitySummary(final Date startDate, final Date endDate){
 		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILGOLDITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
-					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID " +
+					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		List<ItemSummaryDTO> summaryList = jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
@@ -95,7 +95,7 @@ public class SummaryDAO {
 	
 	public List<ItemSummaryDTO> getSilverItemQuantitySummary(final Date startDate, final Date endDate){
 		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILSILVERITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
-					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID" +
+					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		List<ItemSummaryDTO> summaryList = jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
@@ -103,7 +103,7 @@ public class SummaryDAO {
 
 	public List<ItemSummaryDTO> getDiamondItemQuantitySummary(final Date startDate, final Date endDate){
 		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILDIAMONDITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
-					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID" +
+					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		List<ItemSummaryDTO> summaryList =  jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
@@ -111,7 +111,7 @@ public class SummaryDAO {
 	
 	public List<ItemSummaryDTO> getGeneralItemQuantitySummary(final Date startDate, final Date endDate){
 		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILGENERALITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
-					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID" +
+					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID  AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		List<ItemSummaryDTO> summaryList =  jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);

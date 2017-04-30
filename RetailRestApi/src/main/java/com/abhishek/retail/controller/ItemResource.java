@@ -25,8 +25,8 @@ public class ItemResource {
 	}
 	
 	@RolesAllowed({"ADMIN","ADMIN_EXCLUDING_MORTGAGE"})
-	@RequestMapping(value = "/{shopId}/{itemname}/{container}", method = RequestMethod.POST)
-	public long addItem(@PathVariable long shopId, @PathVariable String itemName, @PathVariable String container) {
-		return itemService.addItem(shopId, itemName, container);
+	@RequestMapping(value = "/{shopId}/{itemName}/{container}", method = RequestMethod.POST)
+	public void addItem(@PathVariable long shopId, @PathVariable String itemName, @PathVariable String container) {
+		itemService.addItem(shopId, itemName, container);
 	}
 }

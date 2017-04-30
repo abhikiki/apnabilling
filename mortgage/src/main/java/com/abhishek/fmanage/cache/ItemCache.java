@@ -56,12 +56,12 @@ public class ItemCache {
 	
 	public synchronized boolean addItem(final String itemName, final String containerName){
 		boolean isAdded = false;
-		switch(containerName){
-			case "GOLD": if(!itemMap.get(containerName).contains(itemName)){
-						
+		if(!itemMap.get(containerName).contains(itemName)){
+							ItemDTO dto = new ItemDTO();
+							dto.setItemName(itemName);
+							dto.setOwner("U");
+							itemMap.get(containerName).add(dto);
 							isAdded = true;
-						}
-				break;
 		}
 		return isAdded;
 	}

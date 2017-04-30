@@ -50,7 +50,7 @@ public class RetailItemStaffDAO {
 		return jdbcTemplate.query(sql, new Object[]{shopId}, this::staffMapRow);
 	}
 	
-	public long addItem(final long shopId, final String itemName, String container) {
+	public void addItem(final long shopId, final String itemName, String container) {
 		String tableName = "";
 		switch(container){
 			case "GOLD" : tableName = "RETAILGOLDITEM";
@@ -73,7 +73,7 @@ public class RetailItemStaffDAO {
 				return pst;
 			}
 		}, keyHolder);
-		return (Long) keyHolder.getKey();
+		
 	}
 	
 	public long addStaff(final long shopId, final String staffName) {

@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import com.abhishek.fmanage.retail.dto.RetailAdvanceBillDTO;
 import com.abhishek.fmanage.retail.dto.RetailTaxInvoiceDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
@@ -42,10 +43,23 @@ public class RestRetailTransactionService {
 		paramMap.put("invoiceId", invoiceId);
 		HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto));
 	    ResponseEntity<RetailTaxInvoiceDTO> response = new RestTemplate().exchange(
-	    		new RestServiceUtil().getRestHostPortUrl() + "/bill/findbill/{transId}",
+	    		new RestServiceUtil().getRestHostPortUrl() + "/bill/findbill/invoice/{invoiceId}",
 	        	HttpMethod.GET,
 	        	entityrequest,
 	        	RetailTaxInvoiceDTO.class,
+	        	paramMap);
+		return response.getBody();
+	}
+	
+	public RetailAdvanceBillDTO getBillByAdvancveReceiptId(long advanceReceiptId){
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("advanceReceiptId", advanceReceiptId);
+		HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto));
+	    ResponseEntity<RetailAdvanceBillDTO> response = new RestTemplate().exchange(
+	    		new RestServiceUtil().getRestHostPortUrl() + "/bill/findbill/advancereceipt/{advanceReceiptId}",
+	        	HttpMethod.GET,
+	        	entityrequest,
+	        	RetailAdvanceBillDTO.class,
 	        	paramMap);
 		return response.getBody();
 	}

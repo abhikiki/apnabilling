@@ -19,6 +19,7 @@ import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.PriceDTO;
+import com.abhishek.fmanage.retail.dto.RetailTransactionPaymentDTO;
 import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
 import com.abhishek.fmanage.utility.ConvertNumberToWords;
@@ -130,16 +131,15 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			p.add(new Chunk(invoiceNumber, rowFont));
 			footerTable.addCell(p);
 		}else{
-			Phrase transIdPhrase = new Phrase(new Chunk("Transaction No. : ", headerFont));
-			transIdPhrase.add(new Chunk(String.valueOf(transId), rowFont));
+			Phrase transIdPhrase = new Phrase(new Chunk("Advance Receipt No. : ", headerFont));
+			transIdPhrase.add(new Chunk(String.valueOf(retailTransaction.getAdvanceReceiptId()), rowFont));
 			footerTable.addCell(transIdPhrase);
 		}
 		
 		
 		Phrase notePhrase = new Phrase();
 		if (isEstimateBill) {
-
-			notePhrase.add(new Chunk("Estimate Letter", headerFont));
+			notePhrase.add(new Chunk("Advance Bill", headerFont));
 		} else {
 			notePhrase.add(new Chunk("Retail Invoice", headerFont));
 		}
@@ -493,6 +493,52 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		}
 		document.add(table);
 	}
+	
+	private void addPaymentInformationTable(Document document, Boolean isEstimateBill) throws DocumentException, IOException {
+		PdfPTable table = new PdfPTable(2);
+		table.setWidthPercentage(100f);
+		table.getDefaultCell().setPadding(2);
+		table.getDefaultCell().setUseAscender(true);
+		table.getDefaultCell().setUseDescender(true);
+		// table.getDefaultCell().setColspan(1);
+		table.getDefaultCell().setBorder(0);
+		table.getDefaultCell().setBackgroundColor(new BaseColor(185, 236, 190));
+
+		BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER,
+				BaseFont.CP1252, BaseFont.EMBEDDED);
+		Font headerFont = new Font(baseFont, 10, Font.BOLD);
+		Font rowFont = new Font(baseFont, 9, Font.NORMAL);
+		
+		RetailTransactionPaymentDTO paymentDto  = retailTransaction.getRetailTransPaymentDto();
+		if(paymentDto.getCashPayment() > 0){
+			table.addCell(new Phrase(new Chunk("Cash(INR): ", headerFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f",paymentDto.getCashPayment()), rowFont)));
+		}
+		if(paymentDto.getTotalCardPayment() > 0){
+			table.addCell(new Phrase(new Chunk("Card(INR): ", headerFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f",paymentDto.getTotalCardPayment()), rowFont)));
+		}
+		if(paymentDto.getChequePayment() > 0){
+			table.addCell(new Phrase(new Chunk("Cheque(INR): ", headerFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f",paymentDto.getChequePayment()), rowFont)));
+		}
+		if(paymentDto.getRtgsPayment() > 0){
+			table.addCell(new Phrase(new Chunk("RTGS(INR): ", headerFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f",paymentDto.getRtgsPayment()), rowFont)));
+		}
+		if(paymentDto.getNeftPayment() > 0){
+			table.addCell(new Phrase(new Chunk("NEFT(INR): ", headerFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f",paymentDto.getNeftPayment()), rowFont)));
+		}
+		if(isEstimateBill){
+			Double totalPayment = paymentDto.getCashPayment() + paymentDto.getChequePayment() + paymentDto.getNeftPayment() + paymentDto.getRtgsPayment() + paymentDto.getTotalCardPayment();
+			//String.format(totalPayment, args)
+			//totalPayment = Math.round(totalPayment);
+			table.addCell(new Phrase(new Chunk("TotalPayment(INR): ", headerFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.2f(%s)", totalPayment, new ConvertNumberToWords(totalPayment).convertToWords()), rowFont)));
+		}
+		document.add(table);
+	}
 
 	private void addPriceInformationTable(Document document,
 			boolean isEstimateBill) throws DocumentException, IOException {
@@ -693,7 +739,12 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		addGeneralItemsInformation(document, includePrice);
 		document.add(new Paragraph(" "));
 
-		addPriceInformationTable(document, isEstimateBill);
+		if(!isEstimateBill){
+			addPriceInformationTable(document, isEstimateBill);
+		}else{
+			addPaymentInformationTable(document, isEstimateBill);
+		}
+		
 		document.add(new Paragraph(" "));
 
 		addNotes(document, notes);

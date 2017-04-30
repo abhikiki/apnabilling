@@ -22,6 +22,7 @@ public class TransactionDTO {
 	private Date transactionDate;
 	private String vinNumber;
 	private Long invoiceNumber = -1L;
+	private Long advanceReceiptId = -1L;
 	private String dealingStaffName;
 	private Boolean includePrice;
 	private String notes;
@@ -46,7 +47,8 @@ public class TransactionDTO {
 		final Boolean includePrice,
 		final String notes,
 		boolean isTransactionActive,
-		RetailTransactionPaymentDTO retailTransPaymentDto)
+		RetailTransactionPaymentDTO retailTransPaymentDto,
+		Long advanceReceiptId)
 	{
 		this.goldTransactionItemBeanList = goldTransactionItemBeanList;
 		this.silverTransactionItemBeanList = silverTransactionItemBeanList;
@@ -63,6 +65,7 @@ public class TransactionDTO {
 		this.notes = notes;
 		this.isTransactionActive = isTransactionActive;
 		this.retailTransPaymentDto = retailTransPaymentDto;
+		this.setAdvanceReceiptId(advanceReceiptId);
 	}
 	
 	public RetailTransactionPaymentDTO getRetailTransPaymentDto() {
@@ -189,5 +192,13 @@ public class TransactionDTO {
 
 	public void setTransactionActive(boolean isTransactionActive) {
 		this.isTransactionActive = isTransactionActive;
+	}
+
+	public Long getAdvanceReceiptId() {
+		return advanceReceiptId;
+	}
+
+	public void setAdvanceReceiptId(Long advanceReceiptId) {
+		this.advanceReceiptId = advanceReceiptId;
 	}
 }

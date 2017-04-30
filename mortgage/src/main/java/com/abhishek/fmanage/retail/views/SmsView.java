@@ -208,7 +208,7 @@ public class SmsView extends VerticalLayout implements View{
 		contactMessageHL.setSpacing(true);
 		contactMessageHL.addStyleName("smsMessage");
 		contactMessageHL.setWidth("100%");
-		contactMessageHL.setHeight("100%");
+		contactMessageHL.setHeight("90%");
 		contactMessageHL.setMargin(true);
 		message.setMaxLength(160);
 		message.setIcon(FontAwesome.COMMENTS);

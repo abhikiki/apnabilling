@@ -43,6 +43,7 @@ public class ExtractRetailTransaction {
 	private Date invoiceDate;
 	private String vinNumber;
 	private Long invoiceNumber;
+	private Long advanceReceiptId;
 	private String dealingStaffName;
 	private Boolean includePrice;
 	private String notes;
@@ -65,7 +66,8 @@ public class ExtractRetailTransaction {
 			final Boolean includePrice,
 			final String notes,
 			final boolean isTransactionActive,
-			final PaymentForm paymentForm) {
+			final PaymentForm paymentForm,
+			final Long advanceReceiptId) {
 		this.goldBillingTable = goldBillingTable;
 		this.silverBillingTable = silverBillingTable;
 		this.diamondBillingTable = diamondBillingTable;
@@ -81,6 +83,7 @@ public class ExtractRetailTransaction {
 		this.notes = notes;
 		this.isTransactionActive = isTransactionActive;
 		this.paymentForm = paymentForm;
+		this.advanceReceiptId = advanceReceiptId;
 	}
 
 	public TransactionDTO extract() {
@@ -90,7 +93,8 @@ public class ExtractRetailTransaction {
 		priceBean.setVatCharge(Double.valueOf(pfForm.vatOnNewItemPrice.getValue()));
 		priceBean.setOldPurchase(Double.valueOf(pfForm.oldPurchasePrice.getValue()));
 		priceBean.setNetpayableAmount(Double.valueOf(pfForm.netAmountToPay.getValue()));
-		priceBean.setAdvancePaymentAmount(Double.valueOf(pfForm.advancePayment.getValue()));
+		//priceBean.setAdvancePaymentAmount(Double.valueOf(pfForm.advancePayment.getValue()));
+		priceBean.setAdvancePaymentAmount(Double.valueOf(0.00));
 		priceBean.setBalanceAmount(Double.valueOf(pfForm.balanceAmount.getValue()));
 		RetailTransactionPaymentDTO paymentDto = new RetailTransactionPaymentDTO();
 		paymentDto.setTotalCardPayment(Double.valueOf(paymentForm.totalCardPayment.getValue()));
@@ -113,7 +117,8 @@ public class ExtractRetailTransaction {
 				includePrice,
 				notes,
 				isTransactionActive,
-				paymentDto);
+				paymentDto,
+				advanceReceiptId);
 	}
 
 	private List<GeneralTransactionItemDTO> extractGeneralTransItem() {

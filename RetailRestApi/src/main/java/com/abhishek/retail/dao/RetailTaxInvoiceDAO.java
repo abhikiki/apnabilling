@@ -35,6 +35,11 @@ public class RetailTaxInvoiceDAO {
 		return jdbcTemplate.query(sql, new Object[] { invoiceId }, this::retailTaxInvoiceMapRow);
 	}
 	
+	public boolean deleteTransaction(long transId){
+		final String sql = "DELETE FROM RETAILTAXINVOICE WHERE TRANSID = ?";
+		int rowsAffected = jdbcTemplate.update(sql, transId);
+		return rowsAffected > 0 ? true : false;
+	}
 	
 	public Long saveRetailTaxInvoice(long shopId, long transId){
 		final String sql = "INSERT INTO RETAILTAXINVOICE(SHOPID, TRANSID) values(?, ?)";

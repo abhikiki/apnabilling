@@ -23,6 +23,7 @@ import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.ItemDTO;
+import com.abhishek.fmanage.retail.dto.RetailAdvanceBillDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
 import com.abhishek.fmanage.retail.dto.TransactionDTO;
@@ -36,6 +37,7 @@ import com.abhishek.fmanage.retail.tables.GeneralItemTable;
 import com.abhishek.fmanage.retail.tables.GoldItemTable;
 import com.abhishek.fmanage.retail.tables.SilverItemTable;
 import com.abhishek.fmanage.retail.window.BillWindow;
+import com.avathartech.fastformfields.widgets.DecimalTextField;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.IndexedContainer;
@@ -66,12 +68,13 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.Window;
 
 public class RetailInvoiceView extends VerticalLayout implements View {
 
 	private final Logger logger = LoggerFactory.getLogger(RetailInvoiceView.class);
 	private static final String INVOICE_BILL = "Invoice Bill";
-	public static final String ESTIMATE_BILL = "Estimate Bill";
+	public static final String ESTIMATE_BILL = "Advance Bill";
 	public static final String INDIAN_DATE_FORMAT = "dd/MM/yyyy";
 	public static final String SELECT_DATE = "Select Date";
 
@@ -99,6 +102,10 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	long transId = -1L;
 	private ShopDTO shopDto;
 	private Button generateBillBtn;
+	private HorizontalLayout advanceReceiptLayoutHL = new HorizontalLayout();
+	private VerticalLayout pricePanelInsideLayoutVL = new VerticalLayout();
+	private DecimalTextField advanceReceiptTxt = new DecimalTextField("Advance Receipt Id", "");
+	private boolean proceedBillCreation = false;
 
 	@Override
 	public void enter(ViewChangeEvent event) {
@@ -159,7 +166,12 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		priceFormPanel.setSizeFull();
 		pfForm.addStyleName("diamond-table");
 		priceFormPanel.addStyleName("diamond-table");
-		priceFormPanel.setContent(pfForm);
+		pricePanelInsideLayoutVL = new VerticalLayout();
+		pricePanelInsideLayoutVL.setImmediate(true);
+		pricePanelInsideLayoutVL.setSpacing(true);
+		pricePanelInsideLayoutVL.addComponent(pfForm);
+		pricePanelInsideLayoutVL.addComponent(advanceReceiptLayoutHL = getAdvanceReceiptLayout());
+		priceFormPanel.setContent(pricePanelInsideLayoutVL);
 		priceLayout.addComponent(priceFormPanel);
 		
 		Panel paymentFormPanel = new Panel("PAYMENT PANEL");
@@ -181,10 +193,112 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		priceLayout.setExpandRatio(notes, 1);
 		priceLayout.setExpandRatio(includePrice, 0.8f);
 
-		priceLayout.setExpandRatio(priceFormPanel, 1.2f);
-		priceLayout.setExpandRatio(paymentFormPanel, 1.2f);
+		priceLayout.setExpandRatio(priceFormPanel, 1.8f);
+		priceLayout.setExpandRatio(paymentFormPanel, 1.8f);
 		priceLayout.setExpandRatio(generateBillBtn, 0.8f);
 		return priceLayout;
+	}
+
+	private HorizontalLayout getAdvanceReceiptLayout() {
+		HorizontalLayout hl = new HorizontalLayout();
+		hl.setSpacing(true);
+ 		Button searchAdvanceReceiptBtn = new Button("AdvanceReceipt");
+ 		searchAdvanceReceiptBtn.setSizeUndefined();
+ 		searchAdvanceReceiptBtn.setImmediate(true);
+ 		searchAdvanceReceiptBtn.addStyleName("icon-search-1");
+ 		searchAdvanceReceiptBtn.addStyleName("default");
+ 		searchAdvanceReceiptBtn.addClickListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				if(NumberUtils.isDigits(String.valueOf(advanceReceiptTxt.getValue()))){
+            		long advanceReceiptId = NumberUtils.toLong(String.valueOf(advanceReceiptTxt.getValue()));
+            		ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
+            		RetailAdvanceBillDTO retailAdvanceBillDto = new RestRetailTransactionService(shopDto).getBillByAdvancveReceiptId(advanceReceiptId);
+            		if(retailAdvanceBillDto == null){
+            			Notification.show("Advance Receipt Not Found");
+            			return;
+            		}else{
+            			long transId = retailAdvanceBillDto.getTransId();
+            			TransactionDTO tDto = new RestRetailTransactionService(shopDto).getBill(transId);
+				if (tDto != null) {
+					if(!tDto.isTransactionActive()){
+						Notification.show("Advance Receipt is not active");
+						return;
+					}
+					cusBean = tDto.getCustomer();
+					retailViewVerticalLayout.replaceComponent(customerLayout, customerLayout = new CustomerInfoLayout(cusBean).getUserDetailFormLayout());
+					reloadGoldItems(tDto);
+					reloadSilverItems(tDto);
+					reloadDiamondItems(tDto);
+					reloadGeneralItems(tDto);
+					staffNameComboBox.addItem(tDto.getDealingStaffName());
+					staffNameComboBox.setValue(tDto.getDealingStaffName());
+					mortgageStartDate.setValue(tDto.getTransactionDate());
+					billType.setValue(INVOICE_BILL);
+					pfForm.totalItemPrice.setValue(String.valueOf(tDto.getPriceBean().getTotalItemsPrice()));
+					pfForm.oldPurchasePrice.setValue(String.valueOf(tDto.getPriceBean().getOldPurchase()));
+					pfForm.discountPrice.setValue(String.valueOf(tDto.getPriceBean().getDiscount()));
+					pfForm.vatOnNewItemPrice.setValue(String.valueOf(pfForm.getVatPrice()));
+					pfForm.netAmountToPay.setValue(String.valueOf(pfForm.getTotalNetAmount()));
+					pfForm.balanceAmount.setValue(String.valueOf(pfForm.getBalanceAmount()));
+					paymentForm.totalCardPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getTotalCardPayment()));
+					paymentForm.cashPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getCashPayment()));
+					paymentForm.chequePayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getChequePayment()));
+					paymentForm.rtgsPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getRtgsPayment()));
+					paymentForm.neftPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getNeftPayment()));
+					notes.setValue(tDto.getNotes());
+					includePrice.setValue(tDto.getIncludePrice());
+					transId =-1L;
+					generateBillBtn.setCaption("Generate Bill");
+				} else {
+					goldItemContainer.removeAllItems();
+					goldBillingTable.setColumnFooter(GoldItemContainer.WEIGHT, "0.000");
+					goldBillingTable.setColumnFooter(GoldItemContainer.PRICE, "0.000");
+					goldBillingTable.setPageLength(goldBillingTable.size());
+					goldBillingTable.setColumnFooter(GoldItemContainer.DELETE, ("Items=" + goldBillingTable.size()));
+					
+					silverItemContainer.removeAllItems();
+					silverBillingTable.setColumnFooter(SilverItemContainer.WEIGHT, "0.000");
+					silverBillingTable.setColumnFooter(SilverItemContainer.PRICE, "0.000");
+					silverBillingTable.setPageLength(silverBillingTable.size());
+					silverBillingTable.setColumnFooter(SilverItemContainer.DELETE, ("Items=" + silverBillingTable.size()));
+					
+					diamondItemContainer.removeAllItems();
+					diamondBillingTable.setColumnFooter(DiamondItemContainer.PRICE, "0.000");
+					diamondBillingTable.setColumnFooter(DiamondItemContainer.GOLD_WEIGHT, "0.000");
+					diamondBillingTable.setColumnFooter(DiamondItemContainer.DIAMOND_WEIGHT, "0.00");
+					diamondBillingTable.setPageLength(diamondBillingTable.size());
+					diamondBillingTable.setColumnFooter(DiamondItemContainer.DELETE, ("Items=" + diamondBillingTable.size()));
+					
+					generalItemContainer.removeAllItems();
+					generalBillingTable.setColumnFooter(GeneralItemContainer.PRICE, "0.000");
+					generalBillingTable.setPageLength(generalBillingTable.size());
+					generalBillingTable.setColumnFooter(GeneralItemContainer.DELETE, ("Items=" + generalBillingTable.size()));
+					
+					cusBean = new CustomerDTO();
+					retailViewVerticalLayout.replaceComponent(customerLayout, customerLayout = new CustomerInfoLayout(cusBean).getUserDetailFormLayout());
+					priceLayout.replaceComponent(pfForm, pfForm = new PriceForm(getPricePropertyItem()));
+					billType.setValue(INVOICE_BILL);
+					includePrice.setValue(true);
+					notes.setValue("");
+					staffNameComboBox.addItem("STAFF");
+					staffNameComboBox.setValue("STAFF");
+					mortgageStartDate.setValue(new Date());
+					Notification.show("Transaction " + transId  + " not found");
+				}
+			
+
+            		}
+            	}else{
+            		Notification.show("Advance Receipt Number is not valid");
+            	}
+			}
+ 		});
+ 		hl.addComponent(advanceReceiptTxt);
+ 		hl.addComponent(searchAdvanceReceiptBtn);
+ 		hl.setComponentAlignment(advanceReceiptTxt, Alignment.TOP_LEFT);
+ 		hl.setComponentAlignment(searchAdvanceReceiptBtn, Alignment.BOTTOM_RIGHT);
+		return hl;
 	}
 
 	private Button getDeleteBillBtn() {
@@ -285,7 +399,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		// A single-select radio button group
 		billType = new OptionGroup("Bill Type");
 		billType.addItems(ESTIMATE_BILL, INVOICE_BILL);
-		billType.setValue(ESTIMATE_BILL);
+		billType.setValue(INVOICE_BILL);
 
 		billType.addValueChangeListener((value) -> {
 			if (!value.getProperty().getValue().equals(ESTIMATE_BILL)) {
@@ -295,7 +409,13 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						pfForm.getVatPrice())));
 				pfForm.netAmountToPay.setValue(String.format("%.2f",
 						pfForm.getTotalNetAmount()));
-				pfForm.advancePayment.setValue(String.format("%.2f", 0.00f));
+				//priceLayout.addComponent(advanceReceiptLayoutHL=getAdvanceReceiptLayout());
+				if(advanceReceiptLayoutHL == null){
+					pricePanelInsideLayoutVL.addComponent(advanceReceiptLayoutHL=getAdvanceReceiptLayout());
+				}
+				
+				
+				//pfForm.advancePayment.setValue(String.format("%.2f", 0.00f));
 				//pfForm.advancePayment.setEnabled(false);
 				//pfForm.advancePayment.setIcon(null);
 				//pfForm.balanceAmount.setEnabled(false);
@@ -305,6 +425,9 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 				pfForm.vatOnNewItemPrice.setValue(String.format("%.2f", 0.00f));
 				pfForm.netAmountToPay.setValue(String.format("%.2f",
 						pfForm.getTotalNetAmount()));
+				//priceLayout.removeComponent(advanceReceiptLayoutHL);
+				pricePanelInsideLayoutVL.removeComponent(advanceReceiptLayoutHL);
+				advanceReceiptLayoutHL = null;
 				//pfForm.vatOnNewItemPrice.setEnabled(false);
 				//pfForm.advancePayment.setEnabled(true);
 				//pfForm.advancePayment.setIcon(FontAwesome.EDIT);
@@ -313,8 +436,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 			}
 		});
 		HorizontalLayout optionGroupLayout = new HorizontalLayout();
-		billType.addItems(ESTIMATE_BILL, INVOICE_BILL);
-		billType.setValue(ESTIMATE_BILL);
+		//billType.addItems(ESTIMATE_BILL, INVOICE_BILL);
+		//billType.setValue(INVOICE_BILL);
 		optionGroupLayout.addComponent(billType);
 		optionGroupLayout.setComponentAlignment(billType, Alignment.MIDDLE_LEFT);
 
@@ -343,8 +466,11 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						staffNameComboBox.setValue(tDto.getDealingStaffName());
 						mortgageStartDate.setValue(tDto.getTransactionDate());
 						billType.setValue(tDto.isEstimateBill() ? ESTIMATE_BILL : INVOICE_BILL);
+						
 						pfForm.oldPurchasePrice.setValue(String.valueOf(tDto.getPriceBean().getOldPurchase()));
 						pfForm.discountPrice.setValue(String.valueOf(tDto.getPriceBean().getDiscount()));
+						pfForm.vatOnNewItemPrice.setValue(String.valueOf(tDto.getPriceBean().getVatCharge()));
+						pfForm.netAmountToPay.setValue(String.valueOf(tDto.getPriceBean().getNetpayableAmount()));
 						pfForm.balanceAmount.setValue(String.valueOf(tDto.getPriceBean().getBalanceAmount()));
 						paymentForm.totalCardPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getTotalCardPayment()));
 						paymentForm.cashPayment.setValue(String.valueOf(tDto.getRetailTransPaymentDto().getCashPayment()));
@@ -383,7 +509,12 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						cusBean = new CustomerDTO();
 						retailViewVerticalLayout.replaceComponent(customerLayout, customerLayout = new CustomerInfoLayout(cusBean).getUserDetailFormLayout());
 						priceLayout.replaceComponent(pfForm, pfForm = new PriceForm(getPricePropertyItem()));
-						billType.setValue(ESTIMATE_BILL);
+						paymentForm.totalCardPayment.setValue(String.valueOf("0.00"));
+						paymentForm.cashPayment.setValue(String.valueOf("0.00"));
+						paymentForm.chequePayment.setValue(String.valueOf("0.00"));
+						paymentForm.rtgsPayment.setValue(String.valueOf("0.00"));
+						paymentForm.neftPayment.setValue(String.valueOf("0.00"));
+						billType.setValue(INVOICE_BILL);
 						includePrice.setValue(true);
 						notes.setValue("");
 						staffNameComboBox.addItem("STAFF");
@@ -546,14 +677,27 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 
 			public void buttonClick(ClickEvent event) {
 				try {
+					boolean isEstimateBill = billType.getValue().equals(ESTIMATE_BILL);
 					Double totalPayment = getPaymentTotal();
+					if(isEstimateBill && totalPayment.doubleValue() <= 0.000f){
+						Notification.show("Payment cannot be empty");
+						return;
+					}
 					Double balanceAmount = Double.valueOf(pfForm.balanceAmount.getValue());
-					if(totalPayment.doubleValue() != balanceAmount.doubleValue()){
+					if(!isEstimateBill && totalPayment.doubleValue() != balanceAmount.doubleValue()){
 						Notification.show("Total payment not equal to balance amount");
 						return;
 					}
-					boolean isEstimateBill = billType.getValue().equals(
-							ESTIMATE_BILL);
+					long advanceReceiptId = -1L;
+					if(!isEstimateBill && NumberUtils.isDigits(String.valueOf(advanceReceiptTxt.getValue()))){
+						advanceReceiptId = NumberUtils.toLong(String.valueOf(advanceReceiptTxt.getValue()));
+						RetailAdvanceBillDTO advanceReceiptDTO  = new RestRetailTransactionService(shopDto).getBillByAdvancveReceiptId(advanceReceiptId);
+						new RestRetailTransactionService(shopDto).updateBillStatus(advanceReceiptDTO.getTransId(),"I");
+						Notification.show("Advance Receipt deactivated", "Advance Receipt Id("+ advanceReceiptId + ")applied and deactivated. Associated transId:" 
+								+ advanceReceiptDTO.getTransId(),
+			                  Notification.Type.TRAY_NOTIFICATION);
+					}
+					
 					String invoiceNumber = "-1";
 					boolean isTransactionActive = true;
 					retailTransaction = new ExtractRetailTransaction(
@@ -563,16 +707,17 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 							shopDto.getTinNumber(), Long.parseLong(invoiceNumber),
 							staffNameComboBox.getValue().toString(),
 							includePrice.getValue(), notes.getValue(),
-							isTransactionActive, paymentForm).extract();
+							isTransactionActive,
+							paymentForm,
+							advanceReceiptId).extract();
 					ShopDTO shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
 
 					if (transId == -1L) {
 						BillCreationResponse response = new RestRetailTransactionService(shopDto)
 								.createBill(shopDto, retailTransaction);
-						retailTransaction.setInvoiceNumber(response
-								.getInvoiceId());
+						retailTransaction.setInvoiceNumber(response.getInvoiceId());
+						retailTransaction.setAdvanceReceiptId(response.getAdvanceReceiptId());
 						transId = response.getTransId();
-
 					} else {// update
 						retailTransaction.setEstimateBill(isEstimateBill);
 						retailTransaction.setTransactionDate(mortgageStartDate
@@ -580,8 +725,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						BillCreationResponse response = new RestRetailTransactionService(shopDto)
 								.updateBill(transId, shopDto.getShopId(),
 										retailTransaction);
-						retailTransaction.setInvoiceNumber(response
-								.getInvoiceId());
+						retailTransaction.setInvoiceNumber(response.getInvoiceId());
+						retailTransaction.setAdvanceReceiptId(response.getAdvanceReceiptId());
 					}
 				} catch (Exception e) {
 					logger.error("Error generating invoice", e);
@@ -621,9 +766,58 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		UI.getCurrent().addWindow(bw);
 		bw.focus();
 	}
+	
+	private Window getConfirmationDialogWindow(String message) {
 
-	private VerticalLayout getBillingLayout(Table table,
-			CustomRetailItemContainerInterface container,
+		Window bw = new Window("NOTIFICATION");
+        bw.setModal(true);
+        bw.setWidth("35%");
+        bw.setHeight("30%");
+        bw.setResizable(false);
+        bw.setClosable(true);
+ 		bw.setPosition(700, 200);
+ 		bw.addStyleName("no-vertical-drag-hints");
+ 		bw.addStyleName("no-horizontal-drag-hints");
+ 		
+ 		
+ 		VerticalLayout vl = new VerticalLayout();
+ 		vl.setSpacing(true);
+ 		vl.addComponent(new Label(message));
+ 		HorizontalLayout hl = new HorizontalLayout();
+ 		Button saveBtn = new Button("YES");
+ 		saveBtn.setSizeUndefined();
+ 		saveBtn.setImmediate(true);
+ 		saveBtn.addStyleName("default");
+ 		saveBtn.addClickListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				proceedBillCreation = true;
+				UI.getCurrent().removeWindow(bw);
+			}
+ 		});
+ 		
+ 		Button cancelBtn = new Button("NO");
+ 		cancelBtn.setSizeUndefined();
+ 		cancelBtn.setImmediate(true);
+ 		cancelBtn.addStyleName("default");
+ 		cancelBtn.addClickListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(ClickEvent event) {
+				proceedBillCreation = false;
+				UI.getCurrent().removeWindow(bw);
+			}
+ 		});
+ 		hl.setSpacing(true);
+ 		hl.addComponent(saveBtn);
+ 		hl.addComponent(cancelBtn);
+ 		vl.addComponent(hl);
+ 		bw.setContent(vl);
+        //UI.getCurrent().addWindow(bw);
+ 		//bw.focus();
+ 		return bw;
+	}
+
+	private VerticalLayout getBillingLayout(Table table, CustomRetailItemContainerInterface container,
 			ItemContainerType itemContainerType) {
 		String buttonType = "Gold";
 		String buttonStyle = "";
