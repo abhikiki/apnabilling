@@ -400,10 +400,11 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 		billType = new OptionGroup("Bill Type");
 		billType.addItems(ESTIMATE_BILL, INVOICE_BILL);
 		billType.setValue(INVOICE_BILL);
-
+		tinLabel.setVisible(true);
+		tinLabel.setValue("<font color=\"blue\"><b>GSTIN:</b>" + shopDto.getTinNumber() + "</font>");
 		billType.addValueChangeListener((value) -> {
 			if (!value.getProperty().getValue().equals(ESTIMATE_BILL)) {
-				tinLabel.setValue("<font color=\"blue\"><b>TIN VAT NO:</b>" + shopDto.getTinNumber() + "</font>");
+				tinLabel.setValue("<font color=\"blue\"><b>GSTIN:</b>" + shopDto.getTinNumber() + "</font>");
 				pfForm.isInvoiceEnabled = true;
 				pfForm.vatOnNewItemPrice.setValue((String.format("%.2f",
 						pfForm.getVatPrice())));
@@ -420,7 +421,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 				//pfForm.advancePayment.setIcon(null);
 				//pfForm.balanceAmount.setEnabled(false);
 			} else {
-				tinLabel.setValue("<font color=\"#D5CDCB\"><b>TIN VAT NO:</b>" + shopDto.getTinNumber() + "</font>");
+				tinLabel.setValue("<font color=\"#D5CDCB\"><b>GSTIN:</b>" + shopDto.getTinNumber() + "</font>");
 				pfForm.isInvoiceEnabled = false;
 				pfForm.vatOnNewItemPrice.setValue(String.format("%.2f", 0.00f));
 				pfForm.netAmountToPay.setValue(String.format("%.2f",

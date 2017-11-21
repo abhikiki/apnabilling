@@ -320,7 +320,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     				csvFilePrinter = new CSVPrinter(bufferedWriter, csvFileFormat);
     				Object[] FILE_HEADER = { "TransDate","TransId", 
     					"BillType", "TransactionStatus", "CustomerName", "ContactNumber", "EmailId", "CustomerAddress", "GoldItems", "SilverItems",
-    					"DiamondItems", "GeneralItems", "Sale Amount","Vat Amount", "Discount", "Cash Payment", "Card Payment", "Cheque Payment", "Neft Payment", "RTGS Payment"  };
+    					"DiamondItems", "GeneralItems", "Sale Amount","GST(3%)", "CGST(1.5%)", "SGST(1.5%)", "Discount", "Cash Payment", "Card Payment", "Cheque Payment", "Neft Payment", "RTGS Payment"  };
     				csvFilePrinter.printRecord(FILE_HEADER);
     				List<TransactionSearchResultDto> list = retailViewContainer.getTransactionFilteredSearchResultDtoList();
     				for(TransactionSearchResultDto dto : list){
@@ -339,6 +339,8 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     					record.add(dto.getGeneralItems());
     					record.add(String.valueOf(dto.getTotalItemsPrice()));
     					record.add(String.valueOf(dto.getVatAmount()));
+    					record.add(String.valueOf(dto.getVatAmount()/2.0));
+    					record.add(String.valueOf(dto.getVatAmount()/2.0));
     					record.add(String.valueOf(dto.getDiscount()));
     					record.add(String.valueOf(dto.getCashPayment()));
     					record.add(String.valueOf(dto.getCardPayment()));

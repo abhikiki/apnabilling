@@ -265,7 +265,8 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 					table.addCell(new Phrase(String.format("%.2f", item.getItemPrice()),
 							rowFont));
 				}
-				table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
+				String itemName= String.format("%s\n%s", item.getItemName(), "HSN:7113");
+				table.addCell(new Phrase(itemName, rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getQuantity()), rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getPiecePair()), rowFont));
 				table.addCell(new Phrase(String.format("%.3f", item.getGoldWeight()), rowFont));
@@ -339,7 +340,8 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 					table.addCell(new Phrase(String.format("%.2f", item.getSilverItemPrice()),
 							rowFont));
 				}
-				table.addCell(new Phrase(String.valueOf(item.getItemName()), rowFont));
+				String itemName= String.format("%s\n%s", item.getItemName(), "HSN:7113");
+				table.addCell(new Phrase(itemName, rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getQuantity()), rowFont));
 				table.addCell(new Phrase(String.valueOf(item.getPiecepair()), rowFont));
 				table.addCell(new Phrase(String.format("%.3f", item.getWeight()), rowFont));
@@ -410,7 +412,8 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 				if (includePrice) {
 					table.addCell(new Phrase(String.format("%.2f", golItem.getGoldItemPrice()), rowFont));
 				}
-				table.addCell(new Phrase(String.valueOf(golItem.getGoldItemName()), rowFont));
+				String itemName= String.format("%s\n%s", golItem.getGoldItemName(), "HSN:7113");
+				table.addCell(new Phrase(itemName, rowFont));
 				table.addCell(new Phrase(golItem.getGoldType(), rowFont));
 				table.addCell(new Phrase(String.valueOf(golItem.getQuantity()), rowFont));
 				table.addCell(new Phrase(golItem.getPiecePair(), rowFont));
@@ -465,7 +468,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		if (isEstimateBill) {
 			table = new PdfPTable(1);
 		} else {
-			table = new PdfPTable(2);
+			table = new PdfPTable(3);
 		}
 		table.setWidthPercentage(100f);
 		table.getDefaultCell().setPadding(1);
@@ -487,9 +490,14 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		table.addCell(datePhrase);
 		if (!isEstimateBill) {
 			Phrase vinPhrase = new Phrase();
-			vinPhrase.add(new Chunk("TIN VAT NO: ", headerFont));
+			vinPhrase.add(new Chunk("GSTIN: ", headerFont));
 			vinPhrase.add(new Chunk(vinNumber, rowFont));
 			table.addCell(vinPhrase);
+			
+			Phrase stateCode = new Phrase();
+			stateCode.add(new Chunk("StateCode: ", headerFont));
+			stateCode.add(new Chunk("10", rowFont));
+			table.addCell(stateCode);
 		}
 		document.add(table);
 	}
@@ -567,11 +575,24 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 			table.addCell(new Phrase(new Chunk(String.format("%.2f",priceBean.getDiscount()), rowFont)));
 		}
 		if (!isEstimateBill) {
-			table.addCell(new Phrase(new Chunk("Vat("
+			//GST
+			table.addCell(new Phrase(new Chunk("GST("
 					+ String.valueOf(CustomShopSettingFileUtility.getInstance()
-							.getVatPercentage()) + "%) Charge(INR) : ",
+							.getVatPercentage()) + "%) (INR) : ",
 					headerFont)));
 			table.addCell(new Phrase(new Chunk(String.format("%.2f", priceBean.getVatCharge()), rowFont)));
+			//CGST
+			table.addCell(new Phrase(new Chunk("CGST("
+					+ String.valueOf(CustomShopSettingFileUtility.getInstance()
+							.getVatPercentage()/2.0) + "%) (INR) : ",
+					headerFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getVatCharge()/2.0), rowFont)));
+			//SGST
+			table.addCell(new Phrase(new Chunk("SGST("
+					+ String.valueOf(CustomShopSettingFileUtility.getInstance()
+							.getVatPercentage()/2.0) + "%) (INR) : ",
+					headerFont)));
+			table.addCell(new Phrase(new Chunk(String.format("%.3f", priceBean.getVatCharge()/2.0), rowFont)));
 		}
 		Double oldPurchasePrice = priceBean.getOldPurchase();
 		if (oldPurchasePrice > 0) {

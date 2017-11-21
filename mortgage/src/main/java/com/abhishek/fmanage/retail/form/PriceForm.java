@@ -28,7 +28,7 @@ public class PriceForm extends FormLayout{
 
 	private static final long serialVersionUID = -5016984459457685827L;
 	public TextField totalItemPrice = new TextField("Sales Price", "0.0");
-	public TextField vatOnNewItemPrice = new TextField("Vat(" + String.valueOf(CustomShopSettingFileUtility.getInstance().getVatPercentage()) + "%)", "0.0");
+	public TextField vatOnNewItemPrice = new TextField("GST(" + String.valueOf(CustomShopSettingFileUtility.getInstance().getVatPercentage()) + "%)", "0.0");
     public TextField oldPurchasePrice = new TextField("Old Purchase Price(-)", "0.0");
     public TextField discountPrice =  new TextField("Discount(-)", "0.0");
     public TextField netAmountToPay = new TextField("Net Payable Price", "0.0");

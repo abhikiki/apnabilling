@@ -33,7 +33,7 @@ public class RetailTransactionViewContainer extends IndexedContainer{
     public static final String BILL_STATUS_COL_NAME = "Status";
     public static final String EMAIL_ID_COL_NAME = "Email Id";
     public static final String TRANSACTION_DETAIL_BTN_COL_NAME = "Detail Button";
-    public static final String VATAMOUNT = "Vat Amount";
+    public static final String VATAMOUNT = "GST Amount";
     public static final String DISCOUNT = "Discount";
     public static final String CASHPAYMENT = "Cash Payment";
     public static final String CARDPAYMENT = "Card Payment";

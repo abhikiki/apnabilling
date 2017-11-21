@@ -180,7 +180,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 
 	        sparks.addComponent(buildSummaryLabels("Total Sale(INR)", String.format("%.3f", summary.getTotalSale()), "SALE"));
 	        Double vatTotal = Math.round(summary.getTotalVat() * 100.0) / 100.0;
-	        sparks.addComponent(buildSummaryLabels("Total VAT(INR)", String .format("%.2f",vatTotal), "VAT"));
+	        sparks.addComponent(buildSummaryLabels("Total GST(INR)", String .format("%.2f",vatTotal), "VAT"));
 	        sparks.addComponent(buildSummaryLabels("Total Gold Weight(gms)", String.format("%.3f", summary.getTotalGoldWeight()), "GOLDWEIGHT"));
 	        sparks.addComponent(buildSummaryLabels("Total Silver Weight(gms)", String .format("%.3f",summary.getTotalSilverWeight()), "SILVERWEIGHT"));
 	        return sparks;
@@ -229,7 +229,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
         }
         
         p.setContent(vl);
-        p.addStyleName("mydasboardsummary");
+        p.addStyleName("mydashboardsummary");
 		return p;
 	}
 	

@@ -14,7 +14,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.hsqldb.util.CSVWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,7 @@ public class CustomShopSettingFileUtility {
 			"TIN_NUMBER", "GOLD_ITEMS", "SILVER_ITEMS", "DIAMOND_ITEMS", "GENERAL_ITEMS", "STAFF_NAMES" };
 	private final Logger logger = LoggerFactory.getLogger(CustomShopSettingFileUtility.class);
 
-	private static double vatPercent = 1;
+	private static double vatPercent = 3;
 	private static String tinNumber = "10100310077";
 	private static Map<String, List<String>> customSettingMap = new HashMap<>();
 	
