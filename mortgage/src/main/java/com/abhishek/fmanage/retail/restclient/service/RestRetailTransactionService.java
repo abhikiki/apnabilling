@@ -1,22 +1,18 @@
 package com.abhishek.fmanage.retail.restclient.service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.abhishek.fmanage.retail.dto.*;
+import com.abhishek.fmanage.retail.restclient.response.BillCreationResponse;
+import com.abhishek.fmanage.retail.restclient.response.TransactionSearchResponse;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
-import com.abhishek.fmanage.retail.dto.RetailAdvanceBillDTO;
-import com.abhishek.fmanage.retail.dto.RetailTaxInvoiceDTO;
-import com.abhishek.fmanage.retail.dto.ShopDTO;
-import com.abhishek.fmanage.retail.dto.TransactionDTO;
-import com.abhishek.fmanage.retail.dto.TransactionSearchCriteriaDto;
-import com.abhishek.fmanage.retail.dto.TransactionSearchResultDto;
-import com.abhishek.fmanage.retail.restclient.response.BillCreationResponse;
-import com.abhishek.fmanage.retail.restclient.response.TransactionSearchResponse;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class RestRetailTransactionService {
 
@@ -77,9 +73,17 @@ public class RestRetailTransactionService {
         		paramMap);
 		return response.getBody();
 	}
-	
+
+	private ClientHttpRequestFactory clientHttpRequestFactory() {
+		HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+		factory.setReadTimeout(10000);
+		factory.setConnectTimeout(2000);
+		return factory;
+	}
+
 	public List<TransactionSearchResultDto> findBills(TransactionSearchCriteriaDto dto){
-		RestTemplate restTemplate = new RestTemplate();
+		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
+
         HttpEntity<TransactionSearchCriteriaDto> entityrequest = new HttpEntity<TransactionSearchCriteriaDto>(dto, new RestServiceUtil().getHeaders(shopDto));
         ResponseEntity<TransactionSearchResponse> response = restTemplate.exchange(
         		new RestServiceUtil().getRestHostPortUrl() + "/bill/findbills",

@@ -9,7 +9,7 @@ package com.abhishek.retail.dto;
  */
 public class PriceDTO {
 
-	private Double vatPercentage = 1.0d;// default
+	private Double vatPercentage = 3.0d;// default
 	private Double totalItemsPrice;
 	private Double discount;
 	private Double vatCharge;

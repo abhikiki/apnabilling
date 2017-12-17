@@ -1,20 +1,15 @@
 package com.abhishek.retail.dao;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.abhishek.retail.dto.ItemSummaryDTO;
+import com.abhishek.retail.dto.SummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abhishek.retail.dto.ItemSummaryDTO;
-import com.abhishek.retail.dto.SummaryDTO;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Repository
 public class SummaryDAO {
@@ -37,6 +32,11 @@ public class SummaryDAO {
 		summary.setDiamondItemSummaryDtoList(getDiamondItemQuantitySummary(startDate, endDate));
 		summary.setGeneralItemSummaryDtoList(getGeneralItemQuantitySummary(startDate, endDate));
 		summary.setTotalVat(getTotalVatSummary(startDate, endDate));
+		summary.setTotalCardPayment(getTotalCardPayment(startDate, endDate));
+		summary.setTotalCashPayment(getTotalCashPayment(startDate, endDate));
+		summary.setTotalChequePayment(getTotalChequePayment(startDate, endDate));
+		summary.setTotalNeftPayment(getTotalNeftPayment(startDate, endDate));
+		summary.setTotalRtgsPayment(getTotalRtgsPayment(startDate, endDate));
 		return summary;
 	}
 	
@@ -59,7 +59,52 @@ public class SummaryDAO {
 		Double totalSale = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return totalSale == null ? 0.0f : totalSale;
 	}
-	
+
+	public Double getTotalCardPayment(final Date startDate, final Date endDate){
+		String sql = "SELECT SUM(TOTALCARDPAYMENT) TOTALCARDPAYMENT FROM RETAILTRANSACTIONPAYMENT RTP, RETAILTRANSACTION RT"
+				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
+				+ " AND RTP.TRANSID = RT.TRANSID"
+				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
+		Double totalCardPayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		return totalCardPayment == null ? 0.0f : totalCardPayment;
+	}
+
+	public Double getTotalCashPayment(final Date startDate, final Date endDate){
+		String sql = "SELECT SUM(CASHPAYMENT) TOTALCASHPAYMENT FROM RETAILTRANSACTIONPAYMENT RTP, RETAILTRANSACTION RT"
+				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
+				+ " AND RTP.TRANSID = RT.TRANSID"
+				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
+		Double totalCashPayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		return totalCashPayment == null ? 0.0f : totalCashPayment;
+	}
+
+	public Double getTotalChequePayment(final Date startDate, final Date endDate){
+		String sql = "SELECT SUM(CHEQUEPAYMENT) TOTALCHEQUEPAYMENT FROM RETAILTRANSACTIONPAYMENT RTP, RETAILTRANSACTION RT"
+				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
+				+ " AND RTP.TRANSID = RT.TRANSID"
+				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
+		Double totalChequePayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		return totalChequePayment == null ? 0.0f : totalChequePayment;
+	}
+
+	public Double getTotalNeftPayment(final Date startDate, final Date endDate){
+		String sql = "SELECT SUM(NEFTPAYMENT) TOTALNEFTPAYMENT FROM RETAILTRANSACTIONPAYMENT RTP, RETAILTRANSACTION RT"
+				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
+				+ " AND RTP.TRANSID = RT.TRANSID"
+				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
+		Double totalNeftPayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		return totalNeftPayment == null ? 0.0f : totalNeftPayment;
+	}
+
+	public Double getTotalRtgsPayment(final Date startDate, final Date endDate){
+		String sql = "SELECT SUM(RGTSPAYMENT) TOTALRTGSPAYMENT FROM RETAILTRANSACTIONPAYMENT RTP, RETAILTRANSACTION RT"
+				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
+				+ " AND RTP.TRANSID = RT.TRANSID"
+				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
+		Double totalRtgsPayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		return totalRtgsPayment == null ? 0.0f : totalRtgsPayment;
+	}
+
 	public Double getTotalGoldWeight(final Date startDate, final Date endDate){
 		String sql = "SELECT SUM(WEIGHT) GOLDWEIGHT FROM RETAILGOLDITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'" +

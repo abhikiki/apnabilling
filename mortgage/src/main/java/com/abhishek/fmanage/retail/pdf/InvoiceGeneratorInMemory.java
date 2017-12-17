@@ -1,5 +1,16 @@
 package com.abhishek.fmanage.retail.pdf;
 
+import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
+import com.abhishek.fmanage.retail.dto.*;
+import com.abhishek.fmanage.utility.ConvertNumberToWords;
+import com.itextpdf.text.*;
+import com.itextpdf.text.Font.FontFamily;
+import com.itextpdf.text.pdf.*;
+import com.vaadin.server.StreamResource.StreamSource;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,42 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.abhishek.fmanage.csv.utility.CustomShopSettingFileUtility;
-import com.abhishek.fmanage.retail.dto.CustomerDTO;
-import com.abhishek.fmanage.retail.dto.DiamondTransactionItemDTO;
-import com.abhishek.fmanage.retail.dto.GeneralTransactionItemDTO;
-import com.abhishek.fmanage.retail.dto.GoldTransactionItemDTO;
-import com.abhishek.fmanage.retail.dto.PriceDTO;
-import com.abhishek.fmanage.retail.dto.RetailTransactionPaymentDTO;
-import com.abhishek.fmanage.retail.dto.SilverTransactionItemDTO;
-import com.abhishek.fmanage.retail.dto.TransactionDTO;
-import com.abhishek.fmanage.utility.ConvertNumberToWords;
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Chunk;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Font;
-import com.itextpdf.text.Font.FontFamily;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.ColumnText;
-import com.itextpdf.text.pdf.GrayColor;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfPTableEvent;
-import com.itextpdf.text.pdf.PdfPageEventHelper;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.vaadin.server.StreamResource.StreamSource;
 
 public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 
@@ -778,6 +753,9 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		addSignature(document, isEstimateBill, staffName);
 		document.add(new Paragraph(" "));
 
+     	addSubjectJurisdiction(document);
+		document.add(new Paragraph(" "));
+
 		document.newPage();
 
 		// step 5
@@ -790,6 +768,26 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
         // Here we return the pdf contents as a byte-array
         return new ByteArrayInputStream(os.toByteArray());
     }
+
+    private void addSubjectJurisdiction(Document document) throws Exception{
+		PdfPTable table;
+		table = new PdfPTable(1);
+		table.setWidthPercentage(100f);
+		table.getDefaultCell().setBorder(PdfPCell.NO_BORDER);
+		table.getDefaultCell().setPadding(1);
+		table.getDefaultCell().setUseAscender(true);
+		table.getDefaultCell().setUseDescender(true);
+		table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_LEFT);
+		table.getDefaultCell().setBorder(0);
+		table.getDefaultCell().setBackgroundColor(new BaseColor(243, 175, 250));
+		BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER, BaseFont.CP1252, BaseFont.EMBEDDED);
+		Font headerFont = new Font(baseFont, 11, Font.BOLD);
+		Font rowFont = new Font(baseFont, 10, Font.NORMAL);
+		Phrase jurisdictionText = new Phrase();
+		jurisdictionText.add(new Chunk("** SUBJECT TO PATNA JURISDICTION **", headerFont));
+		table.addCell(jurisdictionText);
+		document.add(table);
+	}
 
 	class Watermark extends PdfPageEventHelper {
 		 

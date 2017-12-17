@@ -3,31 +3,8 @@
  */
 package com.abhishek.fmanage.retail.views;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-
 import com.abhishek.fmanage.retail.data.container.RetailTransactionViewContainer;
-import com.abhishek.fmanage.retail.dto.RetailAdvanceBillDTO;
-import com.abhishek.fmanage.retail.dto.RetailTaxInvoiceDTO;
-import com.abhishek.fmanage.retail.dto.ShopDTO;
-import com.abhishek.fmanage.retail.dto.TransactionDTO;
-import com.abhishek.fmanage.retail.dto.TransactionSearchCriteriaDto;
-import com.abhishek.fmanage.retail.dto.TransactionSearchResultDto;
+import com.abhishek.fmanage.retail.dto.*;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailTransactionService;
 import com.abhishek.fmanage.retail.window.BillWindow;
 import com.vaadin.data.Container.Filter;
@@ -45,19 +22,19 @@ import com.vaadin.server.FileDownloader;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.StreamResource.StreamSource;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.OptionGroup;
-import com.vaadin.ui.PopupDateField;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.Calendar;
 
 /**
  * View class for transactions.
@@ -543,7 +520,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     	        			//	RetailTransactionViewContainer.BILL_TYPE_COL_NAME).getValue().toString().equals("Invoice"))
         				.map(item -> Double.valueOf(retailViewContainer.getItem(item).getItemProperty(
     	        				RetailTransactionViewContainer.SALE_AMOUNT_COL_NAME).getValue().toString())).reduce((price1, price2) -> price1 + price2).get())));
-    		transactionTable.setColumnFooter(RetailTransactionViewContainer.VATAMOUNT, ("Total Vat=" +
+    		transactionTable.setColumnFooter(RetailTransactionViewContainer.VATAMOUNT, ("Total GST=" +
             		String.format("%.3f", retailViewContainer.getItemIds().stream()
             			//	.filter(item -> retailViewContainer.getItem(item).getItemProperty(
         	        //				RetailTransactionViewContainer.BILL_TYPE_COL_NAME).getValue().toString().equals("Invoice"))
@@ -559,7 +536,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
         	        				RetailTransactionViewContainer.DISCOUNT).getValue().toString())).reduce((price1, price2) -> price1 + price2).get())));
     	}else{
     		transactionTable.setColumnFooter(RetailTransactionViewContainer.CUSTOMER_ADDRESS_COL_NAME, ("Total Sale=0.000"));
-    		transactionTable.setColumnFooter(RetailTransactionViewContainer.VATAMOUNT, ("Total Vat=0.000"));
+    		transactionTable.setColumnFooter(RetailTransactionViewContainer.VATAMOUNT, ("Total GST=0.000"));
     		transactionTable.setColumnFooter(RetailTransactionViewContainer.DISCOUNT, ("Total Discount=0.000"));
     	}
 	}

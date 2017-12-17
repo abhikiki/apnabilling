@@ -3,20 +3,20 @@
  */
 package com.abhishek.retail.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import com.abhishek.retail.dto.ShopDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
-
-import com.abhishek.retail.dto.ShopDTO;
+import java.util.Optional;
 
 /**
  * @author GUPTAA6
@@ -25,16 +25,34 @@ import com.abhishek.retail.dto.ShopDTO;
 @Repository
 public class ShopDAO {
 
+	private static Logger logger = LoggerFactory.getLogger(ShopDAO.class);
+
 	private final JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 	@Autowired
 	public ShopDAO(final JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 
-	public List<ShopDTO> getShopInformation(String userId, String password) {
-		final String sql = "SELECT S.SHOPID, S.SHOPNAME, S.TINNUMBER, U.FIRSTNAME, U.LASTNAME, U.USERID, U.USERPASSWORD, U.ROLE FROM SHOP S, USERINFORMATION U WHERE U.USERID= ? AND U.USERPASSWORD = ?";
-		return jdbcTemplate.query(sql, new Object[]{userId, password}, this::shopMapRow);
+	public Optional<ShopDTO> getShopInformation(String userId, String password) {
+		final String sql = "SELECT S.SHOPID, S.SHOPNAME, S.TINNUMBER, U.FIRSTNAME, U.LASTNAME, U.USERID, U.USERPASSWORD," +
+				" U.ROLE FROM SHOP S, USERINFORMATION U WHERE U.USERID= :userId AND U.USERPASSWORD = :password";
+
+		Optional<ShopDTO> shopDTO = Optional.empty();
+		try {
+			shopDTO = Optional.of(namedParameterJdbcTemplate.queryForObject(sql,
+					new MapSqlParameterSource()
+							.addValue("userId", userId)
+							.addValue("password", password),
+					this::shopMapRow));
+		} catch (EmptyResultDataAccessException ex) {
+			logger.info(ex.getMessage());
+		}
+		return shopDTO;
+
 	}
 
 	public List<ShopDTO> getShopInformation(long shopId) {

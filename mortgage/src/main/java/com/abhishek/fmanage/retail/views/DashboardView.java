@@ -1,12 +1,5 @@
 package com.abhishek.fmanage.retail.views;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.Locale;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.abhishek.fmanage.retail.charts.ItemSummaryChart;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SummaryDTO;
@@ -16,20 +9,16 @@ import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.PopupDateField;
-import com.vaadin.ui.Tree;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import org.apache.commons.lang3.StringUtils;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Locale;
 
 public class DashboardView extends VerticalLayout implements View, ItemClickListener {
 
@@ -47,6 +36,11 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
     private Label silverWeightLabel = new Label("");
     private Label goldWeightLabel = new Label("");
     private Label vatLabel = new Label("");
+	private Label cardPaymentLabel = new Label("");
+	private Label cashPaymentLabel = new Label("");
+	private Label chequePaymentLabel = new Label("");
+	private Label neftPaymentLabel = new Label("");
+	private Label rtgsPaymentLabel = new Label("");
     
 	@Override
 	public void enter(ViewChangeEvent event) {
@@ -150,6 +144,11 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	            	silverWeightLabel.setValue(String.format("%.3f",summary.getTotalSilverWeight()));
 	            	goldWeightLabel.setValue(String.format("%.3f",summary.getTotalGoldWeight()));
 	            	totalSaleLabel.setValue(String.format("%.3f",summary.getTotalSale()));
+	            	cardPaymentLabel.setValue(String.format("%.3f",summary.getTotalCardPayment()));
+	            	cashPaymentLabel.setValue(String.format("%.3f",summary.getTotalCashPayment()));
+					chequePaymentLabel.setValue(String.format("%.3f",summary.getTotalChequePayment()));
+					neftPaymentLabel.setValue(String.format("%.3f",summary.getTotalNeftPayment()));
+					rtgsPaymentLabel.setValue(String.format("%.3f",summary.getTotalRtgsPayment()));
 	            	hsplit.setSecondComponent(new ItemSummaryChart().getChart(
 	        				summary.getGoldItemSummaryDtoList(), "Gold Items Sale"));
 	            }
@@ -180,9 +179,14 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 
 	        sparks.addComponent(buildSummaryLabels("Total Sale(INR)", String.format("%.3f", summary.getTotalSale()), "SALE"));
 	        Double vatTotal = Math.round(summary.getTotalVat() * 100.0) / 100.0;
-	        sparks.addComponent(buildSummaryLabels("Total GST(INR)", String .format("%.2f",vatTotal), "VAT"));
-	        sparks.addComponent(buildSummaryLabels("Total Gold Weight(gms)", String.format("%.3f", summary.getTotalGoldWeight()), "GOLDWEIGHT"));
-	        sparks.addComponent(buildSummaryLabels("Total Silver Weight(gms)", String .format("%.3f",summary.getTotalSilverWeight()), "SILVERWEIGHT"));
+	        sparks.addComponent(buildSummaryLabels("GST(INR)", String .format("%.2f",vatTotal), "VAT"));
+	        sparks.addComponent(buildSummaryLabels("Gold Weight(gms)", String.format("%.3f", summary.getTotalGoldWeight()), "GOLDWEIGHT"));
+	        sparks.addComponent(buildSummaryLabels("Silver Weight(gms)", String .format("%.3f",summary.getTotalSilverWeight()), "SILVERWEIGHT"));
+		 	sparks.addComponent(buildSummaryLabels("Card(INR)", String .format("%.3f",summary.getTotalCardPayment()), "CARDPAYMENT"));
+		 	sparks.addComponent(buildSummaryLabels("Cash(INR)", String .format("%.3f",summary.getTotalCashPayment()), "CASHPAYMENT"));
+		 	sparks.addComponent(buildSummaryLabels("Cheque(INR)", String .format("%.3f",summary.getTotalChequePayment()), "CHEQUEPAYMENT"));
+		 	sparks.addComponent(buildSummaryLabels("Neft(INR)", String .format("%.3f",summary.getTotalNeftPayment()), "NEFTPAYMENT"));
+		 	sparks.addComponent(buildSummaryLabels("Rtgs(INR)", String .format("%.3f",summary.getTotalRtgsPayment()), "RTGSPAYMENT"));
 	        return sparks;
 	    }
 	
@@ -219,14 +223,49 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
         	 silverWeightLabel.addStyleName(ValoTheme.LABEL_SMALL);
         	 silverWeightLabel.addStyleName(ValoTheme.LABEL_LIGHT);
              vl.addComponent(silverWeightLabel);
-        }else{
+        }else if(labelName.equals("VAT")){
         	 vatLabel = new Label(weight);
         	 vatLabel.setImmediate(true);
         	 vatLabel.setSizeUndefined();
         	 vatLabel.addStyleName(ValoTheme.LABEL_SMALL);
         	 vatLabel.addStyleName(ValoTheme.LABEL_LIGHT);
              vl.addComponent(vatLabel);
-        }
+        }else if(labelName.equals("CARDPAYMENT")){
+			cardPaymentLabel = new Label(weight);
+			cardPaymentLabel.setImmediate(true);
+			cardPaymentLabel.setSizeUndefined();
+			cardPaymentLabel.addStyleName(ValoTheme.LABEL_SMALL);
+			cardPaymentLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+			vl.addComponent(cardPaymentLabel);
+		}else if(labelName.equals("CASHPAYMENT")){
+			cashPaymentLabel = new Label(weight);
+			cashPaymentLabel.setImmediate(true);
+			cashPaymentLabel.setSizeUndefined();
+			cashPaymentLabel.addStyleName(ValoTheme.LABEL_SMALL);
+			cashPaymentLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+			vl.addComponent(cashPaymentLabel);
+		}else if(labelName.equals("CHEQUEPAYMENT")){
+			chequePaymentLabel = new Label(weight);
+			chequePaymentLabel.setImmediate(true);
+			chequePaymentLabel.setSizeUndefined();
+			chequePaymentLabel.addStyleName(ValoTheme.LABEL_SMALL);
+			chequePaymentLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+			vl.addComponent(chequePaymentLabel);
+		}else if(labelName.equals("NEFTPAYMENT")){
+			neftPaymentLabel = new Label(weight);
+			neftPaymentLabel.setImmediate(true);
+			neftPaymentLabel.setSizeUndefined();
+			neftPaymentLabel.addStyleName(ValoTheme.LABEL_SMALL);
+			neftPaymentLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+			vl.addComponent(neftPaymentLabel);
+		}else if(labelName.equals("RTGSPAYMENT")){
+			rtgsPaymentLabel = new Label(weight);
+			rtgsPaymentLabel.setImmediate(true);
+			rtgsPaymentLabel.setSizeUndefined();
+			rtgsPaymentLabel.addStyleName(ValoTheme.LABEL_SMALL);
+			rtgsPaymentLabel.addStyleName(ValoTheme.LABEL_LIGHT);
+			vl.addComponent(rtgsPaymentLabel);
+		}
         
         p.setContent(vl);
         p.addStyleName("mydashboardsummary");
