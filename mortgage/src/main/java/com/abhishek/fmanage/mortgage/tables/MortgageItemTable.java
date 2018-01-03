@@ -2,7 +2,6 @@ package com.abhishek.fmanage.mortgage.tables;
 
 import com.abhishek.fmanage.mortgage.data.container.MortgageItemContainer;
 import com.abhishek.fmanage.mortgage.data.container.MortgageItemType;
-import com.abhishek.fmanage.retail.data.container.GoldItemContainer;
 import com.vaadin.ui.Table;
 
 public class MortgageItemTable extends Table{

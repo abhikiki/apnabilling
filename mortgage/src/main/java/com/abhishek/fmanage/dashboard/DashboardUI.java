@@ -1,18 +1,8 @@
 package com.abhishek.fmanage.dashboard;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailLoginService;
-import com.abhishek.fmanage.retail.views.DashboardView;
-import com.abhishek.fmanage.retail.views.MortgageTransactionSearchView;
-import com.abhishek.fmanage.retail.views.MortgageView;
-import com.abhishek.fmanage.retail.views.PurchaseRecordView;
-import com.abhishek.fmanage.retail.views.RetailInvoiceView;
-import com.abhishek.fmanage.retail.views.RetailTransactionSearchView;
-import com.abhishek.fmanage.retail.views.SmsView;
+import com.abhishek.fmanage.retail.views.*;
 import com.abhishek.fmanage.retail.window.ItemEntryWindow;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.Title;
@@ -21,32 +11,17 @@ import com.vaadin.event.ShortcutListener;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
-import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
-import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinSession;
+import com.vaadin.server.*;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.DragAndDropWrapper;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
 import com.vaadin.ui.MenuBar.MenuItem;
-import com.vaadin.ui.NativeButton;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
 
 
 /**
@@ -72,7 +47,7 @@ public class DashboardUI extends UI {
     private CssLayout menu = new CssLayout();
     private CssLayout content = new CssLayout();
 
-    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions", "sms", "purchaserecord","mortgage", "mortgagetransaction"};
+    private String[] adminViews = new String[] {"dashboard", "retailbilling", "transactions", "sms", "purchaserecord","mortgage", "mortgagetransaction", "wholesale"};
     private String[] adminExcludingMortgageViews = new String[] {"dashboard", "retailbilling", "transactions", "purchaserecord", "sms"};
     private String[] staffViews = new String[] {"retailbilling"};
     private String currentRole = "ADMIN";
@@ -87,6 +62,7 @@ public class DashboardUI extends UI {
             put("/purchaserecord", PurchaseRecordView.class);
             put("/mortgage", MortgageView.class);
             put("/mortgagetransaction", MortgageTransactionSearchView.class);
+            put("/wholesale", RetailTransactionSearchView.class);
         }
     };
 
@@ -398,6 +374,7 @@ public class DashboardUI extends UI {
 		        	routes.put("/sms", SmsView.class);
 		        	routes.put("/mortgage", MortgageView.class);
 		        	routes.put("/mortgagetransaction", MortgageTransactionSearchView.class);
+                    routes.put("/wholesale", WholeSaleView.class);
 					break;
 			case "STAFF" :
 					currentView = staffViews;

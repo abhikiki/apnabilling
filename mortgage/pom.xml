@@ -15,7 +15,7 @@
 	
 	<properties>
 		<productionMode>false</productionMode>
-		<vaadin.version>7.5.7</vaadin.version>
+		<vaadin.version>7.7.9</vaadin.version>
 		<vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
 	</properties>
 
@@ -37,12 +37,12 @@
 		<profile>
 			<id>production-mode</id>
 			<properties>
-				<productionMode>true</productionMode>
+				<productionMode>false</productionMode>
 			</properties>
 			<activation>
 				<property>
 					<name>productionMode</name>
-					<value>true</value>
+					<value>false</value>
 				</property>
 			</activation>
 			<build>
@@ -102,20 +102,20 @@
 		<dependency>
 			<groupId>com.vaadin.addon</groupId>
 			<artifactId>vaadin-charts</artifactId>
-			<version>1.0.0</version>
+			<version>1.1.9</version>
 		</dependency>
 		<dependency>
    			<groupId>org.vaadin.addons</groupId>
    			<artifactId>fastformfields</artifactId>
    			<version>0.1.6</version>
    		</dependency>
-   		<dependency>
+   		<!--<dependency>
    		<groupId>org.vaadin.addons</groupId>
    		<artifactId>numberfield</artifactId>
    		<version>0.5.1</version>
-		</dependency>
+		</dependency>-->
    
-   		<dependency>
+   		<!--<dependency>
    				<groupId>org.vaadin.addons</groupId>
    				<artifactId>flexibleoptiongroup</artifactId>
    			<version>2.3.0</version>
@@ -124,7 +124,7 @@
 		   <groupId>org.vaadin.addons</groupId>
 		   <artifactId>ratingstars</artifactId>
 		   <version>2.1</version>
-		</dependency>
+		</dependency> -->
 		
 		<dependency>
 			<groupId>org.hibernate</groupId>

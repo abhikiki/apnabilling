@@ -19,6 +19,7 @@ public class SummaryDTO {
 	private List<ItemSummaryDTO> silverItemSummaryDtoList;
 	private List<ItemSummaryDTO> diamondItemSummaryDtoList;
 	private List<ItemSummaryDTO> generalItemSummaryDtoList;
+	private List<GoldTypeQuantitySaleSummaryDTO> goldTypeQuantitySaleSummaryList;
 
 	public Double getTotalSale() {
 		return totalSale;
@@ -38,7 +39,15 @@ public class SummaryDTO {
 	public void setTotalSilverWeight(Double totalSilverWeight) {
 		this.totalSilverWeight = totalSilverWeight;
 	}
-	
+
+	public List<GoldTypeQuantitySaleSummaryDTO> getGoldTypeQuantitySaleSummaryList() {
+		return goldTypeQuantitySaleSummaryList;
+	}
+
+	public void setGoldTypeQuantitySaleSummaryList(List<GoldTypeQuantitySaleSummaryDTO> goldTypeQuantitySaleSummaryList) {
+		this.goldTypeQuantitySaleSummaryList = goldTypeQuantitySaleSummaryList;
+	}
+
 	public Double getTotalVat() {
 		return totalVat;
 	}
@@ -114,4 +123,6 @@ public class SummaryDTO {
 			List<ItemSummaryDTO> generalItemSummaryDtoList) {
 		this.generalItemSummaryDtoList = generalItemSummaryDtoList;
 	}
+
+
 }

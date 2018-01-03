@@ -1,14 +1,5 @@
 package com.abhishek.fmanage.retail.views;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-
 import com.abhishek.fmanage.mortgage.data.container.MortgageItemContainer;
 import com.abhishek.fmanage.mortgage.data.container.MortgageItemType;
 import com.abhishek.fmanage.mortgage.dto.MortgageItemDTO;
@@ -28,24 +19,13 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.shared.ui.label.ContentMode;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Notification.Type;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.PopupDateField;
-import com.vaadin.ui.Table;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import java.util.*;
 
 public class MortgageView extends VerticalLayout implements View {
 
@@ -267,6 +247,7 @@ public class MortgageView extends VerticalLayout implements View {
 					.getItemProperty(MortgageItemContainer.PIECE_PAIR)
 					.getValue())).getValue();
 			if(itemType != MortgageItemType.DIAMOND){
+
 				 weight = Double.valueOf(((DecimalTextField) (workingTable
 						.getContainerDataSource().getItem(obj)
 						.getItemProperty(MortgageItemContainer.WEIGHT).getValue()))

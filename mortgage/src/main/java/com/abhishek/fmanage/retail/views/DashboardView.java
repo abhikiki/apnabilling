@@ -1,5 +1,6 @@
 package com.abhishek.fmanage.retail.views;
 
+import com.abhishek.fmanage.retail.charts.GoldTypeQuantitySaleSummaryChart;
 import com.abhishek.fmanage.retail.charts.ItemSummaryChart;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.dto.SummaryDTO;
@@ -69,6 +70,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	 private Tree getTreeMenu(){
 		 Tree reportHead = new Tree("Report");
 		 reportHead.addItem("Gold Quantity Sale");
+		 reportHead.addItem("Gold Type Quantity Sale");
 		 reportHead.addItem("Silver Quantity Sale");
 		 reportHead.addItem("Diamond Quantity Sale");
 		 reportHead.addItem("General Quantity Sale");
@@ -84,8 +86,10 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	        	if(!StringUtils.isEmpty(eventName) && eventName.equals("Gold Quantity Sale")){
 	        		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
 	        				summary.getGoldItemSummaryDtoList(), "Gold Items Sale"));
-	        	}
-	        	else if(!StringUtils.isEmpty(eventName) && eventName.equals("Silver Quantity Sale")){
+	        	}else if(!StringUtils.isEmpty(eventName) && eventName.equals("Gold Type Quantity Sale")){
+
+	        		hsplit.setSecondComponent(new GoldTypeQuantitySaleSummaryChart().getChart(summary.getGoldTypeQuantitySaleSummaryList(), "Gold Type Quantity Sale"));
+				}else if(!StringUtils.isEmpty(eventName) && eventName.equals("Silver Quantity Sale")){
 	        		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
 	        				summary.getSilverItemSummaryDtoList(), "Silver Items Sale"));
 	        	}else if(!StringUtils.isEmpty(eventName) && eventName.equals("Diamond Quantity Sale")){

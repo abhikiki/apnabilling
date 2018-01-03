@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Title: billing
-Implementation-Version: 1.1
-Built-By: GUPTAA6
-Implementation-Vendor-Id: com.abhishek.fmanage
-Build-Jdk: 1.8.0_111
-Created-By: Maven Integration for Eclipse
-Implementation-Vendor: Pivotal Software, Inc.
-

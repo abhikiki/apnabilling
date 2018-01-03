@@ -1,5 +1,6 @@
 package com.abhishek.retail.dao;
 
+import com.abhishek.retail.dto.GoldTypeQuantitySaleSummaryDTO;
 import com.abhishek.retail.dto.ItemSummaryDTO;
 import com.abhishek.retail.dto.SummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class SummaryDAO {
 		summary.setTotalChequePayment(getTotalChequePayment(startDate, endDate));
 		summary.setTotalNeftPayment(getTotalNeftPayment(startDate, endDate));
 		summary.setTotalRtgsPayment(getTotalRtgsPayment(startDate, endDate));
+		summary.setGoldTypeQuantitySaleSummaryList(getGoldQuantityByTypeSummary(startDate, endDate));
 		return summary;
 	}
 	
@@ -137,9 +139,18 @@ public class SummaryDAO {
 		List<ItemSummaryDTO> summaryList = jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
 	}
-	
+
+	public List<GoldTypeQuantitySaleSummaryDTO> getGoldQuantityByTypeSummary(final Date startDate, final Date endDate){
+		String sql = "SELECT GOLDTYPE, SUM(QUANTITY * (CASE PIECEPAIR WHEN 'Piece' then 1 ELSE 2 END)) QUANTITY  FROM RETAILGOLDITEMTRANSACTION RGT, RETAILTRANSACTION RT" +
+				" WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
+				" AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)" +
+				" GROUP BY GOLDTYPE";
+		return jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::goldTypeQuantitySaleSummaryMapRow);
+	}
+
+
 	public List<ItemSummaryDTO> getSilverItemQuantitySummary(final Date startDate, final Date endDate){
-		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILSILVERITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
+		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILSILVERITEMTRANSACTION RGT, RETAILTRANSACTION RT" +
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		List<ItemSummaryDTO> summaryList = jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
@@ -147,7 +158,7 @@ public class SummaryDAO {
 	}
 
 	public List<ItemSummaryDTO> getDiamondItemQuantitySummary(final Date startDate, final Date endDate){
-		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILDIAMONDITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
+		String sql = "SELECT ITEMNAME, QUANTITY  , PIECEPAIR  FROM RETAILDIAMONDITEMTRANSACTION RGT, RETAILTRANSACTION RT" +
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
 		List<ItemSummaryDTO> summaryList =  jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
@@ -161,7 +172,14 @@ public class SummaryDAO {
 		List<ItemSummaryDTO> summaryList =  jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
 	}
-	
+
+	private GoldTypeQuantitySaleSummaryDTO goldTypeQuantitySaleSummaryMapRow(ResultSet resultSet, int rowNumber) throws SQLException {
+		GoldTypeQuantitySaleSummaryDTO goldTypeQuantitySaleSummaryDto = new GoldTypeQuantitySaleSummaryDTO();
+		goldTypeQuantitySaleSummaryDto.setGoldType(resultSet.getString("GOLDTYPE"));
+		goldTypeQuantitySaleSummaryDto.setQuantity(resultSet.getInt("QUANTITY"));
+		return goldTypeQuantitySaleSummaryDto;
+	}
+
 	private ItemSummaryDTO itemSummaryMapRow(ResultSet resultSet, int rowNumber) throws SQLException {
 		ItemSummaryDTO itemSummaryDto = new ItemSummaryDTO();
 		itemSummaryDto.setItemName(resultSet.getString("ITEMNAME"));

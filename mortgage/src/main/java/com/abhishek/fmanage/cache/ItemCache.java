@@ -3,15 +3,15 @@
  */
 package com.abhishek.fmanage.cache;
 
-import java.util.List;
-import java.util.Map;
-
 import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.abhishek.fmanage.retail.dto.RetailItemStaffDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailItemService;
 import com.google.gwt.dev.util.collect.HashMap;
 import com.vaadin.ui.UI;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author guptaa6
@@ -38,6 +38,7 @@ public class ItemCache {
 	}
 
 	private void initializeCache() {
+		int ll=0;
 		ShopDTO shopDto =  (ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class);
 		RestRetailItemService service = new RestRetailItemService(shopDto);
 		RetailItemStaffDTO dto = service.getItems(shopDto.getShopId());

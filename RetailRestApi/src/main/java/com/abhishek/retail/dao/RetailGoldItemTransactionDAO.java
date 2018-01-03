@@ -1,17 +1,16 @@
 package com.abhishek.retail.dao;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-
+import com.abhishek.retail.dto.GoldTransactionItemDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.abhishek.retail.dto.GoldTransactionItemDTO;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 @Repository
 public class RetailGoldItemTransactionDAO {
@@ -29,6 +28,7 @@ public class RetailGoldItemTransactionDAO {
 	}
 	
 	public void saveGoldItemTransaction(long transId, List<GoldTransactionItemDTO> goldItemList){
+
 		String sql = "INSERT INTO RETAILGOLDITEMTRANSACTION " +
 			    "(TRANSID, GOLDTYPE, ITEMNAME, QUANTITY, PIECEPAIR, WEIGHT, MAKINGCHARGE, MAKINGCHARGETYPE, GOLDRATE, ITEMPRICE) "
 			    + "VALUES (?,?,?,?,?,?,?,?,?,?)";

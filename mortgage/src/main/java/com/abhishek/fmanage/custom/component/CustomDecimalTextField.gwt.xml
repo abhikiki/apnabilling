@@ -24,17 +24,19 @@
     <!-- <set-configuration-property name="devModeRedirectEnabled" value="true" /> -->
 
 
-    <inherits name="org.vaadin.teemu.ratingstars.gwt.RatingStarsWidgetset" />
+   <!--  -->
 
-    <inherits name="com.vaadin.addon.timeline.gwt.TimelineWidgetSet" />
+    
 
-    <inherits name="de.essendi.vaadin.ui.component.numberfield.widgetset.NumberFieldWidgetset" />
+    
 
-    <inherits name="com.abhishek.fmanage.dashboard.DashboardWidgetSet" />
+ <!--   <inherits name="com.abhishek.fmanage.dashboard.DashboardWidgetSet" /> -->
 
-    <inherits name="com.avathartech.fastformfields.widgets.FastformfieldsWidgetset" />
+    <!--<inherits name="com.avathartech.fastformfields.widgets.FastformfieldsWidgetset" />
 
-    <inherits name="org.vaadin.hene.flexibleoptiongroup.widgetset.FlexibleOptionGroupWidgetset" />
+    -->
 
-    <inherits name="com.vaadin.addon.charts.Widgetset" />
+    <!--<inherits name="com.vaadin.addon.charts.Widgetset" />-->
+
+    <!--<inherits name="com.vaadin.addon.timeline.gwt.TimelineWidgetSet" />-->
 </module>

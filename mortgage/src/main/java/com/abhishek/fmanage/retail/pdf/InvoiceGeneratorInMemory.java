@@ -49,8 +49,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 	}
 
 	private void addSignature(Document document, boolean isEstimateBill, String staffName) throws DocumentException, IOException {
-		PdfPTable table;
-		table = new PdfPTable(3);
+		PdfPTable table = new PdfPTable(3);
 		table.setWidthPercentage(100f);
 		table.getDefaultCell().setBorder(PdfPCell.NO_BORDER);
 		table.getDefaultCell().setPadding(1);
@@ -89,7 +88,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 	}
 
 	private void addInvoiceType(Document document, boolean isEstimateBill,
-			Date invoiceDate, String invoiceNumber) throws DocumentException,
+			String invoiceNumber) throws DocumentException,
 			IOException {
 		PdfPTable footerTable = getPDFTable(true, 2);
 		footerTable.getDefaultCell().setBackgroundColor(
@@ -714,7 +713,7 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		document.add(new Paragraph(" "));
 
 		// document.add(generateBarCode(writer));
-		addInvoiceType(document, isEstimateBill, invoiceDate, invoiceNumber);
+		addInvoiceType(document, isEstimateBill, invoiceNumber);
 		document.add(new Paragraph(" "));
 		addDateVinInformation(document, invoiceDate, isEstimateBill, vinNumber);
 		document.add(new Paragraph(" "));
