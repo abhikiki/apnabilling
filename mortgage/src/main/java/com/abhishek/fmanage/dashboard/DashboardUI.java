@@ -374,7 +374,7 @@ public class DashboardUI extends UI {
 		        	routes.put("/sms", SmsView.class);
 		        	routes.put("/mortgage", MortgageView.class);
 		        	routes.put("/mortgagetransaction", MortgageTransactionSearchView.class);
-                    routes.put("/wholesale", WholeSaleView.class);
+                  //  routes.put("/wholesale", WholeSaleView.class);
 					break;
 			case "STAFF" :
 					currentView = staffViews;

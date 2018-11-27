@@ -76,8 +76,8 @@ public class RestRetailTransactionService {
 
 	private ClientHttpRequestFactory clientHttpRequestFactory() {
 		HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-		factory.setReadTimeout(10000);
-		factory.setConnectTimeout(2000);
+		factory.setReadTimeout(1000000);
+		factory.setConnectTimeout(200000);
 		return factory;
 	}
 
