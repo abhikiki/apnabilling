@@ -46,7 +46,7 @@ public class RetailTransactionPaymentDAO {
 				return pst;
 			}
 		}, keyHolder);
-		return (Long) keyHolder.getKey();
+		return (keyHolder.getKey() != null) ? keyHolder.getKey().longValue() : null;
 	}
 	
 	public List<RetailTransactionPaymentDTO> getRetailTransactionPayment(long transId) {

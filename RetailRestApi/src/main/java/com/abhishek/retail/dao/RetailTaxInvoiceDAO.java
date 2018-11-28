@@ -54,7 +54,7 @@ public class RetailTaxInvoiceDAO {
 				return pst;
 			}
 		}, keyHolder);
-		return (Long) keyHolder.getKey();
+		return  (keyHolder.getKey() != null) ? keyHolder.getKey().longValue() : null;
 	}
 	
 //	public boolean updateRetailTaxInvoice(long transId, String invoiceStatus){

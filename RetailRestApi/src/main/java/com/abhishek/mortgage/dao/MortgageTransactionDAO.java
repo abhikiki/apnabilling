@@ -56,7 +56,7 @@ public class MortgageTransactionDAO {
 				return pst;
 			}
 		}, keyHolder);
-		return (Long) keyHolder.getKey();
+		return (keyHolder.getKey() != null) ? keyHolder.getKey().longValue() : null;
 	}
 	
 	public List<MortgageTransactionDTO> getMortgageTransaction(long transId) {

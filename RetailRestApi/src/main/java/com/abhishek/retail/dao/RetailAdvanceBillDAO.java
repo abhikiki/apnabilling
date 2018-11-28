@@ -54,7 +54,7 @@ public class RetailAdvanceBillDAO {
 				return pst;
 			}
 		}, keyHolder);
-		return (Long) keyHolder.getKey();
+		return  (keyHolder.getKey() != null) ? keyHolder.getKey().longValue() : null;
 	}
 	
 	private RetailAdvanceBillDTO retailTaxInvoiceMapRow(ResultSet resultSet, int rowNumber) throws SQLException {

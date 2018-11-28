@@ -69,7 +69,8 @@ public class RetailTransactionDAO {
 				return pst;
 			}
 		}, keyHolder);
-		return (Long) keyHolder.getKey();
+
+		return  (keyHolder.getKey() != null) ? keyHolder.getKey().longValue() : null;
 	}
 	
 	public Long saveRetailTransaction(RetailTransactionDTO retailTransDTO) {
@@ -92,7 +93,7 @@ public class RetailTransactionDAO {
 				return pst;
 			}
 		}, keyHolder);
-		return (Long) keyHolder.getKey();
+		return  (keyHolder.getKey() != null) ? keyHolder.getKey().longValue() : null;
 	}
 
 	private RetailTransactionDTO retailTransactionMapRow(ResultSet resultSet, int rowNumber) throws SQLException {

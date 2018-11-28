@@ -89,7 +89,7 @@ public class RetailItemStaffDAO {
 				return pst;
 			}
 		}, keyHolder);
-		return (Long) keyHolder.getKey();
+		return  (keyHolder.getKey() != null) ? keyHolder.getKey().longValue() : null;
 	}
 	
 	
