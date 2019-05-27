@@ -1,10 +1,11 @@
 package com.abhishek.fmanage.retail.views;
 
 import com.abhishek.fmanage.retail.charts.GoldTypeQuantitySaleSummaryChart;
+import com.abhishek.fmanage.retail.charts.GoldTypeWeightSaleSummaryChart;
 import com.abhishek.fmanage.retail.charts.ItemSummaryChart;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
-import com.abhishek.fmanage.retail.dto.SummaryDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailSummaryService;
+import com.abhishek.retail.dto.SummaryDTO;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.event.ItemClickEvent.ItemClickListener;
 import com.vaadin.navigator.View;
@@ -71,6 +72,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 		 Tree reportHead = new Tree("Report");
 		 reportHead.addItem("Gold Quantity Sale");
 		 reportHead.addItem("Gold Type Quantity Sale");
+		 reportHead.addItem("Gold Type Weight Sale");
 		 reportHead.addItem("Silver Quantity Sale");
 		 reportHead.addItem("Diamond Quantity Sale");
 		 reportHead.addItem("General Quantity Sale");
@@ -89,6 +91,8 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	        	}else if(!StringUtils.isEmpty(eventName) && eventName.equals("Gold Type Quantity Sale")){
 
 	        		hsplit.setSecondComponent(new GoldTypeQuantitySaleSummaryChart().getChart(summary.getGoldTypeQuantitySaleSummaryList(), "Gold Type Quantity Sale"));
+				}else if(!StringUtils.isEmpty(eventName) && eventName.equals("Gold Type Weight Sale")){
+					hsplit.setSecondComponent(new GoldTypeWeightSaleSummaryChart().getChart(summary.getGoldTypeWeightSaleSummaryList(), "Gold Type Weight(gms) Sale"));
 				}else if(!StringUtils.isEmpty(eventName) && eventName.equals("Silver Quantity Sale")){
 	        		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
 	        				summary.getSilverItemSummaryDtoList(), "Silver Items Sale"));

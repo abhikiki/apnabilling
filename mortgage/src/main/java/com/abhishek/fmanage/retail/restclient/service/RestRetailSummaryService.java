@@ -2,6 +2,7 @@ package com.abhishek.fmanage.retail.restclient.service;
 
 import java.util.Date;
 
+import com.abhishek.retail.dto.SummaryDTO;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.abhishek.fmanage.retail.dto.DateRangeCriteriaDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
-import com.abhishek.fmanage.retail.dto.SummaryDTO;
 
 public class RestRetailSummaryService<D> {
 

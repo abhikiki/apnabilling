@@ -1,11 +1,15 @@
-package com.abhishek.fmanage.retail.dto;
+package com.abhishek.retail.dto;
+
+import com.abhishek.fmanage.retail.dto.GoldTypeQuantitySaleSummaryDTO;
+import com.abhishek.fmanage.retail.dto.GoldTypeWeightSaleSummaryDTO;
+import com.abhishek.fmanage.retail.dto.ItemSummaryDTO;
 
 import java.util.List;
 
 public class SummaryDTO {
 
 	public SummaryDTO(){}
-	
+
 	private Double totalSale;
 	private Double totalGoldWeight;
 	private Double totalSilverWeight;
@@ -20,6 +24,7 @@ public class SummaryDTO {
 	private List<ItemSummaryDTO> diamondItemSummaryDtoList;
 	private List<ItemSummaryDTO> generalItemSummaryDtoList;
 	private List<GoldTypeQuantitySaleSummaryDTO> goldTypeQuantitySaleSummaryList;
+	private List<GoldTypeWeightSaleSummaryDTO> goldTypeWeightSaleSummaryList;
 
 	public Double getTotalSale() {
 		return totalSale;
@@ -38,6 +43,14 @@ public class SummaryDTO {
 	}
 	public void setTotalSilverWeight(Double totalSilverWeight) {
 		this.totalSilverWeight = totalSilverWeight;
+	}
+
+	public List<GoldTypeWeightSaleSummaryDTO> getGoldTypeWeightSaleSummaryList() {
+		return goldTypeWeightSaleSummaryList;
+	}
+
+	public void setGoldTypeWeightSaleSummaryList(List<GoldTypeWeightSaleSummaryDTO> goldTypeWeightSaleSummaryList) {
+		this.goldTypeWeightSaleSummaryList = goldTypeWeightSaleSummaryList;
 	}
 
 	public List<GoldTypeQuantitySaleSummaryDTO> getGoldTypeQuantitySaleSummaryList() {

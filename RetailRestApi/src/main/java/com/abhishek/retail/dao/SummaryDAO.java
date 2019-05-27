@@ -1,6 +1,7 @@
 package com.abhishek.retail.dao;
 
 import com.abhishek.retail.dto.GoldTypeQuantitySaleSummaryDTO;
+import com.abhishek.retail.dto.GoldTypeWeightSaleSummaryDTO;
 import com.abhishek.retail.dto.ItemSummaryDTO;
 import com.abhishek.retail.dto.SummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ public class SummaryDAO {
 		summary.setTotalNeftPayment(getTotalNeftPayment(startDate, endDate));
 		summary.setTotalRtgsPayment(getTotalRtgsPayment(startDate, endDate));
 		summary.setGoldTypeQuantitySaleSummaryList(getGoldQuantityByTypeSummary(startDate, endDate));
+		summary.setGoldTypeWeightSaleSummaryList(getGoldWeightByTypeSummary(startDate, endDate));
 		return summary;
 	}
 	
@@ -148,6 +150,15 @@ public class SummaryDAO {
 		return jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::goldTypeQuantitySaleSummaryMapRow);
 	}
 
+	public List<GoldTypeWeightSaleSummaryDTO> getGoldWeightByTypeSummary(final Date startDate, final Date endDate){
+		String sql = "SELECT RGT.GOLDTYPE, SUM(WEIGHT) AS WEIGHT FROM RETAILGOLDITEMTRANSACTION RGT, RETAILTRANSACTION RT" +
+				" WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
+				" AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)" +
+				" GROUP BY GOLDTYPE";
+		return jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::goldTypeWeightSaleSummaryMapRow);
+	}
+
+
 
 	public List<ItemSummaryDTO> getSilverItemQuantitySummary(final Date startDate, final Date endDate){
 		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILSILVERITEMTRANSACTION RGT, RETAILTRANSACTION RT" +
@@ -178,6 +189,13 @@ public class SummaryDAO {
 		goldTypeQuantitySaleSummaryDto.setGoldType(resultSet.getString("GOLDTYPE"));
 		goldTypeQuantitySaleSummaryDto.setQuantity(resultSet.getInt("QUANTITY"));
 		return goldTypeQuantitySaleSummaryDto;
+	}
+
+	private GoldTypeWeightSaleSummaryDTO goldTypeWeightSaleSummaryMapRow(ResultSet resultSet, int rowNumber) throws SQLException {
+		GoldTypeWeightSaleSummaryDTO goldTypeWeightSaleSummaryDTO = new GoldTypeWeightSaleSummaryDTO();
+		goldTypeWeightSaleSummaryDTO.setGoldType(resultSet.getString("GOLDTYPE"));
+		goldTypeWeightSaleSummaryDTO.setWeight(resultSet.getDouble("WEIGHT"));
+		return goldTypeWeightSaleSummaryDTO;
 	}
 
 	private ItemSummaryDTO itemSummaryMapRow(ResultSet resultSet, int rowNumber) throws SQLException {
