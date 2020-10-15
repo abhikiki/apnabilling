@@ -1,5 +1,6 @@
 package com.abhishek.fmanage.retail.views;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import com.abhishek.fmanage.retail.charts.GoldTypeQuantitySaleSummaryChart;
 import com.abhishek.fmanage.retail.charts.GoldTypeWeightSaleSummaryChart;
 import com.abhishek.fmanage.retail.charts.ItemSummaryChart;
@@ -43,7 +44,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	private Label chequePaymentLabel = new Label("");
 	private Label neftPaymentLabel = new Label("");
 	private Label rtgsPaymentLabel = new Label("");
-    
+	private ComboBox billingTypeCombo = new ComboBox("Billing Type");
 	@Override
 	public void enter(ViewChangeEvent event) {
 		setSizeFull();
@@ -55,6 +56,8 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	}
 
 	 private HorizontalSplitPanel getGraphSplitPanel(){
+		 String billingTypeName = billingTypeCombo.getValue().toString();
+		 RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
 		HorizontalSplitPanel hsplit = new HorizontalSplitPanel();
 		hsplit.setSizeFull();
 		//hsplit.setWidth("100%");
@@ -62,7 +65,7 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 		hsplit.setHeight("100%");
 		hsplit.setFirstComponent(getTreeMenu());
 		hsplit.setSecondComponent(new ItemSummaryChart().getChart(
-				new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class))
+				new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class), retailBillingType)
 				.getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue()).getGoldItemSummaryDtoList(), "Gold Items Sale"));
 		return hsplit;
 		 
@@ -145,7 +148,9 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	            
 	            public void buttonClick(ClickEvent event)
 	            {
-	            	summary = new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class))
+					String billingTypeName = billingTypeCombo.getValue().toString();
+					RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
+	            	summary = new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class), retailBillingType)
 	            	.getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
 	            	Double vatTotal = Math.round(summary.getTotalVat() * 100.0) / 100.0;
 	            	vatLabel.setValue(String.format("%.3f", vatTotal));
@@ -166,17 +171,24 @@ public class DashboardView extends VerticalLayout implements View, ItemClickList
 	        searchButton.setWidth("80%");
 	        searchButton.addStyleName("default");
 	        searchButton.setIcon(FontAwesome.SEARCH);
-	        
+
+		 	billingTypeCombo.addItem("RetailBilling");
+	        billingTypeCombo.addItem("RegisteredBilling");
+	        billingTypeCombo.setValue("RetailBilling");
+	        billingTypeCombo.setNullSelectionAllowed(false);
 	        toolbar.addComponent(titleLabel);
 	        toolbar.addComponent(startPopUpDate);
 	        toolbar.addComponent(endPopUpDate);
+		 	toolbar.addComponent(billingTypeCombo);
 	        toolbar.addComponent(searchButton);
 	    return toolbar;
 	 }
 	 
 	 
 	 private Component buildSaleSummary() {
-		 	summary = new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class))
+		String billingTypeName = billingTypeCombo.getValue().toString();
+		RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
+	 	summary = new RestRetailSummaryService((ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class), retailBillingType)
 		 	.getRetailSummary(startPopUpDate.getValue(), endPopUpDate.getValue());
 	        HorizontalLayout sparks = new HorizontalLayout();
 	        //sparks.addStyleName("sparks");

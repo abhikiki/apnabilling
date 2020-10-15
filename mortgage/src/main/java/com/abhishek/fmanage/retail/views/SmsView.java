@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.http.HttpEntity;
@@ -51,6 +52,7 @@ public class SmsView extends VerticalLayout implements View{
 	private TextField customContactNumber = new TextField("Contact Number");
 	private TwinColSelect twinCol = new TwinColSelect();
 	private ComboBox defaultTextCombo = new ComboBox();
+	//private ComboBox billingTypeCombo = new ComboBox("Billing Type");
 	
 	@Override
 	public void enter(ViewChangeEvent event) {
@@ -102,8 +104,10 @@ public class SmsView extends VerticalLayout implements View{
 		twinCol.setLeftColumnCaption("Available Contact Numbers");
 		twinCol.setRightColumnCaption("Selected Contact Numbers");
 		twinCol.setMultiSelect(true);
+		//String billingTypeName = billingTypeCombo.getValue().toString();
+		//RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
 		ShopDTO shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-		List<String> contactList = new RestRetailSmsService(shopDto).getCustomerContact(getShopDto().getShopId());
+		List<String> contactList = new RestRetailSmsService(shopDto, null).getCustomerContact(getShopDto().getShopId());
 		twinCol.addItems(contactList);
 		twinCol.setImmediate(true);
 		twinCol.setRows(15);
@@ -175,12 +179,14 @@ public class SmsView extends VerticalLayout implements View{
 	            @Override
 	            public void buttonClick(ClickEvent event)
 	            {
+				//	String billingTypeName = billingTypeCombo.getValue().toString();
+				//	RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
 	            	SmsSettingDTO smsSettingdto = new SmsSettingDTO();
 	            	smsSettingdto.setSmsUserId(StringUtils.isEmpty(smsUserId.getValue()) ? "" : smsUserId.getValue());
 	            	smsSettingdto.setSmsPassword(StringUtils.isEmpty(password.getValue()) ? "" : password.getValue());
 	            	smsSettingdto.setSmsSenderId(StringUtils.isEmpty(senderId.getValue()) ? "" : senderId.getValue());
 	            	smsSettingdto.setSmsGatewayUrl(StringUtils.isEmpty(smsGatewayUrl.getValue()) ? "" : smsGatewayUrl.getValue());
-	            	new RestRetailSmsService(getShopDto()).updateSmsSetting(getShopDto().getShopId(), smsSettingdto);
+	            	new RestRetailSmsService(getShopDto(), null).updateSmsSetting(getShopDto().getShopId(), smsSettingdto);
 	            }
 	        });
 		smsCredential.addComponent(smsGatewayUrl);
@@ -194,7 +200,9 @@ public class SmsView extends VerticalLayout implements View{
 	}
 
 	private SmsSettingDTO getSmsSetting() {
-		return new RestRetailSmsService(getShopDto()).getSmsSetting(getShopDto().getShopId());
+		//String billingTypeName = billingTypeCombo.getValue().toString();
+		//RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
+		return new RestRetailSmsService(getShopDto(), null).getSmsSetting(getShopDto().getShopId());
 	}
 
 	private ShopDTO getShopDto() {
@@ -300,6 +308,13 @@ public class SmsView extends VerticalLayout implements View{
 	    titleLabel.addStyleName(ValoTheme.LABEL_H1);
 	    titleLabel.addStyleName(ValoTheme.LABEL_NO_MARGIN);
 	    toolbar.addComponent(titleLabel);
+
+//        billingTypeCombo.addItem("RetailBilling");
+//		billingTypeCombo.addItem("RegisteredBilling");
+//		billingTypeCombo.setValue("RetailBilling");
+//		billingTypeCombo.setNullSelectionAllowed(false);
+		//toolbar.addComponent(billingTypeCombo);
+
 		return toolbar;
 	}
 }

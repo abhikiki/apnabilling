@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ public class MortgageCustomerDAO {
 	private final JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	public MortgageCustomerDAO(final JdbcTemplate jdbcTemplate) {
+	public MortgageCustomerDAO(@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
 	

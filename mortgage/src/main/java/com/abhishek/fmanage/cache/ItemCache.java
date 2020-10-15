@@ -3,6 +3,7 @@
  */
 package com.abhishek.fmanage.cache;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import com.abhishek.fmanage.retail.dto.ItemDTO;
 import com.abhishek.fmanage.retail.dto.RetailItemStaffDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
@@ -40,7 +41,7 @@ public class ItemCache {
 	private void initializeCache() {
 		int ll=0;
 		ShopDTO shopDto =  (ShopDTO)UI.getCurrent().getSession().getAttribute(ShopDTO.class);
-		RestRetailItemService service = new RestRetailItemService(shopDto);
+		RestRetailItemService service = new RestRetailItemService(shopDto, RetailBillingType.retailbillingtype);
 		RetailItemStaffDTO dto = service.getItems(shopDto.getShopId());
 		itemMap.put("GOLD", dto.getGoldItemsList());
 		itemMap.put("SILVER", dto.getSilverItemsList());

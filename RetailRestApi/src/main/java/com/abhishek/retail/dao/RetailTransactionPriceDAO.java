@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Repository;
@@ -17,17 +19,21 @@ import com.abhishek.retail.dto.PriceDTO;
 @Repository
 public class RetailTransactionPriceDAO {
 
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public RetailTransactionPriceDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailTransactionPriceDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 
 	public List<PriceDTO> getRetailPriceTransactionItem(long transId){
 		final String sql = "SELECT TRANSID, TOTALITEMSPRICE, DISCOUNT, VATPERCENT, VATONNEWITEMS, OLDPURCHASEPRICE, NETPAYABLEPRICE, ADVANCEPAYMENT, BALANCEAMOUNT "
 				+ "FROM RETAILTRANSACTIONPRICE WHERE TRANSID = ?";
-		return jdbcTemplate.query(sql, new Object[]{transId}, this::priceTransItemMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{transId}, this::priceTransItemMapRow);
 	}
 
 	public void saveRetailTransactionPrice(long transId, PriceDTO priceDto){
@@ -35,8 +41,8 @@ public class RetailTransactionPriceDAO {
 			    "(TRANSID, TOTALITEMSPRICE, DISCOUNT, VATPERCENT, VATONNEWITEMS, OLDPURCHASEPRICE,"
 			    + "NETPAYABLEPRICE, ADVANCEPAYMENT, BALANCEAMOUNT) "
 			    + "VALUES (?,?,?,?,?,?,?,?,?)";
-		
-		jdbcTemplate.update(new PreparedStatementCreator() {
+
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,
@@ -63,7 +69,7 @@ public class RetailTransactionPriceDAO {
 	
 	public boolean deleteTransaction(long transId){
 		final String sql = "DELETE FROM RETAILTRANSACTIONPRICE WHERE TRANSID = ?";
-		int rowsAffected = jdbcTemplate.update(sql, transId);
+		int rowsAffected = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(sql, transId);
 		return rowsAffected > 0 ? true : false;
 	}
 	

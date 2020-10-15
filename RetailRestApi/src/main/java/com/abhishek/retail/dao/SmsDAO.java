@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Repository;
@@ -16,22 +18,26 @@ import com.abhishek.retail.dto.SmsSettingDTO;
 @Repository
 public class SmsDAO {
 
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public SmsDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public SmsDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 	
 	public List<SmsSettingDTO> getSmsSetting(int shopId){
 		final String sql = "SELECT SMSUSERID, SMSUSERPASSWORD, SMSSENDERID, SMSGATEWAYURL FROM RETAILSMS WHERE SHOPID = ?";
-		return jdbcTemplate.query(sql, new Object[]{shopId}, this::smsSettingMap);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{shopId}, this::smsSettingMap);
 	}
 	
 	public int saveSmsSetting(int shopId, SmsSettingDTO smsSettingDto){
 		String sql = "INSERT INTO RETAILSMS(SHOPID, SMSUSERID, SMSUSERPASSWORD, SMSSENDERID, SMSGATEWAYURL) "
 			    + "VALUES (?,?,?,?,?)";
-		return jdbcTemplate.update(new PreparedStatementCreator() {
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql, new String[] { "id" });
 				pst.setInt
@@ -48,7 +54,7 @@ public class SmsDAO {
 	
 	public int updateSmsSetting(int shopId, SmsSettingDTO smsSmsSettingDto){
 		final String sql = "UPDATE  RETAILSMS SET SMSUSERID=?, SMSUSERPASSWORD=?, SMSSENDERID=?, SMSGATEWAYURL=? WHERE SHOPID = ?";
-		return jdbcTemplate.update(new PreparedStatementCreator() {
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,
@@ -66,7 +72,7 @@ public class SmsDAO {
 	public List<String> getCustomerContacts(int shopId){
 		final String sql = "SELECT DISTINCT CONTACTNUMBER FROM RETAILCUSTOMER RC, RETAILTRANSACTION RT WHERE RT.SHOPID = ? AND "
 				+ "RT.TRANSID = RC.TRANSID AND CONTACTNUMBER IS NOT NULL AND CONTACTNUMBER != ''";
-		return jdbcTemplate.query(sql, new Object[]{shopId}, this::contactMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{shopId}, this::contactMapRow);
 	}
 	
 	private String contactMapRow(ResultSet resultSet, int rowNumber) throws SQLException {

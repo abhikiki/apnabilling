@@ -1,7 +1,9 @@
 package com.abhishek.retail.dao;
 
+import com.abhishek.retail.RestTemplateUtil;
 import com.abhishek.retail.dto.GoldTransactionItemDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -14,17 +16,21 @@ import java.util.List;
 
 @Repository
 public class RetailGoldItemTransactionDAO {
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public RetailGoldItemTransactionDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailGoldItemTransactionDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 
 	public List<GoldTransactionItemDTO> getGoldTransactionItem(long transId){
 		final String sql = "SELECT GOLDTYPE, ITEMNAME, QUANTITY, PIECEPAIR, WEIGHT, MAKINGCHARGE, MAKINGCHARGETYPE, GOLDRATE, ITEMPRICE "
 				+ "FROM RETAILGOLDITEMTRANSACTION WHERE TRANSID = ?";
-		return jdbcTemplate.query(sql, new Object[]{transId}, this::goldTransItemMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{transId}, this::goldTransItemMapRow);
 	}
 	
 	public void saveGoldItemTransaction(long transId, List<GoldTransactionItemDTO> goldItemList){
@@ -33,7 +39,7 @@ public class RetailGoldItemTransactionDAO {
 			    "(TRANSID, GOLDTYPE, ITEMNAME, QUANTITY, PIECEPAIR, WEIGHT, MAKINGCHARGE, MAKINGCHARGETYPE, GOLDRATE, ITEMPRICE) "
 			    + "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
-		jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).batchUpdate(sql, new BatchPreparedStatementSetter() {
 
 			    @Override
 			    public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -65,7 +71,7 @@ public class RetailGoldItemTransactionDAO {
 	
 	public boolean deleteTransaction(long transId){
 		final String sql = "DELETE FROM RETAILGOLDITEMTRANSACTION WHERE TRANSID = ?";
-		int rowsAffected = jdbcTemplate.update(sql, transId);
+		int rowsAffected = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(sql, transId);
 		return rowsAffected > 0 ? true : false;
 	}
 	

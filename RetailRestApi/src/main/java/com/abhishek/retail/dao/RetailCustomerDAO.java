@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Repository;
@@ -16,17 +18,22 @@ import com.abhishek.retail.dto.CustomerDTO;
 @Repository
 public class RetailCustomerDAO {
 
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public RetailCustomerDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailCustomerDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
-	
+
+
 	public List<CustomerDTO> getCustomer(long transId){
 		final String sql = "SELECT TRANSID, FIRSTNAME, LASTNAME, CONTACTNUMBER, EMAILID, STREETADDRESS1, STREETADDRESS2, CITY, STATE, ZIPCODE, COUNTRY "
 				+ "FROM RETAILCUSTOMER WHERE TRANSID = ?";
-		return jdbcTemplate.query(sql, new Object[]{transId}, this::customerMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{transId}, this::customerMapRow);
 	}
 	
 	
@@ -35,8 +42,8 @@ public class RetailCustomerDAO {
 			    "(TRANSID, FIRSTNAME, LASTNAME, CONTACTNUMBER, EMAILID, STREETADDRESS1,"
 			    + "STREETADDRESS2, CITY, STATE, ZIPCODE, COUNTRY) "
 			    + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
-		
-		jdbcTemplate.update(new PreparedStatementCreator() {
+
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,
@@ -62,7 +69,7 @@ public class RetailCustomerDAO {
 				+ "SET FIRSTNAME = ?, LASTNAME = ?, CONTACTNUMBER = ?, EMAILID = ?, STREETADDRESS1 = ?, "
 				+ "STREETADDRESS2 = ?, CITY = ?, STATE = ?, ZIPCODE = ?, COUNTRY = ? WHERE TRANSID = ?";
 		
-		return jdbcTemplate.update(new PreparedStatementCreator() {
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,

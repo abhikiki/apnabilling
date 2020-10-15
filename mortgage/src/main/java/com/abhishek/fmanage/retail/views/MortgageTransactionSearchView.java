@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
@@ -194,7 +195,7 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
             	criteriaDto.setStartDate(startPopUpDate.getValue());
             	criteriaDto.setEndDate(endPopUpDate.getValue());
             	criteriaDto.setBillStatus(convertBillStatus(billStatus.getValue().toString()));
-            	List<MortgageTransactionSearchResultDTO> searchResultDtoList = new RestMortgageTransactionService(shopDto).findBills(criteriaDto);
+            	List<MortgageTransactionSearchResultDTO> searchResultDtoList = new RestMortgageTransactionService(shopDto, RetailBillingType.retailbillingtype).findBills(criteriaDto);
             	mortgageViewContainer.addTransactionSearch(searchResultDtoList);
                 setContainerFilters();
                 transactionTable.setPageLength(searchResultDtoList.size());
@@ -268,7 +269,7 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
             		Item item = ((Table) sender).getItem(target);
                     long transId =  (long) item.getItemProperty(MortgageTransactionViewContainer.TRANSID_COL_NAME).getValue();
                     ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-                    new RestMortgageTransactionService(shopDto).updateBillStatus(transId, "A");
+                    new RestMortgageTransactionService(shopDto, RetailBillingType.retailbillingtype).updateBillStatus(transId, "A");
                     Item i = transactionTable.getContainerDataSource().getItem(item.getItemProperty(MortgageTransactionViewContainer.BILL_STATUS_COL_NAME).getValue());
                     item.getItemProperty(MortgageTransactionViewContainer.BILL_STATUS_COL_NAME).setValue("Active");
                     if(!billStatus.getValue().equals("All")){
@@ -298,7 +299,7 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
                 	Item item = ((Table) sender).getItem(target);
                     long transId =  (long) item.getItemProperty(MortgageTransactionViewContainer.TRANSID_COL_NAME).getValue();
                     ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-                    new RestMortgageTransactionService(shopDto).updateBillStatus(transId, "I");
+                    new RestMortgageTransactionService(shopDto, RetailBillingType.retailbillingtype).updateBillStatus(transId, "I");
                     item.getItemProperty(MortgageTransactionViewContainer.BILL_STATUS_COL_NAME).setValue("InActive");
                     if(!billStatus.getValue().equals("All")){
                     	transactionTable.getContainerDataSource().removeItem((Integer) item.getItemProperty(MortgageTransactionViewContainer.ITEM_ID_HIDDEN_COL_NAME).getValue());
@@ -345,7 +346,7 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
         yesBtn.addClickListener(new ClickListener() {
             public void buttonClick(ClickEvent event) {
             	ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-            	new RestMortgageTransactionService(shopDto).deleteBill(transId);
+            	new RestMortgageTransactionService(shopDto, RetailBillingType.retailbillingtype).deleteBill(transId);
                 transactionTable.getContainerDataSource().removeItem((Integer) item.getItemProperty(MortgageTransactionViewContainer.ITEM_ID_HIDDEN_COL_NAME).getValue());
                 mywindow.close(); // Close the sub-window
                 Notification.show("Transaction No: " + transId + " deleted successfully");
@@ -686,7 +687,7 @@ public class MortgageTransactionSearchView extends VerticalLayout implements Vie
     	dto.setEndDate(endDate);
     	dto.setBillStatus(convertBillStatus(billStatus));
     	ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-    	List<MortgageTransactionSearchResultDTO> searchResultDtoList = new RestMortgageTransactionService(shopDto).findBills(dto);
+    	List<MortgageTransactionSearchResultDTO> searchResultDtoList = new RestMortgageTransactionService(shopDto, RetailBillingType.retailbillingtype).findBills(dto);
     	mortgageViewContainer.addTransactionSearch(searchResultDtoList);
         return mortgageViewContainer;
     }

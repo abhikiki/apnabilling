@@ -3,6 +3,7 @@ package com.abhishek.fmanage.retail.window;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -45,9 +46,11 @@ public class BillWindow extends Window{
 	private Embedded e ;
 	private TextArea message = new TextArea("Sms Content(160 characters max)");
 	private ComboBox defaultTextCombo = new ComboBox();
+	private RetailBillingType retailBillingType;
 	
-	public BillWindow(long transId, TransactionDTO retailTransaction){
+	public BillWindow(long transId, TransactionDTO retailTransaction, RetailBillingType retailBillingType){
 		this.retailTransaction = retailTransaction;
+		this.retailBillingType = retailBillingType;
 		windowDataVL.setSizeFull();
 		HorizontalLayout windowHeaderHL = getWindowHeader(transId);
 		if(transId != -1L){ // existing transaction
@@ -221,7 +224,7 @@ public class BillWindow extends Window{
 				if(retailTransaction.isTransactionActive()){
 					//deactivate
 					ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-					Boolean updateSuccess = new RestRetailTransactionService(shopDto).updateBillStatus(transId,"I");
+					Boolean updateSuccess = new RestRetailTransactionService(shopDto, retailBillingType).updateBillStatus(transId,"I");
 					if(updateSuccess){
 						retailTransaction.setTransactionActive(false);
 						actionButton.setCaption("Activate Bill");
@@ -234,7 +237,7 @@ public class BillWindow extends Window{
 				}else{
 					//activate
 					ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-					Boolean updateSuccess = new RestRetailTransactionService(shopDto).updateBillStatus(transId,"A");
+					Boolean updateSuccess = new RestRetailTransactionService(shopDto, retailBillingType).updateBillStatus(transId,"A");
 					if(updateSuccess){
 						retailTransaction.setTransactionActive(true);
 						actionButton.setCaption("Deactivate Bill");
@@ -256,7 +259,7 @@ public class BillWindow extends Window{
 	}
 	
 	private SmsSettingDTO getSmsSetting() {
-		return new RestRetailSmsService(getShopDto()).getSmsSetting(getShopDto().getShopId());
+		return new RestRetailSmsService(getShopDto(), retailBillingType).getSmsSetting(getShopDto().getShopId());
 	}
 
 	private ShopDTO getShopDto() {

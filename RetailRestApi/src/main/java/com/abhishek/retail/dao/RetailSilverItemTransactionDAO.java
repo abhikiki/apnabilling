@@ -5,7 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,17 +19,21 @@ import com.abhishek.retail.dto.SilverTransactionItemDTO;
 @Repository
 public class RetailSilverItemTransactionDAO {
 
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public RetailSilverItemTransactionDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailSilverItemTransactionDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 
 	public List<SilverTransactionItemDTO> getSilverTransactionItem(long transId){
 		final String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR, WEIGHT, MAKINGCHARGE, MAKINGCHARGETYPE, SILVERRATE, ITEMPRICE "
 				+ "FROM RETAILSILVERITEMTRANSACTION WHERE TRANSID = ?";
-		return jdbcTemplate.query(sql, new Object[]{transId}, this::silverTransItemMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{transId}, this::silverTransItemMapRow);
 	}
 	
 	
@@ -36,7 +42,7 @@ public class RetailSilverItemTransactionDAO {
 			    "(TRANSID, ITEMNAME, QUANTITY, PIECEPAIR, WEIGHT, MAKINGCHARGE, MAKINGCHARGETYPE, SILVERRATE, ITEMPRICE) "
 			    + "VALUES (?,?,?,?,?,?,?,?,?)";
 
-		jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).batchUpdate(sql, new BatchPreparedStatementSetter() {
 
 			    @Override
 			    public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -67,7 +73,7 @@ public class RetailSilverItemTransactionDAO {
 	
 	public boolean deleteTransaction(long transId){
 		final String sql = "DELETE FROM RETAILSILVERITEMTRANSACTION WHERE TRANSID = ?";
-		int rowsAffected = jdbcTemplate.update(sql, transId);
+		int rowsAffected = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(sql, transId);
 		return rowsAffected > 0 ? true : false;
 	}
 	

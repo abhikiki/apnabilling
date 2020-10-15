@@ -3,6 +3,7 @@ package com.abhishek.fmanage.retail.restclient.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class RestRetailLoginService {
         shopDto.setUserId(userName);
         shopDto.setPassword(password);
         RestServiceUtil restUtil = new RestServiceUtil();
-        HttpEntity<String> request = new HttpEntity<String>(restUtil.getHeaders(shopDto));
+        HttpEntity<String> request = new HttpEntity<String>(restUtil.getHeaders(shopDto, RetailBillingType.retailbillingtype));
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<ShopDTO> response = null;
         try{

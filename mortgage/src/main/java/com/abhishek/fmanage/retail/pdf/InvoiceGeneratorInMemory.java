@@ -711,6 +711,9 @@ public class InvoiceGeneratorInMemory implements PdfPTableEvent, StreamSource{
 		document.add(new Paragraph(" "));
 		document.add(new Paragraph(" "));
 		document.add(new Paragraph(" "));
+			document.add(new Paragraph(" "));
+			document.add(new Paragraph(" "));
+			document.add(new Paragraph(" "));
 
 		// document.add(generateBarCode(writer));
 		addInvoiceType(document, isEstimateBill, invoiceNumber);

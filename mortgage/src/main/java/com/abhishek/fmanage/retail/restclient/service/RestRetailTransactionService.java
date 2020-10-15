@@ -1,5 +1,6 @@
 package com.abhishek.fmanage.retail.restclient.service;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import com.abhishek.fmanage.retail.dto.*;
 import com.abhishek.fmanage.retail.restclient.response.BillCreationResponse;
 import com.abhishek.fmanage.retail.restclient.response.TransactionSearchResponse;
@@ -17,14 +18,16 @@ import java.util.Map;
 public class RestRetailTransactionService {
 
 	private ShopDTO shopDto = null;
-	public RestRetailTransactionService(ShopDTO shopDto){
+	private RetailBillingType retailBillingType;
+	public RestRetailTransactionService(ShopDTO shopDto, RetailBillingType retailBillingType){
 		this.shopDto = shopDto;
+		this.retailBillingType = retailBillingType;
 	}
 			
 	public TransactionDTO getBill(long transacationId){
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("transId", transacationId);
-	    HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto));
+	    HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto, retailBillingType));
 	    ResponseEntity<TransactionDTO> response = new RestTemplate().exchange(
 	    		new RestServiceUtil().getRestHostPortUrl() + "/bill/findbill/{transId}",
 	        	HttpMethod.GET,
@@ -37,7 +40,7 @@ public class RestRetailTransactionService {
 	public RetailTaxInvoiceDTO getBillByInvoiceId(long invoiceId){
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("invoiceId", invoiceId);
-		HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto));
+		HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto, retailBillingType));
 	    ResponseEntity<RetailTaxInvoiceDTO> response = new RestTemplate().exchange(
 	    		new RestServiceUtil().getRestHostPortUrl() + "/bill/findbill/invoice/{invoiceId}",
 	        	HttpMethod.GET,
@@ -50,7 +53,7 @@ public class RestRetailTransactionService {
 	public RetailAdvanceBillDTO getBillByAdvancveReceiptId(long advanceReceiptId){
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("advanceReceiptId", advanceReceiptId);
-		HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto));
+		HttpEntity<String> entityrequest = new HttpEntity<String>(new RestServiceUtil().getHeaders(shopDto, retailBillingType));
 	    ResponseEntity<RetailAdvanceBillDTO> response = new RestTemplate().exchange(
 	    		new RestServiceUtil().getRestHostPortUrl() + "/bill/findbill/advancereceipt/{advanceReceiptId}",
 	        	HttpMethod.GET,
@@ -64,7 +67,7 @@ public class RestRetailTransactionService {
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		paramMap.put("shopId", shopDto.getShopId());
 		RestTemplate restTemplate = new RestTemplate();
-        HttpEntity<TransactionDTO> entityrequest = new HttpEntity<TransactionDTO>(retailTransaction, new RestServiceUtil().getHeaders(shopDto));
+        HttpEntity<TransactionDTO> entityrequest = new HttpEntity<TransactionDTO>(retailTransaction, new RestServiceUtil().getHeaders(shopDto, retailBillingType));
         ResponseEntity<BillCreationResponse> response = restTemplate.exchange(
         		new RestServiceUtil().getRestHostPortUrl() + "/bill/create/{shopId}",
         		HttpMethod.POST,
@@ -84,7 +87,7 @@ public class RestRetailTransactionService {
 	public List<TransactionSearchResultDto> findBills(TransactionSearchCriteriaDto dto){
 		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactory());
 
-        HttpEntity<TransactionSearchCriteriaDto> entityrequest = new HttpEntity<TransactionSearchCriteriaDto>(dto, new RestServiceUtil().getHeaders(shopDto));
+        HttpEntity<TransactionSearchCriteriaDto> entityrequest = new HttpEntity<TransactionSearchCriteriaDto>(dto, new RestServiceUtil().getHeaders(shopDto, retailBillingType));
         ResponseEntity<TransactionSearchResponse> response = restTemplate.exchange(
         		new RestServiceUtil().getRestHostPortUrl() + "/bill/findbills",
         		HttpMethod.POST,
@@ -97,7 +100,7 @@ public class RestRetailTransactionService {
 		Map<String, Object> updateBillParamMap = new HashMap<String, Object>();
 		updateBillParamMap.put("shopId", shopId);
 		updateBillParamMap.put("transId", transId);
-		HttpEntity<TransactionDTO> entityrequest = new HttpEntity<TransactionDTO>(retailTransaction, new RestServiceUtil().getHeaders(shopDto));
+		HttpEntity<TransactionDTO> entityrequest = new HttpEntity<TransactionDTO>(retailTransaction, new RestServiceUtil().getHeaders(shopDto, retailBillingType));
 	    ResponseEntity<BillCreationResponse> response = new RestTemplate().exchange(
 	    		new RestServiceUtil().getRestHostPortUrl() + "/bill/updatebill/{shopId}/{transId}",
 	        	HttpMethod.POST,
@@ -111,7 +114,7 @@ public class RestRetailTransactionService {
 		Map<String, Object> updateBillParamMap = new HashMap<String, Object>();
 		updateBillParamMap.put("transId", transId);
 		updateBillParamMap.put("transactionStatus", transactionStatus);
-		HttpEntity<String> entityrequest = new HttpEntity<String>(transactionStatus, new RestServiceUtil().getHeaders(shopDto));
+		HttpEntity<String> entityrequest = new HttpEntity<String>(transactionStatus, new RestServiceUtil().getHeaders(shopDto, retailBillingType));
 	    ResponseEntity<Boolean> response = new RestTemplate().exchange(
 	    		new RestServiceUtil().getRestHostPortUrl() + "/bill/updatebillstatus/{transId}",
 	        	HttpMethod.POST,

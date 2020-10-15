@@ -5,6 +5,7 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,22 +23,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RestServiceUtil {
 
-	protected HttpHeaders getHeaders(ShopDTO shopDto){
+	protected static HttpHeaders getHeaders(ShopDTO shopDto, RetailBillingType retailBillingType){
         String plainCredentials= shopDto.getUserId() + ":" + shopDto.getPassword();
         String base64Credentials = new String(Base64.encode(plainCredentials.getBytes()));
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Basic " + base64Credentials);
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+        headers.add("billingType", RetailBillingType.registeredCustomertype.equals(retailBillingType) ?
+                RetailBillingType.registeredCustomertype.name() :
+                RetailBillingType.retailbillingtype.name());
         return headers;
     }
 
-	protected String getRestHostPortUrl() {
+	protected static String getRestHostPortUrl() {
 		return PropertiesFileReader.getInstance().getProperty("url");
 	}
 
-	protected <T> ResponseEntity<T> getResponseEntity(URI url, Class<T> clazz, ShopDTO shopDto) throws SignatureException, Exception {
-        HttpEntity<T> headersEntity = new HttpEntity<T>(getHeaders(shopDto));
+	protected static <T> ResponseEntity<T> getResponseEntity(URI url, Class<T> clazz, ShopDTO shopDto, RetailBillingType retailBillingType) throws SignatureException, Exception {
+        HttpEntity<T> headersEntity = new HttpEntity<T>(getHeaders(shopDto, retailBillingType));
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         List<HttpMessageConverter<?>> converters = new ArrayList<>();

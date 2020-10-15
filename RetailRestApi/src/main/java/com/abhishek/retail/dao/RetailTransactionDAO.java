@@ -7,7 +7,9 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -19,39 +21,43 @@ import com.abhishek.retail.dto.RetailTransactionDTO;
 @Repository
 public class RetailTransactionDAO {
 
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public RetailTransactionDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailTransactionDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 
 	public boolean updateTransactionStatus(long transId, String transactionStatus){
 		final String sql = "UPDATE RETAILTRANSACTION SET TRANSACTIONSTATUS = ? WHERE TRANSID = ?";
-		int rowsAffected = jdbcTemplate.update(sql, new Object[] {transactionStatus, transId});
+		int rowsAffected = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(sql, new Object[] {transactionStatus, transId});
 		return rowsAffected > 0? true : false;
 	}
 	
 	public boolean deleteTransaction(long transId){
 		final String sql = "DELETE FROM RETAILTRANSACTION WHERE TRANSID = ?";
-		int rowsAffected = jdbcTemplate.update(sql, transId);
+		int rowsAffected = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(sql, transId);
 		final String deleteRetailTaxInvoiceSql = "DELETE FROM RETAILTAXINVOICE WHERE TRANSID = ?";
-		jdbcTemplate.update(deleteRetailTaxInvoiceSql, transId);
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(deleteRetailTaxInvoiceSql, transId);
 		final String deleteRetailAdvanceReceipt = "DELETE FROM RETAILADVANCEBILL WHERE TRANSID = ?";
-		jdbcTemplate.update(deleteRetailAdvanceReceipt, transId);
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(deleteRetailAdvanceReceipt, transId);
 		return rowsAffected > 0? true : false;
 	}
 	
 	public List<RetailTransactionDTO> getRetailTransaction(long transId) {
 		final String sql = "SELECT SHOPID, TRANSID, TRANSDATE, BILLTYPE, DEALINGSTAFFNAME, NOTES, INCLUDEPRICE, TRANSACTIONSTATUS FROM RETAILTRANSACTION WHERE TRANSID = ?";
-		return jdbcTemplate.query(sql, new Object[] { transId }, this::retailTransactionMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] { transId }, this::retailTransactionMapRow);
 	}
 
 	public Long updateRetailTransaction(long transId, RetailTransactionDTO retailTransDTO) {
 		final String sql = "UPDATE RETAILTRANSACTION SET SHOPID = ?, TRANSDATE = ?, BILLTYPE = ?, "
 			+ "DEALINGSTAFFNAME = ?, NOTES = ?, INCLUDEPRICE = ?, TRANSACTIONSTATUS = ? WHERE TRANSID = ?";
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		jdbcTemplate.update(new PreparedStatementCreator() {
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,
@@ -76,7 +82,7 @@ public class RetailTransactionDAO {
 	public Long saveRetailTransaction(RetailTransactionDTO retailTransDTO) {
 		final String sql = "INSERT INTO RETAILTRANSACTION(SHOPID, TRANSDATE, BILLTYPE, DEALINGSTAFFNAME, NOTES, INCLUDEPRICE, TRANSACTIONSTATUS) values(?, ?, ?, ?, ?, ?, ?)";
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		jdbcTemplate.update(new PreparedStatementCreator() {
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,

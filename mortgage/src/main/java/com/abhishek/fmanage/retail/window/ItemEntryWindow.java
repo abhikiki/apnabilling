@@ -2,6 +2,7 @@ package com.abhishek.fmanage.retail.window;
 
 import java.util.stream.Collectors;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import org.apache.commons.lang3.StringUtils;
 
 import com.abhishek.fmanage.cache.ItemCache;
@@ -68,7 +69,8 @@ public class ItemEntryWindow extends Window{
 			return;
 		}
 		ShopDTO shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-		new RestRetailItemService(shopDto).addItem(shopDto.getShopId(), itemName, itemType);
+		new RestRetailItemService(shopDto, RetailBillingType.retailbillingtype).addItem(shopDto.getShopId(), itemName, itemType);
+		new RestRetailItemService(shopDto, RetailBillingType.registeredCustomertype).addItem(shopDto.getShopId(), itemName, itemType);
 		
 			select.addItem(itemName.toUpperCase());
 			Notification.show("Item Successfully added");

@@ -3,6 +3,7 @@
  */
 package com.abhishek.fmanage.retail.views;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import com.abhishek.fmanage.retail.data.container.RetailTransactionViewContainer;
 import com.abhishek.fmanage.retail.dto.*;
 import com.abhishek.fmanage.retail.restclient.service.RestRetailTransactionService;
@@ -90,7 +91,8 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     
     private final TextField invoiceIdTextField = new TextField();
     private final TextField advanceReceiptIdTextField = new TextField();
-    
+    private ComboBox billingTypeCombo = new ComboBox("Billing Type");
+
     /** Data container for holding transactions */
     RetailTransactionViewContainer retailViewContainer = new RetailTransactionViewContainer();
 
@@ -131,6 +133,11 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
         endPopUpDate.setInputPrompt(SELECT_DATE);
         endPopUpDate.setValue(new Date());
 
+        billingTypeCombo.addItem("RetailBilling");
+        billingTypeCombo.addItem("RegisteredBilling");
+        billingTypeCombo.setNullSelectionAllowed(false);
+        billingTypeCombo.setValue("RetailBilling");
+
         transactionTable = getTransactionTable();
         setContainerFilters();
 
@@ -150,6 +157,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
                 endPopUpDate.setValue(new Date());
                 billType.setValue(ALL);
                 billStatus.setValue(ACTIVE_BILL_STATUS);
+                billingTypeCombo.setValue("RetailBilling");
                 initializeData();
                 setTableColumnFooters();
             }
@@ -159,13 +167,15 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
         resetFilterButton.setWidth("80%");
         resetFilterButton.addStyleName("default");
         resetFilterButton.setIcon(FontAwesome.REFRESH);
-       
+
+
+        toolbar.addComponent(billingTypeCombo);
         toolbar.addComponent(startPopUpDate);
         toolbar.addComponent(endPopUpDate);
         toolbar.addComponent( billType = getBillTypeOptionGroup());
         toolbar.addComponent( billStatus = getBillStatusOptionGroup());
-       
-       
+
+        toolbar.setExpandRatio(billingTypeCombo, 1);
         toolbar.setExpandRatio(startPopUpDate, 1);
         toolbar.setExpandRatio(endPopUpDate, 1);
         toolbar.setExpandRatio(billType, 1);
@@ -186,6 +196,9 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             @Override
             public void buttonClick(ClickEvent event)
             {
+                String billingTypeName = billingTypeCombo.getValue().toString();
+                RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
+
             	filter.setValue(StringUtils.EMPTY);
                 retailViewContainer.removeAllContainerFilters();
             	retailViewContainer.removeAllItems();
@@ -198,7 +211,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             	criteriaDto.setEndDate(endPopUpDate.getValue());
             	criteriaDto.setBillType(convertBillType(billType.getValue().toString()));
             	criteriaDto.setBillStatus(convertBillStatus(billStatus.getValue().toString()));
-            	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService(shopDto).findBills(criteriaDto);
+            	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService(shopDto, retailBillingType).findBills(criteriaDto);
                 retailViewContainer.addTransactionSearch(searchResultDtoList);
                 setContainerFilters();
                 transactionTable.setPageLength(searchResultDtoList.size());
@@ -241,13 +254,15 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
             @Override
             public void handleAction(Action action, Object sender, Object target)
             {
+                String billingTypeName = billingTypeCombo.getValue().toString();
+                RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
                 if (action == transactionDetailAction)
                 {
                     Item item = ((Table) sender).getItem(target);
                     long transId =  (long) item.getItemProperty(
                         RetailTransactionViewContainer.TRANSID_COL_NAME).getValue();
                     ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-                    BillWindow bw = new BillWindow(transId, new RestRetailTransactionService(shopDto).getBill(transId));
+                    BillWindow bw = new BillWindow(transId, new RestRetailTransactionService(shopDto, retailBillingType).getBill(transId), retailBillingType);
             		UI.getCurrent().addWindow(bw);
             		bw.focus();
                 }
@@ -375,12 +390,14 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
              
              public void buttonClick(ClickEvent event)
              {
+                 String billingTypeName = billingTypeCombo.getValue().toString();
+                 RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
             	if(NumberUtils.isDigits(String.valueOf(transIdTextField.getValue()))){
             		long transId = NumberUtils.toLong(String.valueOf(transIdTextField.getValue()));
             		ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-            		TransactionDTO transDto = new RestRetailTransactionService(shopDto).getBill(transId);
+            		TransactionDTO transDto = new RestRetailTransactionService(shopDto, retailBillingType).getBill(transId);
             		if(transDto != null){
-            			BillWindow bw = new BillWindow(transId, transDto);
+            			BillWindow bw = new BillWindow(transId, transDto, retailBillingType);
                  		UI.getCurrent().addWindow(bw);
                  		bw.focus();
             		}else{
@@ -406,16 +423,18 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
              
              public void buttonClick(ClickEvent event)
              {
+                 String billingTypeName = billingTypeCombo.getValue().toString();
+                 RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
             	if(NumberUtils.isDigits(String.valueOf(invoiceIdTextField.getValue()))){
             		long invoiceId = NumberUtils.toLong(String.valueOf(invoiceIdTextField.getValue()));
             		ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-            		RetailTaxInvoiceDTO retailTaxInvoiceDto = new RestRetailTransactionService(shopDto).getBillByInvoiceId(invoiceId);
+            		RetailTaxInvoiceDTO retailTaxInvoiceDto = new RestRetailTransactionService(shopDto, retailBillingType).getBillByInvoiceId(invoiceId);
             		if(retailTaxInvoiceDto == null){
             			Notification.show("Invoice Not Found");
             		}else{
             			long transId = retailTaxInvoiceDto.getTransId();
-                		TransactionDTO transDto = new RestRetailTransactionService(shopDto).getBill(transId);
-                		BillWindow bw = new BillWindow(transId, transDto);
+                		TransactionDTO transDto = new RestRetailTransactionService(shopDto, retailBillingType).getBill(transId);
+                		BillWindow bw = new BillWindow(transId, transDto, retailBillingType);
                  		UI.getCurrent().addWindow(bw);
                  		bw.focus();
             		}
@@ -439,16 +458,18 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
              
              public void buttonClick(ClickEvent event)
              {
+                 String billingTypeName = billingTypeCombo.getValue().toString();
+                 RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
             	if(NumberUtils.isDigits(String.valueOf(advanceReceiptIdTextField.getValue()))){
             		long advanceReceiptId = NumberUtils.toLong(String.valueOf(advanceReceiptIdTextField.getValue()));
             		ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-            		RetailAdvanceBillDTO retailAdvanceBillDto = new RestRetailTransactionService(shopDto).getBillByAdvancveReceiptId(advanceReceiptId);
+            		RetailAdvanceBillDTO retailAdvanceBillDto = new RestRetailTransactionService(shopDto, retailBillingType).getBillByAdvancveReceiptId(advanceReceiptId);
             		if(retailAdvanceBillDto == null){
             			Notification.show("Advance Receipt not found");
             		}else{
             			long transId = retailAdvanceBillDto.getTransId();
-                		TransactionDTO transDto = new RestRetailTransactionService(shopDto).getBill(transId);
-                		BillWindow bw = new BillWindow(transId, transDto);
+                		TransactionDTO transDto = new RestRetailTransactionService(shopDto, retailBillingType).getBill(transId);
+                		BillWindow bw = new BillWindow(transId, transDto, retailBillingType);
                  		UI.getCurrent().addWindow(bw);
                  		bw.focus();
             		}
@@ -698,6 +719,8 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
 
     private RetailTransactionViewContainer getTransactionSearchViewContainer(int shopId, Date startDate, Date endDate, String billType, String billStatus)
     {
+        String billingTypeName = billingTypeCombo.getValue().toString();
+        RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
     	TransactionSearchCriteriaDto dto = new TransactionSearchCriteriaDto();
     	dto.setShopId(shopId);
     	dto.setStartDate(startDate);
@@ -705,7 +728,7 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     	dto.setBillType(convertBillType(billType));
     	dto.setBillStatus(convertBillStatus(billStatus));
     	ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-    	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService(shopDto).findBills(dto);
+    	List<TransactionSearchResultDto> searchResultDtoList = new RestRetailTransactionService(shopDto, retailBillingType).findBills(dto);
         retailViewContainer.addTransactionSearch(searchResultDtoList);
         return retailViewContainer;
     }
@@ -740,5 +763,4 @@ public class RetailTransactionSearchView extends VerticalLayout implements View
     	}
     	return convertedBillStatus;
     }
-    
 }

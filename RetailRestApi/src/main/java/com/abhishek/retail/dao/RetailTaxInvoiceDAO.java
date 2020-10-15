@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -17,34 +19,38 @@ import com.abhishek.retail.dto.RetailTaxInvoiceDTO;
 
 @Repository
 public class RetailTaxInvoiceDAO {
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public RetailTaxInvoiceDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailTaxInvoiceDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 
 	public List<RetailTaxInvoiceDTO> getRetailTaxInvoice(long transId) {
 		final String sql = "SELECT SHOPID, TRANSID, INVOICENUMBER FROM RETAILTAXINVOICE WHERE TRANSID = ?";
-		return jdbcTemplate.query(sql, new Object[] { transId },
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] { transId },
 				this::retailTaxInvoiceMapRow);
 	}
 	
 	public List<RetailTaxInvoiceDTO> getRetailTaxInvoiceByInvoiceId(long invoiceId) {
 		final String sql = "SELECT SHOPID, TRANSID, INVOICENUMBER FROM RETAILTAXINVOICE WHERE INVOICENUMBER = ?";
-		return jdbcTemplate.query(sql, new Object[] { invoiceId }, this::retailTaxInvoiceMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] { invoiceId }, this::retailTaxInvoiceMapRow);
 	}
 	
 	public boolean deleteTransaction(long transId){
 		final String sql = "DELETE FROM RETAILTAXINVOICE WHERE TRANSID = ?";
-		int rowsAffected = jdbcTemplate.update(sql, transId);
+		int rowsAffected = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(sql, transId);
 		return rowsAffected > 0 ? true : false;
 	}
 	
 	public Long saveRetailTaxInvoice(long shopId, long transId){
 		final String sql = "INSERT INTO RETAILTAXINVOICE(SHOPID, TRANSID) values(?, ?)";
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		jdbcTemplate.update(new PreparedStatementCreator() {
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,

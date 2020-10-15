@@ -1,10 +1,12 @@
 package com.abhishek.retail.dao;
 
+import com.abhishek.retail.RestTemplateUtil;
 import com.abhishek.retail.dto.GoldTypeQuantitySaleSummaryDTO;
 import com.abhishek.retail.dto.GoldTypeWeightSaleSummaryDTO;
 import com.abhishek.retail.dto.ItemSummaryDTO;
 import com.abhishek.retail.dto.SummaryDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +18,15 @@ import java.util.*;
 @Repository
 public class SummaryDAO {
 
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public SummaryDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public SummaryDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 	
 	@Transactional
@@ -51,7 +57,7 @@ public class SummaryDAO {
 			+ " AND RTP.TRANSID = RT.TRANSID"
 			+ " AND RT.BILLTYPE = 'I'"
 			+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-			Double totalVat = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+			Double totalVat = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 			return totalVat == null ? 0.0f : totalVat;
 	}
 
@@ -60,7 +66,7 @@ public class SummaryDAO {
 		 + " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
 		 + " AND RTP.TRANSID = RT.TRANSID"
 		 + " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double totalSale = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double totalSale = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return totalSale == null ? 0.0f : totalSale;
 	}
 
@@ -69,7 +75,7 @@ public class SummaryDAO {
 				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
 				+ " AND RTP.TRANSID = RT.TRANSID"
 				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double totalCardPayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double totalCardPayment = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return totalCardPayment == null ? 0.0f : totalCardPayment;
 	}
 
@@ -78,7 +84,7 @@ public class SummaryDAO {
 				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
 				+ " AND RTP.TRANSID = RT.TRANSID"
 				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double totalCashPayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double totalCashPayment = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return totalCashPayment == null ? 0.0f : totalCashPayment;
 	}
 
@@ -87,7 +93,7 @@ public class SummaryDAO {
 				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
 				+ " AND RTP.TRANSID = RT.TRANSID"
 				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double totalChequePayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double totalChequePayment = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return totalChequePayment == null ? 0.0f : totalChequePayment;
 	}
 
@@ -96,7 +102,7 @@ public class SummaryDAO {
 				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
 				+ " AND RTP.TRANSID = RT.TRANSID"
 				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double totalNeftPayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double totalNeftPayment = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return totalNeftPayment == null ? 0.0f : totalNeftPayment;
 	}
 
@@ -105,7 +111,7 @@ public class SummaryDAO {
 				+ " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'"
 				+ " AND RTP.TRANSID = RT.TRANSID"
 				+ " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double totalRtgsPayment = jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double totalRtgsPayment = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return totalRtgsPayment == null ? 0.0f : totalRtgsPayment;
 	}
 
@@ -114,13 +120,13 @@ public class SummaryDAO {
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'" +
 					 " AND RGT.TRANSID = RT.TRANSID" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double goldWeight=  jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double goldWeight=  RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		
 		sql = "SELECT SUM(GOLDWEIGHT) GOLDWEIGHT FROM RETAILDIAMONDITEMTRANSACTION RDT, RETAILTRANSACTION RT" + 
 				 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'" +
 				 " AND RDT.TRANSID = RT.TRANSID" +
 				  " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double goldWeightInDiamond =  jdbcTemplate.queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
+		Double goldWeightInDiamond =  RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return (goldWeight == null ? 0.0f : goldWeight) + (goldWeightInDiamond == null ? 0.0f : goldWeightInDiamond);
 	}
 	
@@ -129,7 +135,7 @@ public class SummaryDAO {
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RT.BILLTYPE='I'" +
 					 " AND RST.TRANSID = RT.TRANSID" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		Double silverWeight = jdbcTemplate.queryForObject(
+		Double silverWeight = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).queryForObject(
 				sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, Double.class);
 		return silverWeight == null ? 0.0f : silverWeight;
 	}
@@ -138,7 +144,7 @@ public class SummaryDAO {
 		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILGOLDITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		List<ItemSummaryDTO> summaryList = jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
+		List<ItemSummaryDTO> summaryList = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
 	}
 
@@ -147,7 +153,7 @@ public class SummaryDAO {
 				" WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 				" AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)" +
 				" GROUP BY GOLDTYPE";
-		return jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::goldTypeQuantitySaleSummaryMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::goldTypeQuantitySaleSummaryMapRow);
 	}
 
 	public List<GoldTypeWeightSaleSummaryDTO> getGoldWeightByTypeSummary(final Date startDate, final Date endDate){
@@ -155,7 +161,7 @@ public class SummaryDAO {
 				" WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 				" AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)" +
 				" GROUP BY GOLDTYPE";
-		return jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::goldTypeWeightSaleSummaryMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::goldTypeWeightSaleSummaryMapRow);
 	}
 
 
@@ -164,7 +170,7 @@ public class SummaryDAO {
 		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILSILVERITEMTRANSACTION RGT, RETAILTRANSACTION RT" +
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		List<ItemSummaryDTO> summaryList = jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
+		List<ItemSummaryDTO> summaryList = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
 	}
 
@@ -172,7 +178,7 @@ public class SummaryDAO {
 		String sql = "SELECT ITEMNAME, QUANTITY  , PIECEPAIR  FROM RETAILDIAMONDITEMTRANSACTION RGT, RETAILTRANSACTION RT" +
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		List<ItemSummaryDTO> summaryList =  jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
+		List<ItemSummaryDTO> summaryList =  RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
 	}
 	
@@ -180,7 +186,7 @@ public class SummaryDAO {
 		String sql = "SELECT ITEMNAME, QUANTITY, PIECEPAIR  FROM RETAILGENERALITEMTRANSACTION RGT, RETAILTRANSACTION RT" + 
 					 " WHERE RT.TRANSACTIONSTATUS = 'A' AND RGT.TRANSID = RT.TRANSID  AND RT.BILLTYPE='I'" +
 					 " AND CAST(RT.TRANSDATE AS DATE) BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)";
-		List<ItemSummaryDTO> summaryList =  jdbcTemplate.query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
+		List<ItemSummaryDTO> summaryList =  RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] {new java.sql.Timestamp(startDate.getTime()), new java.sql.Timestamp(endDate.getTime()) }, this::itemSummaryMapRow);
 		return consolidateItemSummary(summaryList);
 	}
 

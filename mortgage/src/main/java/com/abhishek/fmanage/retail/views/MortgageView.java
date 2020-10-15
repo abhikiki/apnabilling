@@ -5,6 +5,7 @@ import com.abhishek.fmanage.mortgage.data.container.MortgageItemType;
 import com.abhishek.fmanage.mortgage.dto.MortgageItemDTO;
 import com.abhishek.fmanage.mortgage.dto.MortgageTransactionDTO;
 import com.abhishek.fmanage.mortgage.tables.MortgageItemTable;
+import com.abhishek.fmanage.retail.RetailBillingType;
 import com.abhishek.fmanage.retail.dto.CustomerDTO;
 import com.abhishek.fmanage.retail.dto.ShopDTO;
 import com.abhishek.fmanage.retail.restclient.service.RestMortgageTransactionService;
@@ -203,7 +204,7 @@ public class MortgageView extends VerticalLayout implements View {
 						ShopDTO.class);
 				String validationMessage = checkToSaveTransaction(transDto);
 				if(StringUtils.isEmpty(validationMessage)){
-					long transId = new RestMortgageTransactionService(shopDto).createBill(shopDto,	transDto);
+					long transId = new RestMortgageTransactionService(shopDto, RetailBillingType.retailbillingtype).createBill(shopDto,	transDto);
 					if(transId > 0){
 						Notification.show("Transaction Saved successfully", Type.WARNING_MESSAGE);
 					}else{

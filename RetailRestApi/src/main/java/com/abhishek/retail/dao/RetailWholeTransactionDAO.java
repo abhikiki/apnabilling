@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -58,14 +60,15 @@ public class RetailWholeTransactionDAO {
 	@Autowired
 	private RetailTransactionPaymentDAO paymentDAO;
 	
-	@Autowired
-    protected NamedParameterJdbcTemplate namedJdbcTemplate;
-	
-	private final JdbcTemplate jdbcTemplate;
+	private final NamedParameterJdbcTemplate retailBillingJdbcTemplate;
+	private final NamedParameterJdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public RetailWholeTransactionDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailWholeTransactionDAO(
+			@Qualifier("namedRetailBillingJdbcTemplate") final NamedParameterJdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("namedRegisteredBillingJdbcTemplate") final NamedParameterJdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 
 	@Transactional
@@ -148,7 +151,7 @@ public class RetailWholeTransactionDAO {
 			billStatus1 = "I";
 		}
 		
-        return namedJdbcTemplate.query("call customtransactionsearch(:shopId, :billType1, :billType2, :billStatus1, :billStatus2, :startDate, :endDate)",
+        return RestTemplateUtil.getNamedJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query("call customtransactionsearch(:shopId, :billType1, :billType2, :billStatus1, :billStatus2, :startDate, :endDate)",
         		new MapSqlParameterSource()
         		.addValue("shopId", shopId)
                 .addValue("billType1", billType1)

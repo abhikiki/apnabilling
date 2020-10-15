@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -18,36 +20,40 @@ import com.abhishek.retail.dto.ItemDTO;
 @Repository
 public class RetailItemStaffDAO {
 
-	private final JdbcTemplate jdbcTemplate;
-	
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
+
 	@Autowired
-	public RetailItemStaffDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailItemStaffDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 	
 	public List<ItemDTO> getGoldItems(final long shopId) {
 		final String sql = "SELECT ITEMNAME FROM RETAILGOLDITEM WHERE SHOPID = ?";
-		return jdbcTemplate.query(sql, new Object[]{shopId}, this::itemMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{shopId}, this::itemMapRow);
 	}
 
 	public List<ItemDTO> getSilverItems(final long shopId) {
 		final String sql = "SELECT ITEMNAME FROM RETAILSILVERITEM WHERE SHOPID = ?";
-		return jdbcTemplate.query(sql, new Object[]{shopId}, this::itemMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{shopId}, this::itemMapRow);
 	}
 	
 	public List<ItemDTO> getDiamondItems(final long shopId) {
 		final String sql = "SELECT ITEMNAME FROM RETAILDIAMONDITEM WHERE SHOPID = ?";
-		return jdbcTemplate.query(sql, new Object[]{shopId}, this::itemMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{shopId}, this::itemMapRow);
 	}
 	
 	public List<ItemDTO> getGeneralItems(final long shopId) {
 		final String sql = "SELECT ITEMNAME FROM RETAILGENERALITEM WHERE SHOPID = ?";
-		return jdbcTemplate.query(sql, new Object[]{shopId}, this::itemMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{shopId}, this::itemMapRow);
 	}
 	
 	public List<ItemDTO> getStaffList(final long shopId) {
 		final String sql = "SELECT STAFFNAME FROM RETAILSTAFF WHERE SHOPID = ?";
-		return jdbcTemplate.query(sql, new Object[]{shopId}, this::staffMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{shopId}, this::staffMapRow);
 	}
 	
 	public void addItem(final long shopId, final String itemName, String container) {
@@ -64,7 +70,7 @@ public class RetailItemStaffDAO {
 		}
 		final String sql = "INSERT INTO " + tableName + "(SHOPID, ITEMNAME, OWNER) VALUES(?, ?, ?)";
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		jdbcTemplate.update(new PreparedStatementCreator() {
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,	new String[] { "id" });
 				pst.setLong(1, shopId);
@@ -80,7 +86,7 @@ public class RetailItemStaffDAO {
 		
 		final String sql = "INSERT INTO RETAILSTAFF(SHOPID, STAFFNAME, OWNER) VALUES(?, ?, ?)";
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		jdbcTemplate.update(new PreparedStatementCreator() {
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,	new String[] { "id" });
 				pst.setLong(1, shopId);

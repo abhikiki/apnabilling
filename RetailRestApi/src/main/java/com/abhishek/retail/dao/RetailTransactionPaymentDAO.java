@@ -7,7 +7,9 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
+import com.abhishek.retail.RestTemplateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -22,17 +24,21 @@ import com.abhishek.retail.dto.RetailTransactionPaymentDTO;
 @Repository
 public class RetailTransactionPaymentDAO {
 
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
 
 	@Autowired
-	public RetailTransactionPaymentDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public RetailTransactionPaymentDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate) {
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
 	}
 	
 	public Long saveRetailTransactionPayment(Long transId, RetailTransactionPaymentDTO retailTransPaymentDto) {
 		final String sql = "INSERT INTO RETAILTRANSACTIONPAYMENT(TRANSID, TOTALCARDPAYMENT, CASHPAYMENT, CHEQUEPAYMENT, NEFTPAYMENT, RGTSPAYMENT) values(?, ?, ?, ?, ?, ?)";
 		KeyHolder keyHolder = new GeneratedKeyHolder();
-		jdbcTemplate.update(new PreparedStatementCreator() {
+		RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(new PreparedStatementCreator() {
 			public PreparedStatement createPreparedStatement(Connection con)
 					throws SQLException {
 				PreparedStatement pst = con.prepareStatement(sql,
@@ -51,12 +57,12 @@ public class RetailTransactionPaymentDAO {
 	
 	public List<RetailTransactionPaymentDTO> getRetailTransactionPayment(long transId) {
 		final String sql = "SELECT TRANSID, TOTALCARDPAYMENT, CASHPAYMENT, CHEQUEPAYMENT, NEFTPAYMENT, RGTSPAYMENT FROM RETAILTRANSACTIONPAYMENT WHERE TRANSID = ?";
-		return jdbcTemplate.query(sql, new Object[] { transId }, this::retailTransactionPaymentMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[] { transId }, this::retailTransactionPaymentMapRow);
 	}
 	
 	public boolean deleteTransaction(long transId){
 		final String sql = "DELETE FROM RETAILTRANSACTIONPAYMENT WHERE TRANSID = ?";
-		int rowsAffected = jdbcTemplate.update(sql, transId);
+		int rowsAffected = RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).update(sql, transId);
 		return rowsAffected > 0 ? true : false;
 	}
 	

@@ -3,10 +3,12 @@
  */
 package com.abhishek.retail.dao;
 
+import com.abhishek.retail.RestTemplateUtil;
 import com.abhishek.retail.dto.ShopDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -27,14 +29,24 @@ public class ShopDAO {
 
 	private static Logger logger = LoggerFactory.getLogger(ShopDAO.class);
 
-	private final JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate retailBillingJdbcTemplate;
+	private final JdbcTemplate registeredBillingJdbcTemplate;
+
+	private final NamedParameterJdbcTemplate namedRetailBillingJdbcTemplate;
+	private final NamedParameterJdbcTemplate namedRegisteredBillingJdbcTemplate;
+
 
 	@Autowired
-	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
-	@Autowired
-	public ShopDAO(final JdbcTemplate jdbcTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
+	public ShopDAO(
+			@Qualifier("retailBillingJdbcTemplate") final JdbcTemplate retailBillingJdbcTemplate,
+			@Qualifier("namedRetailBillingJdbcTemplate") final NamedParameterJdbcTemplate namedRetailBillingJdbcTemplate,
+			@Qualifier("registeredBillingJdbcTemplate") final JdbcTemplate registeredBillingJdbcTemplate,
+			@Qualifier("namedRegisteredBillingJdbcTemplate") final NamedParameterJdbcTemplate namedRegisteredBillingJdbcTemplate)
+	{
+		this.retailBillingJdbcTemplate = retailBillingJdbcTemplate;
+		this.namedRetailBillingJdbcTemplate = namedRetailBillingJdbcTemplate;
+		this.registeredBillingJdbcTemplate = registeredBillingJdbcTemplate;
+		this.namedRegisteredBillingJdbcTemplate = namedRegisteredBillingJdbcTemplate;
 	}
 
 	public Optional<ShopDTO> getShopInformation(String userId, String password) {
@@ -43,7 +55,7 @@ public class ShopDAO {
 
 		Optional<ShopDTO> shopDTO = Optional.empty();
 		try {
-			shopDTO = Optional.of(namedParameterJdbcTemplate.queryForObject(sql,
+			shopDTO = Optional.of(RestTemplateUtil.getNamedJdbcTemplate(namedRetailBillingJdbcTemplate, namedRegisteredBillingJdbcTemplate).queryForObject(sql,
 					new MapSqlParameterSource()
 							.addValue("userId", userId)
 							.addValue("password", password),
@@ -57,7 +69,7 @@ public class ShopDAO {
 
 	public List<ShopDTO> getShopInformation(long shopId) {
 		final String sql = "SELECT S.SHOPID, S.SHOPNAME, S.TINNUMBER, U.FIRSTNAME, U.LASTNAME, U.USERID, U.USERPASSWORD, U.ROLE FROM SHOP S, USERINFORMATION U WHERE S.SHOPID = ?";
-		return jdbcTemplate.query(sql, new Object[]{shopId}, this::shopMapRow);
+		return RestTemplateUtil.getJdbcTemplate(retailBillingJdbcTemplate, registeredBillingJdbcTemplate).query(sql, new Object[]{shopId}, this::shopMapRow);
 	}
 	
 //	public Long saveShopInformation(ShopDTO shopDto) {

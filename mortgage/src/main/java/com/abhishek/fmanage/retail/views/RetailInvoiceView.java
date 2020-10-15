@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.abhishek.fmanage.retail.RetailBillingType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -94,6 +95,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	private PaymentForm paymentForm = new PaymentForm(getPaymentPropertyItem());
 	private HorizontalLayout priceLayout = new HorizontalLayout();
 	private ComboBox staffNameComboBox = new ComboBox("Staff Name");
+	private ComboBox billingTypeCombo = new ComboBox("Billing Type");
 	private CustomerDTO cusBean = new CustomerDTO();
 	private CheckBox includePrice = new CheckBox("Include Price", true);
 	private OptionGroup billType;
@@ -210,16 +212,18 @@ public class RetailInvoiceView extends VerticalLayout implements View {
  		searchAdvanceReceiptBtn.addClickListener(new Button.ClickListener() {
 			@Override
 			public void buttonClick(ClickEvent event) {
+				String billingTypeName = billingTypeCombo.getValue().toString();
+				RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
 				if(NumberUtils.isDigits(String.valueOf(advanceReceiptTxt.getValue()))){
             		long advanceReceiptId = NumberUtils.toLong(String.valueOf(advanceReceiptTxt.getValue()));
             		ShopDTO shopDto = (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
-            		RetailAdvanceBillDTO retailAdvanceBillDto = new RestRetailTransactionService(shopDto).getBillByAdvancveReceiptId(advanceReceiptId);
+            		RetailAdvanceBillDTO retailAdvanceBillDto = new RestRetailTransactionService(shopDto, retailBillingType).getBillByAdvancveReceiptId(advanceReceiptId);
             		if(retailAdvanceBillDto == null){
             			Notification.show("Advance Receipt Not Found");
             			return;
             		}else{
             			long transId = retailAdvanceBillDto.getTransId();
-            			TransactionDTO tDto = new RestRetailTransactionService(shopDto).getBill(transId);
+            			TransactionDTO tDto = new RestRetailTransactionService(shopDto, retailBillingType).getBill(transId);
 				if (tDto != null) {
 					if(!tDto.isTransactionActive()){
 						Notification.show("Advance Receipt is not active");
@@ -450,11 +454,13 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 			private static final long serialVersionUID = 1L;
 
 			public void buttonClick(ClickEvent event) {
+				String billingTypeName = billingTypeCombo.getValue().toString();
+				RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
 				if (!StringUtils.isEmpty(transactionSearchTxt.getValue())
 						&& NumberUtils.isDigits(transactionSearchTxt.getValue())) {
 					transId = Long.parseLong(transactionSearchTxt
 							.getValue());
-					TransactionDTO tDto = new RestRetailTransactionService(shopDto)
+					TransactionDTO tDto = new RestRetailTransactionService(shopDto, retailBillingType)
 							.getBill(transId);
 					if (tDto != null) {
 						cusBean = tDto.getCustomer();
@@ -531,7 +537,11 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 
 			
 		});
-
+		billingTypeCombo.addItem("RetailBilling");
+		billingTypeCombo.addItem("RegisteredBilling");
+		billingTypeCombo.setValue("RetailBilling");
+		billingTypeCombo.setNullSelectionAllowed(false);
+		toolbar.addComponent(billingTypeCombo);
 		toolbar.addComponent(optionGroupLayout);
 		toolbar.addComponent(transactionSearchTxt);
 		toolbar.addComponent(autoFillTransBtn);
@@ -678,6 +688,8 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 
 			public void buttonClick(ClickEvent event) {
 				try {
+					String billingTypeName = billingTypeCombo.getValue().toString();
+					RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
 					boolean isEstimateBill = billType.getValue().equals(ESTIMATE_BILL);
 					Double totalPayment = getPaymentTotal();
 					if(isEstimateBill && totalPayment.doubleValue() <= 0.000f){
@@ -692,8 +704,9 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 					long advanceReceiptId = -1L;
 					if(!isEstimateBill && NumberUtils.isDigits(String.valueOf(advanceReceiptTxt.getValue()))){
 						advanceReceiptId = NumberUtils.toLong(String.valueOf(advanceReceiptTxt.getValue()));
-						RetailAdvanceBillDTO advanceReceiptDTO  = new RestRetailTransactionService(shopDto).getBillByAdvancveReceiptId(advanceReceiptId);
-						new RestRetailTransactionService(shopDto).updateBillStatus(advanceReceiptDTO.getTransId(),"I");
+
+						RetailAdvanceBillDTO advanceReceiptDTO  = new RestRetailTransactionService(shopDto, retailBillingType).getBillByAdvancveReceiptId(advanceReceiptId);
+						new RestRetailTransactionService(shopDto, retailBillingType).updateBillStatus(advanceReceiptDTO.getTransId(),"I");
 						Notification.show("Advance Receipt deactivated", "Advance Receipt Id("+ advanceReceiptId + ")applied and deactivated. Associated transId:" 
 								+ advanceReceiptDTO.getTransId(),
 			                  Notification.Type.TRAY_NOTIFICATION);
@@ -714,7 +727,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 					ShopDTO shopDto =  (ShopDTO) getUI().getSession().getAttribute(ShopDTO.class);
 
 					if (transId == -1L) {
-						BillCreationResponse response = new RestRetailTransactionService(shopDto)
+						BillCreationResponse response = new RestRetailTransactionService(shopDto, retailBillingType)
 								.createBill(shopDto, retailTransaction);
 						retailTransaction.setInvoiceNumber(response.getInvoiceId());
 						retailTransaction.setAdvanceReceiptId(response.getAdvanceReceiptId());
@@ -723,7 +736,7 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 						retailTransaction.setEstimateBill(isEstimateBill);
 						retailTransaction.setTransactionDate(mortgageStartDate
 								.getValue());
-						BillCreationResponse response = new RestRetailTransactionService(shopDto)
+						BillCreationResponse response = new RestRetailTransactionService(shopDto, retailBillingType)
 								.updateBill(transId, shopDto.getShopId(),
 										retailTransaction);
 						retailTransaction.setInvoiceNumber(response.getInvoiceId());
@@ -763,7 +776,9 @@ public class RetailInvoiceView extends VerticalLayout implements View {
 	
 	private void getBillWindow(long transId, TransactionDTO retailTransaction) {
 
-		BillWindow bw = new BillWindow(transId, retailTransaction);
+		String billingTypeName = billingTypeCombo.getValue().toString();
+		RetailBillingType retailBillingType = "RetailBilling".equalsIgnoreCase(billingTypeName) ? RetailBillingType.retailbillingtype : RetailBillingType.registeredCustomertype;
+		BillWindow bw = new BillWindow(transId, retailTransaction, retailBillingType);
 		UI.getCurrent().addWindow(bw);
 		bw.focus();
 	}
